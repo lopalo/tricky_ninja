@@ -25,7 +25,7 @@ class Manager(object):
                 pass
             elif kind == 'sprite':
                 pass
-                
+
             txt = self._get_texture(self.map.substrate_texture, 'ss')
             txt.setPos(coord[0], coord[1], 0)
 
@@ -37,7 +37,7 @@ class Manager(object):
                 raise BuildWorldError(
                         'Wrong texture names ({0})'.format(txt_name))
             #TODO: choose right texture and angle
-        elif len(txt_paths) > 1:
+        elif len(txt_paths) > 1 or len(txt_paths) == 0:
             raise BuildWorldError(
                     'Wrong count of textures ({0})'.format(txt_name))
         else:
@@ -45,7 +45,7 @@ class Manager(object):
             if path.basename(texture).split('.')[0] != 'main':
                 raise BuildWorldError(
                     'Wrong name of texture ({0})'.format(txt_name))
-            
+
         plane = loader.loadModel(S.model('plane'))
         plane.setTexture(loader.loadTexture(texture))
         plane.reparentTo(render)
@@ -65,4 +65,3 @@ class Manager(object):
     def unblock(self):
         pass
 
-    
