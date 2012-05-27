@@ -1,0 +1,4 @@
+paths:
+  textures: 'models/textures'
+  models: 'models'
+  maps: 'maps'

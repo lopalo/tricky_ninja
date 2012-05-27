@@ -1,0 +1,24 @@
+substrate-texture: '0'
+#for substrate-texture ident always is 'ss'
+
+definitions:
+  '00':
+     kind: texture
+     texture: '1'
+  '11':
+     kind: texture
+     texture: '2'
+  '22':
+     kind: texture
+     texture: '3'
+
+topology:
+- '........00000000........'
+- '..00000000ss1122ssss....'
+- '..222222ssssssssssssssss'
+- 'ssssss22ssssss112211ssss'
+- 'ssssss2222ssssssss22ssss'
+- 'ssssssss22ssssssss22ssss'
+- 'ssssssss....ssssssssssss'
+- 'ssssssss..ssssssssss1111'
+- '....ssssssssssss........'

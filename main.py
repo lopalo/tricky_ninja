@@ -1,0 +1,28 @@
+from direct.showbase.ShowBase import ShowBase
+from manager import Manager
+from settings import Settings
+
+class App(ShowBase):
+
+    def __init__(self):
+        ShowBase.__init__(self)
+        #TODO: implement menu and setting manager from it
+        self.set_manager('test_map.yaml')
+        self.disableMouse()
+        camera.setPosHpr(5, -10, 30, 0, -60, 0)
+
+    def set_manager(self, *args, **kwargs):
+        self.remove_manager()
+        self.manager = Manager(*args, **kwargs)
+        taskMgr.add(self.manager, 'manager')
+
+    def remove_manager(self):
+        if getattr(self, 'manager', None) is not None:
+            taskMgr.remove('manager')
+            self.manager.clear()
+            self.manager = None
+
+if __name__ == '__main__':
+    __builtins__.S = Settings('settings.yaml')
+    app = App()
+    run()
