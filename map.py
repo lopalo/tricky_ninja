@@ -1,9 +1,20 @@
+from collections import OrderedDict
 import yaml
 
 class MapDataError(Exception):
     pass
 
 class Map(object):
+    _neighbors = OrderedDict((
+        ('top', (0, 1)),
+        ('top-right', (1, 1)),
+        ('right', (1, 0)),
+        ('right-bottom', (1, -1)),
+        ('bottom', (0, -1)),
+        ('bottom-left', (-1, -1)),
+        ('left', (-1, 0)),
+        ('left-top', (-1, 1))
+    ))
 
     def __init__(self, manager, name):
         with open(S.map(name), 'r') as f:
@@ -63,8 +74,21 @@ class Map(object):
                     continue
                 assert id in data['definitions'], 'Unknown ident ' + id
 
-    def __getitem__(self, val):
-        return self.data.get(val)
+    def __getitem__(self, coord):
+        return self.data.get(coord)
 
     def __iter__(self):
         return self.data.items().__iter__()
+
+    def neighbors(self, coord, all=False, yield_names=False):
+        keys = self._neighbors.keys()
+        keys = keys if all else keys[::2]
+        for key in keys:
+            offset = self._neighbors[key]
+            pos = coord[0] + offset[0], coord[1] + offset[1]
+            if self[pos] is not None:
+                if yield_names:
+                    yield key, self[pos]
+                else:
+                    yield pos. self[pos]
+
