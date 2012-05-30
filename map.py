@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import yaml
 
+
 class MapDataError(Exception):
     pass
 
@@ -26,6 +27,8 @@ class Map(object):
             raise MapDataError(e.message + ' ({0})'.format(name))
         self.substrate_texture = data['substrate-texture']
 
+        self.textures = set([self.substrate_texture])
+        self.models = set()
         self.data = {}
         for num_row, row in enumerate(data['topology']):
             for index in range(0, len(data['topology'][0]), 3):
@@ -38,6 +41,10 @@ class Map(object):
                     info = data['definitions'][ident]
                     info['ident'] = ident
                 self.data[index/3, num_row] = info
+                if info['kind'] == 'texture':
+                    self.textures.add(info['texture'])
+                if info['kind'] == 'model':
+                    self.models.add(info['model'])
 
     def _check_data(self, data):
         assert 'substrate-texture' in data, (

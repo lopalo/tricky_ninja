@@ -1,24 +1,21 @@
-substrate-texture: '0'
+substrate-texture: 'grass'
 #for substrate-texture ident always is 'ss'
 
 definitions:
-  '00':
+  'sa':
      kind: texture
-     texture: '1'
-  '11':
+     texture: 'sand'
+  'st':
      kind: texture
-     texture: '2'
-  '22':
-     kind: texture
-     texture: '3'
+     texture: 'stone'
 
 topology:
 - '.. .. .. .. ss ss ss ss .. .. .. ..'
-- '.. ss ss ss ss ss 11 22 ss ss .. ..'
-- '.. 22 22 22 ss ss 00 00 ss ss ss ss'
-- 'ss ss ss 22 ss ss 00 11 22 11 ss ss'
-- 'ss ss ss 22 22 00 00 ss ss 22 ss ss'
-- 'ss ss ss ss 22 00 00 00 ss 22 ss ss'
-- 'ss ss ss ss .. 00 ss ss ss ss ss ss'
-- 'ss ss ss ss ss ss ss ss ss ss 11 11'
+- '.. ss ss ss ss ss st .. ss ss .. ..'
+- 'sa sa sa sa ss ss sa sa ss ss ss ss'
+- 'ss ss ss .. ss ss sa st .. st ss ss'
+- 'ss ss ss .. .. sa sa ss ss .. ss ss'
+- 'ss ss ss ss .. sa sa sa ss .. ss ss'
+- 'ss ss ss ss .. sa ss ss ss ss ss ss'
+- 'ss ss ss ss ss ss ss ss ss ss st st'
 - '.. .. ss ss ss ss ss ss .. .. .. ..'
