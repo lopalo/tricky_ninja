@@ -57,6 +57,8 @@ class Manager(object):
                         sub_i.copySubImage(i, 0, 0, _x, _y, x, y)
                         texture = Texture()
                         texture.load(sub_i)
+                        texture.setWrapU(Texture.WMClamp)
+                        texture.setWrapV(Texture.WMClamp)
                         parts[num][name] = texture
 
             elif len(txt_paths) > 1 or len(txt_paths) == 0:
