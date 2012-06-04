@@ -22,22 +22,19 @@ class Manager(object):
         for coord, info in self.map:
             kind = info['kind']
             if kind == 'substrate_texture':
-                pass
+                txt = self._get_texture(None, None, coord, True)
+                txt.setPos(coord[0], coord[1], 0)
             elif kind == 'texture':
                 txt = self._get_texture(info['texture'],
                                         info['ident'], coord)
-                txt.setPos(coord[0], coord[1], 0.001)
+                txt.setPos(coord[0], coord[1], 0)
             elif kind == 'model':
                 pass
             elif kind == 'sprite':
                 pass
 
-            txt = self._get_texture(self.map.substrate_texture,
-                                                        'ss', coord)
-            txt.setPos(coord[0], coord[1], 0)
-
     def _load_textures(self):
-        self.textures = {}
+        self.map_textures = {}
         for txt_name in self.map.textures:
             txt_paths = glob(path.join(S.texture(txt_name), '*.png'))
             if len(txt_paths) == 5:
@@ -45,22 +42,21 @@ class Manager(object):
                 if set(names) != set(self.texture_names):
                     raise BuildWorldError(
                             'Wrong texture names ({0})'.format(txt_name))
-                self.textures[txt_name] = parts = [{}, {}, {}, {}]
+                self.map_textures[txt_name] = parts = [{}, {}, {}, {}]
                 images = dict((name, PNMImage(Filename(path)))
                         for name, path in zip(names, txt_paths))
                 for name, i in images.items():
-                    x, y = i.getXSize() / 2, i.getYSize() / 2
-                    for num, (_x, _y) in enumerate(((0, 0), (x, 0),
-                                                    (x, y), (0, y))):
-                        sub_i = PNMImage(x, y)
+                    size = S.map_texture_size
+                    image = PNMImage(size, size)
+                    image.addAlpha()
+                    image.quickFilterFrom(i)
+                    w, h = size / 2, size / 2
+                    for num, (x, y) in enumerate(((0, 0), (w, 0),
+                                                  (w, h), (0, h))):
+                        sub_i = PNMImage(w, h)
                         sub_i.addAlpha()
-                        sub_i.copySubImage(i, 0, 0, _x, _y, x, y)
-                        texture = Texture()
-                        texture.load(sub_i)
-                        texture.setWrapU(Texture.WMClamp)
-                        texture.setWrapV(Texture.WMClamp)
-                        parts[num][name] = texture
-
+                        sub_i.copySubImage(image, 0, 0, x, y, w, h)
+                        parts[num][name] = sub_i
             elif len(txt_paths) > 1 or len(txt_paths) == 0:
                 raise BuildWorldError(
                         'Wrong count of textures ({0})'.format(txt_name))
@@ -69,56 +65,85 @@ class Manager(object):
                 if path.basename(texture).split('.')[0] != 'main':
                     raise BuildWorldError(
                         'Wrong name of texture ({0})'.format(txt_name))
-                self.textures[txt_name] = loader.loadTexture(texture)
+                self.map_textures[txt_name] = PNMImage(texture)
 
 
-    def _get_texture(self, txt_name, ident, pos):
-        textures = self.textures[txt_name]
-        if type(textures) is list:
-            #creating parts of a texture
-            #TODO: create particular algorithm for 'ss'
-            plane = render.attachNewNode("")
+    def _get_texture(self, txt_name, ident, pos, only_ss=False):
+        ss_textures = self.map_textures[self.map.substrate_texture]
+        size = S.map_texture_size
+        result_image = PNMImage(size, size)
+        result_image.addAlpha()
+        w, h = size / 2, size / 2
 
-            nbs = dict(self.map.neighbors(pos, True, True))
-            t, tr = nbs.get('top'), nbs.get('top-right')
-            r, rb = nbs.get('right'), nbs.get('right-bottom')
-            b, bl = nbs.get('bottom'), nbs.get('bottom-left')
-            l, lt = nbs.get('left'), nbs.get('left-top')
-            nbs = deque((l, lt, t, tr, r, rb, b, bl))
-
-            for num, pos in enumerate(((-0.25, 0.25), (0.25, 0.25),
-                                       (0.25, -0.25), (-0.25, -0.25))):
-                c = tuple(nbs)[:3]
-                if all(c) and all(i.get('ident') == ident
-                                                for i in c):
-                    texture = textures[num]['center']
-                elif (c[0] and c[2] and c[0].get('ident') == ident
-                                    and c[2].get('ident') == ident):
-                    texture = textures[num]['corners']
-                elif c[0] and c[0].get('ident') == ident:
-                    if num % 2 == 0:
-                        texture = textures[num]['horizontal']
-                    else:
-                        texture = textures[num]['vertical']
-                elif c[2] and c[2].get('ident') == ident:
-                    if num % 2 == 0:
-                        texture = textures[num]['vertical']
-                    else:
-                        texture = textures[num]['horizontal']
+        nbs = dict(self.map.neighbors(pos, True, True))
+        t, tr = nbs.get('top'), nbs.get('top-right')
+        r, rb = nbs.get('right'), nbs.get('right-bottom')
+        b, bl = nbs.get('bottom'), nbs.get('bottom-left')
+        l, lt = nbs.get('left'), nbs.get('left-top')
+        nbs = deque((l, lt, t, tr, r, rb, b, bl))
+        #draws substrate multipart texture
+        for num, (x, y) in enumerate(((0, 0), (w, 0),
+                                      (w, h), (0, h))):
+            c = tuple(nbs)[:3]
+            if all(c):
+                ss_img = ss_textures[num]['center']
+            elif c[0] and c[2]:
+                ss_img = ss_textures[num]['corners']
+            elif c[0]:
+                if num % 2 == 0:
+                    ss_img = ss_textures[num]['horizontal']
                 else:
-                    texture = textures[num]['main']
-                subpl = loader.loadModel(S.model('plane'))
-                subpl.setTexture(texture)
-                subpl.setScale(0.5)
-                subpl.reparentTo(plane)
-                subpl.setPosHpr(pos[0], pos[1], 0, 0, -90, 0)
-                nbs.rotate(-2)
-        else:
-            texture = textures
-            plane = loader.loadModel(S.model('plane'))
-            plane.setTexture(texture)
-            plane.setHpr(0, -90, 0)
+                    ss_img = ss_textures[num]['vertical']
+            elif c[2]:
+                if num % 2 == 0:
+                    ss_img = ss_textures[num]['vertical']
+                else:
+                    ss_img = ss_textures[num]['horizontal']
+            else:
+                ss_img = ss_textures[num]['main']
+            nbs.rotate(-2)
+            result_image.copySubImage(ss_img, x, y, 0, 0, w, h)
 
+        if not only_ss:
+            textures = self.map_textures[txt_name]
+            mpart = type(textures) is list
+            if mpart:
+                #draws multipart texture
+                for num, (x, y) in enumerate(((0, 0), (w, 0),
+                                              (w, h), (0, h))):
+                    c = tuple(nbs)[:3]
+                    if all(c) and all(i.get('ident') == ident
+                                                    for i in c):
+                        img = textures[num]['center']
+                    elif (c[0] and c[2] and c[0].get('ident') == ident
+                                        and c[2].get('ident') == ident):
+                        img = textures[num]['corners']
+                    elif c[0] and c[0].get('ident') == ident:
+                        if num % 2 == 0:
+                            img = textures[num]['horizontal']
+                        else:
+                            img = textures[num]['vertical']
+                    elif c[2] and c[2].get('ident') == ident:
+                        if num % 2 == 0:
+                            img = textures[num]['vertical']
+                        else:
+                            img = textures[num]['horizontal']
+                    else:
+                        img = textures[num]['main']
+                    nbs.rotate(-2)
+                    result_image.blendSubImage(img, x, y, 0, 0, w, h)
+            else:
+                #draws single texture
+                img = textures
+                result_image.blendSubImage(img, 0, 0, 0, 0, size, size)
+
+        plane = loader.loadModel(S.model('plane'))
+        texture = Texture()
+        texture.load(result_image)
+        texture.setWrapU(Texture.WMClamp)
+        texture.setWrapV(Texture.WMClamp)
+        plane.setTexture(texture)
+        plane.setHpr(0, -90, 0)
         plane.reparentTo(render)
         plane.setTransparency(True)
         return plane
