@@ -21,10 +21,12 @@ class Map(object):
         with open(S.map(name), 'r') as f:
            data = yaml.load(f)
            data['topology'].reverse()
-        try:
-            self._check_data(data)
-        except (AssertionError, MapDataError) as e:
-            raise MapDataError(e.message + ' ({0})'.format(name))
+        errors = list(self._check_data(data))
+        if errors:
+            msg = "\nMap '{0}'\n".format(name.split('.')[0])
+            for f, err in errors:
+                msg +='{0}: {1}\n'.format(f, err)
+            raise MapDataError(msg)
         self.substrate_texture = data['substrate-texture']
 
         self.textures = set([self.substrate_texture])
@@ -47,39 +49,47 @@ class Map(object):
                     self.models.add(info['model'])
 
     def _check_data(self, data):
-        assert 'substrate-texture' in data, (
-                        "'substrate-texture' is not specified")
-        assert type(data['substrate-texture']) is str, (
-                        "'substrate-texture' is not a string")
-        assert 'definitions' in data, (
-                        "'definitions' is not specified")
-        assert 'topology' in data and data['topology'], (
-                        "'topology' is not specified")
+        stop = False
+        for f in ('substrate-texture', 'definitions', 'topology'):
+            if f not in data:
+                stop = True
+                yield f, 'is not specified'
+        if stop: return
+        if type(data['substrate-texture']) is not str:
+            yield 'substrate-texture', 'is not a string'
         for id, info in data['definitions'].items():
-            assert len(id) == 2, 'Ident should contain two characters'
+            if len(id) != 2:
+                yield ('definitions',
+                   "ident '{0}' should contain two characters".format(id))
             for row in data['topology']:
                 if id in row:
                     break
             else:
-                raise MapDataError("'{0}' is not in topology".format(id))
+                yield 'definitions', "'{0}' is not in topology".format(id)
             if info['kind'] == 'texture':
-                assert 'texture' in info, (
-                "Value of '{0}' doesn't have texture name'".format(id))
-                assert type(info['texture']) is str, (
-                    "Texture name for '{0}' is not a string".format(id))
+                if 'texture' not in info:
+                    yield ('definitions',
+                    "value of '{0}' doesn't have texture name'".format(id))
+                    continue
+                if type(info['texture']) is not str:
+                    yield ('definitions',
+                    "texture name for '{0}' is not a string".format(id))
             elif info['kind'] == 'model':
                 pass
             else:
-                raise MapDataError("Unknown kind for '{0}'".format(id))
+                yield 'definitions', "unknown kind for '{0}'".format(id)
         length = len(data['topology'][0])
         for row in data['topology']:
-            assert len(row) == length, (
-                "Topology has different count of rows")
+            if (len(row) + 1) % 3:
+                yield 'topology', 'wrong length of row'
+            if len(row) != length:
+                yield 'topology', 'different count of rows'
             for index in range(0, length, 3):
                 id = row[index:index+2]
                 if id in ('..', 'ss'):
                     continue
-                assert id in data['definitions'], 'Unknown ident ' + id
+                if id not in data['definitions']:
+                    yield 'topology', 'unknown ident ' + id
 
     def __getitem__(self, coord):
         return self.data.get(coord)

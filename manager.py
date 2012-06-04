@@ -9,6 +9,10 @@ class BuildWorldError(Exception):
     pass
 
 
+class MapTextureError(BuildWorldError):
+    pass
+
+
 class Manager(object):
     texture_names = ['main', 'center', 'horizontal', 'vertical', 'corners']
 
@@ -40,12 +44,15 @@ class Manager(object):
             if len(txt_paths) == 5:
                 names = [path.basename(i).split('.')[0] for i in txt_paths]
                 if set(names) != set(self.texture_names):
-                    raise BuildWorldError(
-                            'Wrong texture names ({0})'.format(txt_name))
+                    raise MapTextureError(
+                            'Wrong part names ({0})'.format(txt_name))
                 self.map_textures[txt_name] = parts = [{}, {}, {}, {}]
                 images = dict((name, PNMImage(Filename(path)))
                         for name, path in zip(names, txt_paths))
                 for name, i in images.items():
+                    if i.getXSize() != i.getYSize():
+                        raise MapTextureError(
+                            'Parts must be square ({0})'.format(txt_name))
                     size = S.map_texture_size
                     image = PNMImage(size, size)
                     image.addAlpha()
@@ -58,13 +65,13 @@ class Manager(object):
                         sub_i.copySubImage(image, 0, 0, x, y, w, h)
                         parts[num][name] = sub_i
             elif len(txt_paths) > 1 or len(txt_paths) == 0:
-                raise BuildWorldError(
-                        'Wrong count of textures ({0})'.format(txt_name))
+                raise MapTextureError(
+                        'Wrong count of parts ({0})'.format(txt_name))
             else:
                 texture = txt_paths[0]
                 if path.basename(texture).split('.')[0] != 'main':
-                    raise BuildWorldError(
-                        'Wrong name of texture ({0})'.format(txt_name))
+                    raise MapTextureError(
+                        'Wrong name of main part ({0})'.format(txt_name))
                 self.map_textures[txt_name] = PNMImage(texture)
 
 
