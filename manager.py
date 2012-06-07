@@ -26,21 +26,25 @@ class Manager(object):
         for coord, info in self.map:
             kind = info['kind']
             if kind == 'substrate_texture':
-                txt = self._get_texture(None, None, coord, True)
-                txt.setPos(coord[0], coord[1], 0)
-            elif kind == 'texture':
-                txt = self._get_texture(info['texture'],
-                                        info['ident'], coord)
-                txt.setPos(coord[0], coord[1], 0)
-            elif kind == 'model':
                 pass
+            elif kind == 'texture':
+                self._set_texture(info['texture'], info['ident'], coord)
+                continue
+            elif kind == 'model':
+                model = loader.loadModel(S.model(info['model']))
+                model.reparentTo(render)
+                angle = info.get('angle', 0)
+                model.setHpr(angle, 0, 0)
+                model.setScale(S.model_size(info['model']))
+                model.setPos(coord[0], coord[1], 0)
             elif kind == 'sprite':
                 pass
+            self._set_texture(None, None, coord, True)
 
     def _load_textures(self):
         self.map_textures = {}
         for txt_name in self.map.textures:
-            txt_paths = glob(path.join(S.texture(txt_name), '*.png'))
+            txt_paths = glob(path.join(S.map_texture(txt_name), '*.png'))
             if len(txt_paths) == 5:
                 names = [path.basename(i).split('.')[0] for i in txt_paths]
                 if set(names) != set(self.texture_names):
@@ -75,7 +79,7 @@ class Manager(object):
                 self.map_textures[txt_name] = PNMImage(texture)
 
 
-    def _get_texture(self, txt_name, ident, pos, only_ss=False):
+    def _set_texture(self, txt_name, ident, pos, only_ss=False):
         ss_textures = self.map_textures[self.map.substrate_texture]
         size = S.map_texture_size
         result_image = PNMImage(size, size)
@@ -153,7 +157,7 @@ class Manager(object):
         plane.setHpr(0, -90, 0)
         plane.reparentTo(render)
         plane.setTransparency(True)
-        return plane
+        plane.setPos(pos[0], pos[1], 0)
 
     def __call__(self, task):
         pass #TODO: implement actions per frame

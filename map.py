@@ -30,7 +30,6 @@ class Map(object):
         self.substrate_texture = data['substrate-texture']
 
         self.textures = set([self.substrate_texture])
-        self.models = set()
         self.data = {}
         for num_row, row in enumerate(data['topology']):
             for index in range(0, len(data['topology'][0]), 3):
@@ -45,8 +44,6 @@ class Map(object):
                 self.data[index/3, num_row] = info
                 if info['kind'] == 'texture':
                     self.textures.add(info['texture'])
-                if info['kind'] == 'model':
-                    self.models.add(info['model'])
 
     def _check_data(self, data):
         stop = False
@@ -75,7 +72,13 @@ class Map(object):
                     yield ('definitions',
                     "texture name for '{0}' is not a string".format(id))
             elif info['kind'] == 'model':
-                pass
+                if 'model' not in info:
+                    yield ('definitions',
+                    "value of '{0}' doesn't have model name'".format(id))
+                    continue
+                if 'angle' in info and type(info['angle']) is not int:
+                    yield ('definitions',
+                    "angle for '{0}' is not an integer".format(id))
             else:
                 yield 'definitions', "unknown kind for '{0}'".format(id)
         length = len(data['topology'][0])

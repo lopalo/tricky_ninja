@@ -2,20 +2,42 @@ substrate-texture: 'grass'
 #for substrate-texture ident always is 'ss'
 
 definitions:
-  'sa':
-     kind: texture
-     texture: 'sand'
-  'st':
-     kind: texture
-     texture: 'stone'
+  sa:
+    kind: texture
+    texture: 'sand'
+  st:
+    kind: texture
+    texture: 'stone'
+  S0:
+    kind: model
+    model: 'stone'
+    angle: 128
+  S1:
+    kind: model
+    model: 'stone'
+    angle: 23
+#   ff:
+#     kind: chain_model
+#     vertival_model: fence
+#     left_bottom_model: fence-corner
 
 topology:
-- '.. .. .. .. ss ss ss ss .. .. .. ..'
-- '.. ss ss ss ss ss st .. ss ss .. ..'
-- 'sa sa sa sa ss ss sa sa ss ss ss ss'
-- 'ss ss ss .. ss ss sa st .. st ss ss'
-- 'ss ss ss .. .. sa sa ss ss .. ss ss'
-- 'ss ss ss ss .. sa sa sa ss .. ss ss'
-- 'ss ss ss ss .. sa ss ss ss ss ss ss'
-- 'ss ss ss ss ss ss ss ss ss ss st st'
-- '.. .. ss ss ss ss ss ss .. .. .. ..'
+- '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
+- '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
+- '.. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..'
+- '.. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..'
+- '.. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss S0'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..'
+- '.. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa ..'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ss ss sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ss sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss sa sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss st st st ss sa sa sa sa sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss st st sa sa sa sa sa sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss S0 st S1 sa sa sa sa sa sa sa sa sa ..'
+- '.. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..'
+- '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. sa sa .. .. .. .. .. ..'
