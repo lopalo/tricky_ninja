@@ -1,25 +1,25 @@
-substrate-texture: 'grass'
+substrate-texture: grass
 #for substrate-texture ident always is 'ss'
 
 definitions:
   sa:
     kind: texture
-    texture: 'sand'
+    texture: sand
   st:
     kind: texture
-    texture: 'stone'
+    texture: stone
   S0:
     kind: model
-    model: 'stone'
+    model: stone
     angle: 128
   S1:
     kind: model
-    model: 'stone'
+    model: stone
     angle: 23
-#   ff:
-#     kind: chain_model
-#     vertival_model: fence
-#     left_bottom_model: fence-corner
+  ff:
+    kind: chain_model
+    vertical_model: fence
+    left_bottom_model: fence-corner
 
 topology:
 - '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
@@ -32,11 +32,11 @@ topology:
 - 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ss ss sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ss sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss sa sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss st st st ss sa sa sa sa sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ff ff sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ff sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ff ff sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss st st ss ff ff ff ff sa sa sa sa sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss st st st ff sa sa sa sa sa sa sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss ss st st sa sa sa sa sa sa sa sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss S0 st S1 sa sa sa sa sa sa sa sa sa ..'
 - '.. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..'

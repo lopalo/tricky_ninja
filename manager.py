@@ -37,6 +37,13 @@ class Manager(object):
                 model.setHpr(angle, 0, 0)
                 model.setScale(S.model_size(info['model']))
                 model.setPos(coord[0], coord[1], 0)
+            elif kind == 'chain_model':
+                self._set_chain_model(
+                info['vertical_model'],
+                info['left_bottom_model'],
+                info['ident'],
+                coord
+            )
             elif kind == 'sprite':
                 pass
             self._set_texture(None, None, coord, True)
@@ -158,6 +165,41 @@ class Manager(object):
         plane.reparentTo(render)
         plane.setTransparency(True)
         plane.setPos(pos[0], pos[1], 0)
+
+    def _set_chain_model(self, vm, lbm, ident, pos):
+        nbs = dict(self.map.neighbors(pos, yield_names=True))
+        t, r = nbs.get('top'), nbs.get('right')
+        b, l = nbs.get('bottom'), nbs.get('left')
+        nbs = deque((t, r, b, l))
+        count = len([i for i in nbs if i and i.get('ident') == ident])
+        if count == 0 or count > 2:
+            model_name, angle = vm, 0
+        elif count == 1:
+            model_name = vm
+            for num, i in enumerate(nbs):
+                if i and i.get('ident') == ident:
+                    angle = -90 * num
+                    break
+        elif count == 2:
+            if (t and b and t.get('ident') == ident
+                        and b.get('ident') == ident):
+                model_name, angle = vm, 0
+            elif (l and r and l.get('ident') == ident
+                          and r.get('ident') == ident):
+                model_name, angle = vm, 90
+            else:
+                for num in range(4):
+                    f, s= tuple(nbs)[:2]
+                    if (f and s and f.get('ident') == ident
+                                and s.get('ident') == ident):
+                        model_name, angle = lbm, -90 * num
+                        break
+                    nbs.rotate(-1)
+        model = loader.loadModel(S.model(model_name))
+        model.reparentTo(render)
+        model.setScale(0.016)
+        model.setScale(S.model_size(model_name))
+        model.setPosHpr(pos[0], pos[1], 0, angle, 0, 0)
 
     def __call__(self, task):
         pass #TODO: implement actions per frame

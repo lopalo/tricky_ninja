@@ -66,19 +66,33 @@ class Map(object):
             if info['kind'] == 'texture':
                 if 'texture' not in info:
                     yield ('definitions',
-                    "value of '{0}' doesn't have texture name'".format(id))
+                    "value of '{0}' doesn't have texture name".format(id))
                     continue
                 if type(info['texture']) is not str:
                     yield ('definitions',
                     "texture name for '{0}' is not a string".format(id))
             elif info['kind'] == 'model':
-                if 'model' not in info:
-                    yield ('definitions',
-                    "value of '{0}' doesn't have model name'".format(id))
-                    continue
                 if 'angle' in info and type(info['angle']) is not int:
                     yield ('definitions',
                     "angle for '{0}' is not an integer".format(id))
+                if 'model' not in info:
+                    yield ('definitions',
+                    "value of '{0}' doesn't have model name".format(id))
+                    continue
+                if type(info['model']) is not str:
+                    yield ('definitions',
+                    "model name for '{0}' is not a string".format(id))
+            elif info['kind'] == 'chain_model':
+                for name in ('vertical_model', 'left_bottom_model'):
+                    if name not in info:
+                        yield ('definitions',
+                        "value of '{0}' doesn't have {1} name".format(
+                                                                id, name))
+                    elif type(info[name]) is not str:
+                        yield ('definitions',
+                        "{0} name for '{1}' is not a string".format
+                                                             (name, id))
+
             else:
                 yield 'definitions', "unknown kind for '{0}'".format(id)
         length = len(data['topology'][0])
