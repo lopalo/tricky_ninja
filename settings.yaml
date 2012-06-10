@@ -4,4 +4,12 @@ paths:
   models: models
   model_sizes: models/sizes.yaml
   maps: maps
+
 map_texture_size: 256
+
+camera:
+  min_distance: 3
+  max_distance: 30
+  init_distance: 10
+  init_vertical_angle: -90
+  horizontal_angle: 60

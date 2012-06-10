@@ -149,3 +149,11 @@ class Map(object):
                 else:
                     yield pos. self[pos]
 
+    def block(self, x, y):
+        pass
+
+    def is_availale(self, x, y):
+        pass #is existed on map and not in blocked_squares
+
+    def unblock(self):
+        pass

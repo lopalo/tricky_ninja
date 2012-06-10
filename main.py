@@ -9,7 +9,6 @@ class App(ShowBase):
         #TODO: implement menu and setting manager from it
         self.set_manager('test_map.yaml')
         self.disableMouse()
-        camera.setPosHpr(15, -6, 25, 0, -60, 0)
 
     def set_manager(self, *args, **kwargs):
         self.remove_manager()
