@@ -16,10 +16,15 @@ definitions:
     kind: model
     model: stone
     angle: 23
+    size: 1.5
   ff:
     kind: chain_model
     vertical_model: fence
     left_bottom_model: fence-corner
+  tr:
+    kind: sprite
+    texture: tree
+    size: 6.0
 
 topology:
 - '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
@@ -27,9 +32,9 @@ topology:
 - '.. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..'
 - '.. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..'
 - '.. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss S0'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss tr ss tr ss ss ss ss ss ss ..'
 - '.. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa ..'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss S1 ss tr ss ss ss ss ss sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ff ff sa sa sa sa'
@@ -38,6 +43,6 @@ topology:
 - 'ss ss ss ss ss ss ss ss ss ss ss st st ss ff ff ff ff sa sa sa sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss st st st ff sa sa sa sa sa sa sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss ss st st sa sa sa sa sa sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss S0 st S1 sa sa sa sa sa sa sa sa sa ..'
+- 'ss ss ss ss ss ss ss ss ss ss ss S0 st st sa sa sa sa sa sa sa sa sa ..'
 - '.. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..'
 - '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. sa sa .. .. .. .. .. ..'

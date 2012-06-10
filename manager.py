@@ -35,7 +35,10 @@ class Manager(object):
                 model.reparentTo(render)
                 angle = info.get('angle', 0)
                 model.setHpr(angle, 0, 0)
-                model.setScale(S.model_size(info['model']))
+                if 'size' in info:
+                    model.setScale(info['size'])
+                else:
+                    model.setScale(S.model_size(info['model']))
                 model.setPos(coord[0], coord[1], 0)
             elif kind == 'chain_model':
                 self._set_chain_model(
@@ -45,7 +48,19 @@ class Manager(object):
                 coord
             )
             elif kind == 'sprite':
-                pass
+                sprite = loader.loadModel(S.model('plane'))
+                texture = loader.loadTexture(S.texture(info['texture']))
+                texture.setWrapU(Texture.WMClamp)
+                texture.setWrapV(Texture.WMClamp)
+                sprite.setTexture(texture)
+                sprite.reparentTo(render)
+                sprite.setTransparency(True)
+                sprite.reparentTo(render)
+                size = info.get('size', 1.0)
+                sprite.setScale(size)
+                sprite.setPos(coord[0], coord[1], size / 2)
+                sprite.setBillboardAxis()
+
             self._set_texture(None, None, coord, True)
 
     def _load_textures(self):

@@ -5,6 +5,92 @@ import yaml
 class MapDataError(Exception):
     pass
 
+def check_map_data(data):
+    stop = False
+    for f in ('substrate-texture', 'definitions', 'topology'):
+        if f not in data:
+            stop = True
+            yield f, 'is not specified'
+    if stop: return
+    if type(data['substrate-texture']) is not str:
+        yield 'substrate-texture', 'is not a string'
+    for id, info in data['definitions'].items():
+        if len(id) != 2:
+            yield ('definitions',
+                "ident '{0}' should contain two characters".format(id))
+        for row in data['topology']:
+            if id in row:
+                break
+        else:
+            yield 'definitions', "'{0}' is not in topology".format(id)
+        if info['kind'] == 'texture':
+            if 'texture' not in info:
+                yield ('definitions',
+                    "value of '{0}' doesn't have texture name".format(id))
+                continue
+            if type(info['texture']) is not str:
+                yield ('definitions',
+                    "texture name for '{0}' is not a string".format(id))
+        elif info['kind'] == 'model':
+            if 'angle' in info and type(info['angle']) is not int:
+                yield ('definitions',
+                    "angle for '{0}' is not an integer".format(id))
+            if 'model' not in info:
+                yield ('definitions',
+                    "value of '{0}' doesn't have model name".format(id))
+                continue
+            if type(info['model']) is not str:
+                yield ('definitions',
+                    "model name for '{0}' is not a string".format(id))
+            if 'size' in info:
+                size = info['size']
+                if type(size) is not float:
+                    yield ('definitions',
+                    "model size for '{0}' is not a float".format(id))
+                elif size <= 0:
+                    yield ('definitions',
+                    "model size for '{0}' must be positive".format(id))
+        elif info['kind'] == 'chain_model':
+            for name in ('vertical_model', 'left_bottom_model'):
+                if name not in info:
+                    yield ('definitions',
+                    "value of '{0}' doesn't have {1} name".format(
+                                                            id, name))
+                elif type(info[name]) is not str:
+                    yield ('definitions',
+                    "{0} name for '{1}' is not a string".format
+                                                            (name, id))
+        elif info['kind'] == 'sprite':
+            if 'texture' not in info:
+                yield ('definitions',
+                    "value of '{0}' doesn't have texture name".format(id))
+                continue
+            if type(info['texture']) is not str:
+                yield ('definitions',
+                    "texture name for '{0}' is not a string".format(id))
+            if 'size' in info:
+                size = info['size']
+                if type(size) is not float:
+                    yield ('definitions',
+                    "sprite size for '{0}' is not a float".format(id))
+                elif size <= 0:
+                    yield ('definitions',
+                    "sprite size for '{0}' must be positive".format(id))
+        else:
+            yield 'definitions', "unknown kind for '{0}'".format(id)
+    length = len(data['topology'][0])
+    for row in data['topology']:
+        if (len(row) + 1) % 3:
+            yield 'topology', 'wrong length of row'
+        if len(row) != length:
+            yield 'topology', 'different count of rows'
+        for index in range(0, length, 3):
+            id = row[index:index+2]
+            if id in ('..', 'ss'):
+                continue
+            if id not in data['definitions']:
+                yield 'topology', 'unknown ident ' + id
+
 class Map(object):
     _neighbors = OrderedDict((
         ('top', (0, 1)),
@@ -21,7 +107,7 @@ class Map(object):
         with open(S.map(name), 'r') as f:
            data = yaml.load(f)
            data['topology'].reverse()
-        errors = list(self._check_data(data))
+        errors = list(check_map_data(data))
         if errors:
             msg = "\nMap '{0}'\n".format(name.split('.')[0])
             for f, err in errors:
@@ -44,69 +130,6 @@ class Map(object):
                 self.data[index/3, num_row] = info
                 if info['kind'] == 'texture':
                     self.textures.add(info['texture'])
-
-    def _check_data(self, data):
-        stop = False
-        for f in ('substrate-texture', 'definitions', 'topology'):
-            if f not in data:
-                stop = True
-                yield f, 'is not specified'
-        if stop: return
-        if type(data['substrate-texture']) is not str:
-            yield 'substrate-texture', 'is not a string'
-        for id, info in data['definitions'].items():
-            if len(id) != 2:
-                yield ('definitions',
-                   "ident '{0}' should contain two characters".format(id))
-            for row in data['topology']:
-                if id in row:
-                    break
-            else:
-                yield 'definitions', "'{0}' is not in topology".format(id)
-            if info['kind'] == 'texture':
-                if 'texture' not in info:
-                    yield ('definitions',
-                    "value of '{0}' doesn't have texture name".format(id))
-                    continue
-                if type(info['texture']) is not str:
-                    yield ('definitions',
-                    "texture name for '{0}' is not a string".format(id))
-            elif info['kind'] == 'model':
-                if 'angle' in info and type(info['angle']) is not int:
-                    yield ('definitions',
-                    "angle for '{0}' is not an integer".format(id))
-                if 'model' not in info:
-                    yield ('definitions',
-                    "value of '{0}' doesn't have model name".format(id))
-                    continue
-                if type(info['model']) is not str:
-                    yield ('definitions',
-                    "model name for '{0}' is not a string".format(id))
-            elif info['kind'] == 'chain_model':
-                for name in ('vertical_model', 'left_bottom_model'):
-                    if name not in info:
-                        yield ('definitions',
-                        "value of '{0}' doesn't have {1} name".format(
-                                                                id, name))
-                    elif type(info[name]) is not str:
-                        yield ('definitions',
-                        "{0} name for '{1}' is not a string".format
-                                                             (name, id))
-
-            else:
-                yield 'definitions', "unknown kind for '{0}'".format(id)
-        length = len(data['topology'][0])
-        for row in data['topology']:
-            if (len(row) + 1) % 3:
-                yield 'topology', 'wrong length of row'
-            if len(row) != length:
-                yield 'topology', 'different count of rows'
-            for index in range(0, length, 3):
-                id = row[index:index+2]
-                if id in ('..', 'ss'):
-                    continue
-                if id not in data['definitions']:
-                    yield 'topology', 'unknown ident ' + id
 
     def __getitem__(self, coord):
         return self.data.get(coord)
