@@ -226,14 +226,48 @@ class Manager(object):
         self.cam_angle = S.camera['init_vertical_angle']
         focus_node = render.attachNewNode('focus_node')
         camera.reparentTo(focus_node)
+
         pos = [11, 4] #bind with the player
-        def set_pos(x_shift=0, y_shift=0):
-            #TODO: move relative to the angle
-            new_pos = [pos[0] + x_shift, pos[1] + y_shift]
-            if self.map[tuple(new_pos)] is None:
-                return
+        def set_pos(right=0, forward=0):
+            directions = deque((
+                ('right'),
+                ('right-bottom'),
+                ('bottom'),
+                ('bottom-left'),
+                ('left'),
+                ('left-top'),
+                ('top'),
+                ('top-right')
+            ))
+            nbs = dict(self.map.neighbors(pos, True, True))
+            shift = (0, 0)
+            angle = self.cam_angle + 180
+
+            #(forward, angle)
+            angle_table = {
+                (0, 0): None,
+                (1, 0): 0,
+                (-1, 0): 180,
+                (0, 1): -90,
+                (0, -1): 90
+            }
+            dir_angle = angle_table[forward, right]
+            if dir_angle is not None:
+                angle += dir_angle
+                angle = angle % 360
+                for a in range(-22, 360, 45):
+                    start, end = a, a + 45
+                    if start <= angle < end:
+                        direction = directions[0]
+                        if direction not in nbs:
+                            return
+                        break
+                    directions.rotate(1)
+                shift = self.map._neighbors[direction]
+            new_pos = [pos[0] + shift[0], pos[1] + shift[1]]
             pos[:] = new_pos
             focus_node.setPos(pos[0], pos[1], 0)
+
         def right_arrow():
             set_pos(1)
         base.accept('arrow_right', right_arrow)
@@ -250,7 +284,6 @@ class Manager(object):
             set_pos(0, -1)
         base.accept('arrow_down', down_arrow)
         base.accept('arrow_down-repeat', down_arrow)
-        #TODO: check max and min values for angle and distance
         def incr_angle():
             self.cam_angle += 3
             self._recalc_camera_position()
@@ -276,7 +309,9 @@ class Manager(object):
 
     def _recalc_camera_position(self):
         pitch = -S.camera['horizontal_angle']
+        min_d, max_d = S.camera['min_distance'], S.camera['max_distance']
         yaw = self.cam_angle
+        self.cam_distance = min(max(self.cam_distance, min_d), max_d)
         dist = self.cam_distance
         z = dist * sin(radians(-pitch))
         xy_dist = dist * cos(radians(-pitch))

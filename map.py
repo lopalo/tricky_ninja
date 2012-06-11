@@ -147,7 +147,7 @@ class Map(object):
                 if yield_names:
                     yield key, self[pos]
                 else:
-                    yield pos. self[pos]
+                    yield pos, self[pos]
 
     def block(self, x, y):
         pass
