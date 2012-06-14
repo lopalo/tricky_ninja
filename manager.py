@@ -1,9 +1,9 @@
 from os import path
 from glob import glob
-from math import cos, sin, radians
 from collections import deque
 from panda3d.core import *
 from map import Map
+from character import Character
 
 
 class BuildWorldError(Exception):
@@ -18,10 +18,11 @@ class Manager(object):
     texture_names = ['main', 'center', 'horizontal', 'vertical', 'corners']
 
     def __init__(self, map_name):
+        self.main_node = render.attachNewNode('main_node')
         self.blocked_squares = set()
         self.map = Map(self, map_name)
         self.build_world()
-        self.set_camera_control()
+        self.player = Character(self)
 
     def build_world(self):
         self._load_textures()
@@ -34,7 +35,7 @@ class Manager(object):
                 continue
             elif kind == 'model':
                 model = loader.loadModel(S.model(info['model']))
-                model.reparentTo(render)
+                model.reparentTo(self.main_node)
                 angle = info.get('angle', 0)
                 model.setHpr(angle, 0, 0)
                 if 'size' in info:
@@ -55,9 +56,9 @@ class Manager(object):
                 texture.setWrapU(Texture.WMClamp)
                 texture.setWrapV(Texture.WMClamp)
                 sprite.setTexture(texture)
-                sprite.reparentTo(render)
+                sprite.reparentTo(self.main_node)
                 sprite.setTransparency(True)
-                sprite.reparentTo(render)
+                sprite.reparentTo(self.main_node)
                 size = info.get('size', 1.0)
                 sprite.setScale(size)
                 sprite.setPos(coord[0], coord[1], size / 2)
@@ -179,7 +180,7 @@ class Manager(object):
         texture.setWrapV(Texture.WMClamp)
         plane.setTexture(texture)
         plane.setHpr(0, -90, 0)
-        plane.reparentTo(render)
+        plane.reparentTo(self.main_node)
         plane.setTransparency(True)
         plane.setPos(pos[0], pos[1], 0)
 
@@ -213,108 +214,10 @@ class Manager(object):
                         break
                     nbs.rotate(-1)
         model = loader.loadModel(S.model(model_name))
-        model.reparentTo(render)
-        model.setScale(0.016)
+        model.reparentTo(self.main_node)
         model.setScale(S.model_size(model_name))
         model.setPosHpr(pos[0], pos[1], 0, angle, 0, 0)
 
     def __call__(self, task):
-        pass #TODO: implement actions per frame
-
-    def set_camera_control(self): #TODO: move this method to the player class
-        self.cam_distance = S.camera['init_distance']
-        self.cam_angle = S.camera['init_vertical_angle']
-        focus_node = render.attachNewNode('focus_node')
-        camera.reparentTo(focus_node)
-
-        pos = [11, 4] #bind with the player
-        def set_pos(right=0, forward=0):
-            directions = deque((
-                ('right'),
-                ('right-bottom'),
-                ('bottom'),
-                ('bottom-left'),
-                ('left'),
-                ('left-top'),
-                ('top'),
-                ('top-right')
-            ))
-            nbs = dict(self.map.neighbors(pos, True, True))
-            shift = (0, 0)
-            angle = self.cam_angle + 180
-
-            #(forward, angle)
-            angle_table = {
-                (0, 0): None,
-                (1, 0): 0,
-                (-1, 0): 180,
-                (0, 1): -90,
-                (0, -1): 90
-            }
-            dir_angle = angle_table[forward, right]
-            if dir_angle is not None:
-                angle += dir_angle
-                angle = angle % 360
-                for a in range(-22, 360, 45):
-                    start, end = a, a + 45
-                    if start <= angle < end:
-                        direction = directions[0]
-                        if direction not in nbs:
-                            return
-                        break
-                    directions.rotate(1)
-                shift = self.map._neighbors[direction]
-            new_pos = [pos[0] + shift[0], pos[1] + shift[1]]
-            pos[:] = new_pos
-            focus_node.setPos(pos[0], pos[1], 0)
-
-        def right_arrow():
-            set_pos(1)
-        base.accept('arrow_right', right_arrow)
-        base.accept('arrow_right-repeat', right_arrow)
-        def left_arrow():
-            set_pos(-1)
-        base.accept('arrow_left', left_arrow)
-        base.accept('arrow_left-repeat', left_arrow)
-        def up_arrow():
-            set_pos(0, 1)
-        base.accept('arrow_up', up_arrow)
-        base.accept('arrow_up-repeat', up_arrow)
-        def down_arrow():
-            set_pos(0, -1)
-        base.accept('arrow_down', down_arrow)
-        base.accept('arrow_down-repeat', down_arrow)
-        def incr_angle():
-            self.cam_angle += 3
-            self._recalc_camera_position()
-        base.accept('z', incr_angle)
-        base.accept('z-repeat', incr_angle)
-        def decr_angle():
-            self.cam_angle -= 3
-            self._recalc_camera_position()
-        base.accept('x', decr_angle)
-        base.accept('x-repeat', decr_angle)
-        def incr_dist():
-            self.cam_distance += 1
-            self._recalc_camera_position()
-        base.accept('a', incr_dist)
-        base.accept('a-repeat', incr_dist)
-        def decr_dist():
-            self.cam_distance -= 1
-            self._recalc_camera_position()
-        base.accept('s', decr_dist)
-        base.accept('s-repeat', decr_dist)
-        self._recalc_camera_position()
-        set_pos()
-
-    def _recalc_camera_position(self):
-        pitch = -S.camera['horizontal_angle']
-        min_d, max_d = S.camera['min_distance'], S.camera['max_distance']
-        yaw = self.cam_angle
-        self.cam_distance = min(max(self.cam_distance, min_d), max_d)
-        dist = self.cam_distance
-        z = dist * sin(radians(-pitch))
-        xy_dist = dist * cos(radians(-pitch))
-        x = xy_dist * cos(radians(yaw))
-        y = xy_dist * sin(radians(yaw))
-        camera.setPosHpr(x, y, z, 90 + yaw, pitch, 0)
+        self.player.update_action()
+        return task.cont

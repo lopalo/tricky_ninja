@@ -13,3 +13,10 @@ camera:
   init_distance: 10
   init_vertical_angle: -90
   horizontal_angle: 60
+
+player:
+  model: ninja
+  walk_range: [0, 12]
+  idle_frame: 28
+  speed: 2
+  init_position: [11, 4]
