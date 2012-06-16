@@ -16,7 +16,10 @@ camera:
 
 player:
   model: ninja
+  pointer_texture: pointer
   walk_range: [0, 12]
+  pre_jump_range: [103, 106]
+  jump_range: [107, 110]
   idle_frame: 28
   speed: 2
   init_position: [11, 4]

@@ -1,9 +1,11 @@
 from functools import wraps
 from collections import deque
-from math import cos, sin, radians
+from math import cos, sin, radians, atan2, degrees, hypot
 from types import GeneratorType
 from direct.interval.LerpInterval import (LerpPosInterval,
                                 LerpHprInterval, LerpNodePathInterval)
+from direct.interval.ProjectileInterval import ProjectileInterval
+from direct.interval.ActorInterval import ActorInterval
 from direct.actor.Actor import Actor
 
 _actions = {}
@@ -33,19 +35,19 @@ def _runner(char, gen, send_value=None):
         def callback(task):
             _runner(char, gen)
         taskMgr.doMethodLater(yielded.seconds, callback, str(id(wait)))
-    elif isinstance(yielded, LerpNodePathInterval):
+    elif isinstance(yielded, (LerpNodePathInterval, ActorInterval)):
         def callback():
             _runner(char, gen)
         key = str(id(gen))
         base.acceptOnce(key, callback)
         yielded.setDoneEvent(key)
     elif isinstance(yielded, events):
-        events = yielded.items
+        items = yielded.items
         def callback(e_name):
-            for ev in events:
+            for ev in items:
                 base.ignore(ev)
             _runner(char, gen, e_name)
-        for i in events:
+        for i in items:
             base.acceptOnce(i, callback, [i])
     else:
         raise Exception('Unsupported type ' + type(yielded).__name__)
@@ -95,6 +97,7 @@ class Character:
         actor.setBlend(frameBlend=True)
         self.set_camera()
         self.set_arrow_handlers()
+        self.set_control()
 
     def set_camera(self):
         camera.reparentTo(self.node)
@@ -174,6 +177,11 @@ class Character:
         base.ignore('arrow_left')
         base.ignore('arrow_left-up')
 
+    def set_control(self):
+        def space_down():
+            self.update_action('jump')
+        base.accept('space', space_down)
+
     def update_action(self, action=None):
         #calls in every frame and by some
         #events('arrows'...)
@@ -243,7 +251,7 @@ class Character:
             if d_angle != 0:
                 if abs(d_angle) > 180:
                     angle = angle - 360 if d_angle > 0 else angle + 360
-                dur = float(abs(d_angle)) / 360 / sp
+                dur = float(abs(angle - c_angle)) / 360 / sp
                 interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                        (c_angle, 0, 0))
                 interval.start()
@@ -266,27 +274,77 @@ class Character:
 
     @action('jump')
     def do_jump(self):
-        self.remove_arrow_handlers()
-        #set new handlers
-        #enter to change position state
+        def pred(info):
+            return True #remove later
+            return 'jump' in info['actions']
+        field = self.manager.map.get_field(self.pos, 2, pred)
+        next(field)
+        field = deque(sorted(sum(field, [])))
+        if not field:
+            return
+        pointer = loader.loadModel(S.model('plane'))
+        texture = loader.loadTexture(
+                    S.texture(S.player['pointer_texture']))
+        pointer.setTexture(texture)
+        pointer.setTransparency(True)
+        pointer.setHpr(0, -90, 0)
+        pointer.reparentTo(self.manager.main_node)
         while True:
-            #set initial position
-            val = yield events('arrow_left', 'arrow_right',
-                                'space-up', self.must_die_event)
-            if val in (self.should_die_event, 'space-up'):
+            pos = field[0]
+            pointer.setPos(pos[0], pos[1], 0.1)
+            val = yield events('arrow_left', 'arrow_left-repeat',
+                               'arrow_right', 'arrow_right-repeat',
+                               'space-up', self.must_die_event)
+            if val in (self.must_die_event, 'space-up'):
                 break
-            elif val == 'arrow':
-                pass
-                #change position and rotate
+            elif val in ('arrow_left', 'arrow_left-repeat'):
+                field.rotate(1)
+            elif val in ('arrow_right', 'arrow_right-repeat'):
+                field.rotate(-1)
             else:
-                pass
-                #raise
-        #exit from change position state
+                raise Exception('Unknown event')
         self.set_arrow_handlers()
+        pointer.removeNode()
         if self.must_die:
             return
-        #actually do jump(create animation)
-        #yield jump interval for waiting finish of jump action
+        actor = self.actor
+        sp = float(S.player['speed'])
+        v = pos[0] - self.pos[0], pos[1] - self.pos[1]
+        dist = float(hypot(v[0], v[1]))
+        angle = (degrees(atan2(v[1], v[0])) + 90) % 360
+        c_angle = actor.getHpr()[0] % 360
+        d_angle = angle - c_angle
+        if d_angle != 0:
+            if abs(d_angle) > 180:
+                angle = angle - 360 if d_angle > 0 else angle + 360
+            dur = float(abs(angle - c_angle)) / 360 / sp
+            interval = LerpHprInterval(actor, dur, (angle, 0, 0),
+                                                    (c_angle, 0, 0))
+            interval.start()
+            anim = actor.getAnimControl('anim')
+            anim.setPlayRate(sp / 2)
+            wr = S.player['walk_range']
+            anim.loop(True, wr[0], wr[1])
+            yield interval
+        wr = S.player['pre_jump_range']
+        interval = actor.actorInterval('anim', playRate=0.7,
+                            startFrame=wr[0], endFrame=wr[1])
+        interval.start()
+        yield interval
+        interval = ProjectileInterval(actor, (0, 0, 0),
+                                (0, 0, 0), 1, gravityMult=1)
+        interval.start()
+        interval = LerpPosInterval(self.node, 1, pos + (0,))
+        interval.start()
+        yield interval
+        wr = S.player['jump_range']
+        interval = actor.actorInterval('anim', playRate=0.7,
+                            startFrame=wr[0], endFrame=wr[1])
+        interval.start()
+        yield interval
+        self.pos = pos
+        yield wait(0.1)
+        actor.pose('anim', S.player['idle_frame'])
 
 
 

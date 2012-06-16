@@ -20,7 +20,7 @@ class Manager(object):
     def __init__(self, map_name):
         self.main_node = render.attachNewNode('main_node')
         self.blocked_squares = set()
-        self.map = Map(self, map_name)
+        self.map = Map(map_name)
         self.build_world()
         self.player = Character(self)
 

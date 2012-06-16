@@ -103,12 +103,12 @@ class Map(object):
         ('left-top', (-1, 1))
     ))
 
-    def __init__(self, manager, name):
+    def __init__(self, name, check=True):
         with open(S.map(name), 'r') as f:
            data = yaml.load(f)
            data['topology'].reverse()
         errors = list(check_map_data(data))
-        if errors:
+        if errors and check:
             msg = "\nMap '{0}'\n".format(name.split('.')[0])
             for f, err in errors:
                 msg +='{0}: {1}\n'.format(f, err)
@@ -148,6 +148,30 @@ class Map(object):
                     yield key, self[pos]
                 else:
                     yield pos, self[pos]
+
+    def wave(self, coord):
+        assert self[coord], coord
+        wave = [coord]
+        visited = set(wave)
+        while True:
+            new_wave = []
+            for c in wave:
+                for n, info in self.neighbors(c):
+                    if n not in visited:
+                        new_wave.append((n, info))
+                        visited.add(n)
+            if len(new_wave) == 0:
+                return
+            yield new_wave
+            wave = [c for c, info in new_wave]
+
+    def get_field(self, coord, radius, pred=lambda x: True):
+        assert radius > 0
+        for n, wave in enumerate(self.wave(coord)):
+            wave[:] = [i for i in wave if pred(i[1])]
+            yield [c for c, info in wave]
+            if n == radius - 1:
+                return
 
     def block(self, x, y):
         pass
