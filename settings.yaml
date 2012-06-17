@@ -10,8 +10,10 @@ map_texture_size: 256
 camera:
   min_distance: 3
   max_distance: 30
+  distance_step: 1
   init_distance: 10
   init_vertical_angle: -90
+  vertical_angle_step: 3
   horizontal_angle: 60
 
 player:
@@ -19,7 +21,10 @@ player:
   pointer_texture: pointer
   walk_range: [0, 12]
   pre_jump_range: [103, 106]
-  jump_range: [107, 110]
+  pre_jump_speed: 0.7
+  post_jump_range: [107, 110]
+  post_jump_speed: 0.7
   idle_frame: 28
   speed: 2
+  jump_height: 0.5
   init_position: [11, 4]

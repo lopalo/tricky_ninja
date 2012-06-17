@@ -41,6 +41,7 @@ def _runner(char, gen, send_value=None):
         key = str(id(gen))
         base.acceptOnce(key, callback)
         yielded.setDoneEvent(key)
+        yielded.start()
     elif isinstance(yielded, events):
         items = yielded.items
         def callback(e_name):
@@ -116,22 +117,22 @@ class Character:
             y = xy_dist * sin(radians(yaw))
             camera.setPosHpr(x, y, z, 90 + yaw, pitch, 0)
         def incr_angle():
-            self.cam_angle += 3 #TODO: use value from settings
+            self.cam_angle += S.camera['vertical_angle_step']
             recalc()
         base.accept('z', incr_angle)
         base.accept('z-repeat', incr_angle)
         def decr_angle():
-            self.cam_angle -= 3 #TODO: use value from settings
+            self.cam_angle -= S.camera['vertical_angle_step']
             recalc()
         base.accept('x', decr_angle)
         base.accept('x-repeat', decr_angle)
         def incr_dist():
-            self.cam_distance += 1 #TODO: use value from settings
+            self.cam_distance += S.camera['distance_step']
             recalc()
         base.accept('a', incr_dist)
         base.accept('a-repeat', incr_dist)
         def decr_dist():
-            self.cam_distance -= 1 #TODO: use value from settings
+            self.cam_distance -= S.camera['distance_step']
             recalc()
         base.accept('s', decr_dist)
         base.accept('s-repeat', decr_dist)
@@ -254,11 +255,9 @@ class Character:
                 dur = float(abs(angle - c_angle)) / 360 / sp
                 interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                        (c_angle, 0, 0))
-                interval.start()
                 yield interval
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
-            interval.start()
             yield interval
             self.pos = next_pos
         anim.pose(S.player['idle_frame'])
@@ -320,34 +319,32 @@ class Character:
             dur = float(abs(angle - c_angle)) / 360 / sp
             interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                     (c_angle, 0, 0))
-            interval.start()
             anim = actor.getAnimControl('anim')
             anim.setPlayRate(sp / 2)
             wr = S.player['walk_range']
             anim.loop(True, wr[0], wr[1])
             yield interval
         wr = S.player['pre_jump_range']
-        interval = actor.actorInterval('anim', playRate=0.7,
-                            startFrame=wr[0], endFrame=wr[1])
-        interval.start()
+        interval = actor.actorInterval(
+            'anim',
+            playRate=S.player['pre_jump_speed'],
+            startFrame=wr[0], endFrame=wr[1]
+        )
         yield interval
         interval = ProjectileInterval(actor, (0, 0, 0),
-                                (0, 0, 0), 1, gravityMult=1)
+                    (0, 0, 0), 1, gravityMult=S.player['jump_height'])
         interval.start()
         interval = LerpPosInterval(self.node, 1, pos + (0,))
-        interval.start()
         yield interval
-        wr = S.player['jump_range']
-        interval = actor.actorInterval('anim', playRate=0.7,
-                            startFrame=wr[0], endFrame=wr[1])
-        interval.start()
+        wr = S.player['post_jump_range']
+        interval = actor.actorInterval(
+            'anim',
+            playRate=S.player['post_jump_speed'],
+            startFrame=wr[0], endFrame=wr[1]
+        )
         yield interval
         self.pos = pos
         yield wait(0.1)
         actor.pose('anim', S.player['idle_frame'])
-
-
-
-
 
 
