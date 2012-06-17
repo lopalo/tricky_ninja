@@ -84,6 +84,7 @@ class Character:
     def __init__(self, manager):
         self.action = None
         self.must_die = False
+        self.dead = False
         self.move_direction = [0, 0] #[forward, right]
         self.manager = manager
         self.node = node = render.attachNewNode(str(id(self)))
@@ -99,6 +100,9 @@ class Character:
         self.set_camera()
         self.set_arrow_handlers()
         self.set_control()
+
+    def __bool__(self):
+        return not self.dead
 
     def set_camera(self):
         camera.reparentTo(self.node)
@@ -182,6 +186,9 @@ class Character:
         def space_down():
             self.update_action('jump')
         base.accept('space', space_down)
+        def k_down():
+            self.kill()
+        base.accept('k', k_down)
 
     def update_action(self, action=None):
         #calls in every frame and by some
@@ -191,7 +198,7 @@ class Character:
         if self.action is not None:
             return
         if self.must_die:
-            self.do_die()
+            self.actions['die'](self)
         if action is not None:
             self.actions[action](self)
 
@@ -261,15 +268,6 @@ class Character:
             yield interval
             self.pos = next_pos
         anim.pose(S.player['idle_frame'])
-
-    @property
-    def must_die_event(self):
-        return 'die:' + str(id(self))
-
-    def kill(self):
-        self.must_die = True
-        messenger.send(self.must_die_event)
-        #do something addition actions
 
     @action('jump')
     def do_jump(self):
@@ -347,4 +345,30 @@ class Character:
         yield wait(0.1)
         actor.pose('anim', S.player['idle_frame'])
 
+    @action('die')
+    def do_die(self):
+        self.must_die = False
+        self.dead = True
+        actor = self.actor
+        wr = S.player['death_range']
+        interval = actor.actorInterval(
+            'anim',
+            playRate=S.player['death_speed'],
+            startFrame=wr[0], endFrame=wr[1]
+        )
+        yield interval
 
+        #TODO: change this behavior later
+        yield wait(1)
+        self.dead = False
+        self.pos = tuple(S.player['init_position'])
+        self.node.setPos(self.pos[0], self.pos[1], 0)
+        actor.pose('anim', S.player['idle_frame'])
+
+    @property
+    def must_die_event(self):
+        return 'die:' + str(id(self))
+
+    def kill(self):
+        self.must_die = True
+        messenger.send(self.must_die_event)
