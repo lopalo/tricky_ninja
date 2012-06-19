@@ -27,8 +27,8 @@ class Manager(object):
     def build_world(self):
         self._load_textures()
         for coord, info in self.map:
-            kind = info['kind']
-            if kind == 'substrate_texture':
+            kind = info.get('kind')
+            if kind in ('substrate_texture', None):
                 pass
             elif kind == 'texture':
                 self._set_texture(info['texture'], info['ident'], coord)

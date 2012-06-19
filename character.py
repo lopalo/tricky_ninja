@@ -209,7 +209,7 @@ class Character:
         move_dir = tuple(self.move_direction)
         pos = self.pos
         if move_dir == (0, 0):
-            return
+            return None, False
         directions = deque((
             ('right'),
             ('right-bottom'),
@@ -232,15 +232,20 @@ class Character:
                 start, end = a, a + 45
                 if start <= angle < end:
                     direction = directions[0]
-                    if direction not in nbs:
-                        return
+                    walk = direction in nbs
                     break
                 directions.rotate(1)
             shift = self.manager.map._neighbors[direction]
-        return (pos[0] + shift[0], pos[1] + shift[1])
+        new_pos = pos[0] + shift[0], pos[1] + shift[1]
+        if not walk:
+            return new_pos, False
+        if 'walk' in self.manager.map[new_pos]['actions']:
+            return new_pos, True
+        return new_pos, False
 
     @action('walk')
     def do_walk(self):
+        #TODO: fix moving to sideways through obstacle
         yield wait(.05)
         actor = self.actor
         anim = actor.getAnimControl('anim')
@@ -249,7 +254,7 @@ class Character:
         wr = S.player['walk_range']
         anim.loop(True, wr[0], wr[1])
         while True:
-            next_pos = self.get_next_pos()
+            next_pos, walk = self.get_next_pos()
             if self.must_die or next_pos is None:
                 break
             shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
@@ -263,6 +268,8 @@ class Character:
                 interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                        (c_angle, 0, 0))
                 yield interval
+            if not walk:
+                break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
             yield interval
@@ -272,7 +279,6 @@ class Character:
     @action('jump')
     def do_jump(self):
         def pred(info):
-            return True #remove later
             return 'jump' in info['actions']
         field = self.manager.map.get_field(self.pos, 2, pred)
         next(field)

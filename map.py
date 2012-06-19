@@ -5,15 +5,21 @@ import yaml
 class MapDataError(Exception):
     pass
 
+available_actions = ('walk', 'jump',)
+
 def check_map_data(data):
     stop = False
-    for f in ('substrate-texture', 'definitions', 'topology'):
+    for f in ('substrate-texture', 'definitions',
+              'topology', 'action_groups'):
         if f not in data:
             stop = True
             yield f, 'is not specified'
     if stop: return
     if type(data['substrate-texture']) is not str:
         yield 'substrate-texture', 'is not a string'
+    actions = data['substrate_actions']
+    if actions is not None and actions not in data['action_groups']:
+            yield ('substrate_actions', "unknown action group")
     for id, info in data['definitions'].items():
         if len(id) != 2:
             yield ('definitions',
@@ -23,7 +29,8 @@ def check_map_data(data):
                 break
         else:
             yield 'definitions', "'{0}' is not in topology".format(id)
-        if info['kind'] == 'texture':
+        kind = info.get('kind')
+        if kind == 'texture':
             if 'texture' not in info:
                 yield ('definitions',
                     "value of '{0}' doesn't have texture name".format(id))
@@ -31,7 +38,7 @@ def check_map_data(data):
             if type(info['texture']) is not str:
                 yield ('definitions',
                     "texture name for '{0}' is not a string".format(id))
-        elif info['kind'] == 'model':
+        elif kind == 'model':
             if 'angle' in info and type(info['angle']) is not int:
                 yield ('definitions',
                     "angle for '{0}' is not an integer".format(id))
@@ -50,7 +57,7 @@ def check_map_data(data):
                 elif size <= 0:
                     yield ('definitions',
                     "model size for '{0}' must be positive".format(id))
-        elif info['kind'] == 'chain_model':
+        elif kind == 'chain_model':
             for name in ('vertical_model', 'left_bottom_model'):
                 if name not in info:
                     yield ('definitions',
@@ -60,7 +67,7 @@ def check_map_data(data):
                     yield ('definitions',
                     "{0} name for '{1}' is not a string".format
                                                             (name, id))
-        elif info['kind'] == 'sprite':
+        elif kind == 'sprite':
             if 'texture' not in info:
                 yield ('definitions',
                     "value of '{0}' doesn't have texture name".format(id))
@@ -76,8 +83,15 @@ def check_map_data(data):
                 elif size <= 0:
                     yield ('definitions',
                     "sprite size for '{0}' must be positive".format(id))
+        elif kind is None:
+            pass
         else:
             yield 'definitions', "unknown kind for '{0}'".format(id)
+        actions = info.get('actions')
+        if actions is not None and actions not in data['action_groups']:
+            yield ('definitions',
+                    "unknown action group for '{0}'".format(id))
+
     length = len(data['topology'][0])
     for row in data['topology']:
         if (len(row) + 1) % 3:
@@ -90,6 +104,19 @@ def check_map_data(data):
                 continue
             if id not in data['definitions']:
                 yield 'topology', 'unknown ident ' + id
+
+    used_action_groups = set(i['actions'] for i in
+                             data['definitions'].values()
+                             if i.get('actions') is not None)
+    unused = set(data['action_groups']) - used_action_groups
+    if unused:
+        yield 'action_groups', 'Unused groups ' + str(list(unused))
+    for k, v in data['action_groups'].items():
+        for a in v:
+            if a not in available_actions:
+                yield ('action_groups',
+                    "'{0}' contains unknown action".format(k))
+
 
 class Map(object):
     _neighbors = OrderedDict((
@@ -117,18 +144,30 @@ class Map(object):
 
         self.textures = set([self.substrate_texture])
         self.data = {}
+        #TODO: check
+        for info in data['definitions'].values():
+            actions = info.get('actions')
+            if actions is not None:
+                info['actions'] = data['action_groups'][actions]
+            else:
+                info['actions'] = tuple()
         for num_row, row in enumerate(data['topology']):
             for index in range(0, len(data['topology'][0]), 3):
                 ident = row[index:index+2]
                 if ident == '..':
                     continue
                 elif ident == 'ss':
-                    info = dict(kind='substrate_texture')
+                    #TODO: check 'actions' field
+                    actions = data['substrate_actions']
+                    info = dict(
+                        kind='substrate_texture',
+                        actions=data['action_groups'][actions]
+                    )
                 else:
                     info = data['definitions'][ident]
                     info['ident'] = ident
                 self.data[index/3, num_row] = info
-                if info['kind'] == 'texture':
+                if info.get('kind') == 'texture':
                     self.textures.add(info['texture'])
 
     def __getitem__(self, coord):

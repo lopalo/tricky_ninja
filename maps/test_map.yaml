@@ -1,17 +1,26 @@
 substrate-texture: grass
+substrate_actions: free
 #for substrate-texture ident always is 'ss'
+
+action_groups:
+  free: [walk, jump]
+  jump: [jump]
+  walk: [walk]
 
 definitions:
   sa:
     kind: texture
     texture: sand
+    actions: free
   st:
     kind: texture
     texture: stone
+    actions: free
   S0:
     kind: model
     model: stone
     angle: 128
+    actions: jump
   S1:
     kind: model
     model: stone
@@ -25,17 +34,22 @@ definitions:
     kind: sprite
     texture: tree
     size: 6.0
+    actions: walk
+  ow:
+    actions: walk
+  wl:
+    actions: null
 
 topology:
 - '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
 - '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
 - '.. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..'
 - '.. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..'
-- '.. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss S0'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss tr ss tr ss ss ss ss ss ss ..'
-- '.. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa ..'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss S1 ss tr ss ss ss ss ss sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
+- '.. ss ss ss ss ss ss ss ss ss ss ss ss ss ow ss ow ss ss ss ss ss ss S0'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ow tr ow tr ow ss ss ss ss ss ..'
+- '.. .. ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss ss sa ..'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss wl S1 wl tr ow ss ss ss ss sa sa'
+- 'ss ss ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ff ff sa sa sa sa'
 - 'ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ff sa sa sa sa sa'
