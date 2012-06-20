@@ -141,6 +141,7 @@ class Map(object):
             for f, err in errors:
                 msg +='{0}: {1}\n'.format(f, err)
             raise MapDataError(msg)
+        self.blocked_squares = set()
         self.substrate_texture = data['substrate_texture']
 
         self.textures = set([self.substrate_texture])
@@ -175,6 +176,9 @@ class Map(object):
     def __iter__(self):
         return self.data.items().__iter__()
 
+    def __contains__(self, coord):
+        return coord in self.data
+
     def neighbors(self, coord, all=False, yield_names=False):
         keys = self._neighbors.keys()
         keys = keys if all else keys[::2]
@@ -203,25 +207,25 @@ class Map(object):
             yield new_wave
             wave = [c for c, info in new_wave]
 
-    def get_field(self, coord, radius, pred=lambda x: True):
+    def get_field(self, coord, radius, pred=lambda pos, info: True):
         assert radius > 0
         for n, wave in enumerate(self.wave(coord)):
-            wave[:] = [i for i in wave if pred(i[1])]
+            wave[:] = [i for i in wave if pred(*i)]
             yield [c for c, info in wave]
             if n == radius - 1:
                 return
 
-    def find_path(self, start, end, pred=lambda x: True):
+    def find_path(self, start, end, pred=lambda pos, info: True):
         squares = {}
         for num, wave in enumerate(self.wave(start)):
-            wave[:] = [i for i in wave if pred(i[1])]
+            wave[:] = [i for i in wave if pred(*i)]
             for c, info in wave:
                 squares[c] = num
                 if c == end:
                     return num, squares
         return None, None
 
-    def get_path(self, start, end, pred=lambda x: True):
+    def get_path(self, start, end, pred=lambda pos, info: True):
         last_wave_num, squares = self.find_path(start, end, pred)
         if last_wave_num is None:
             return
@@ -241,11 +245,12 @@ class Map(object):
         return tuple(path)
 
 
-    def block(self, x, y):
-        pass
+    def block(self, pos):
+        assert self[pos] and pos not in self.blocked_squares
+        self.blocked_squares.add(pos)
 
-    def is_availale(self, x, y):
-        pass #is existed on map and not in blocked_squares
+    def is_available(self, pos):
+        return pos in self and pos not in self.blocked_squares
 
-    def unblock(self):
-        pass
+    def unblock(self, pos):
+        self.blocked_squares.remove(pos)

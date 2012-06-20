@@ -225,6 +225,13 @@ class Manager(object):
         pos, model, texture = (3, 3), 'ninja', 'nskinbr'
         route = ((0, 13), (17, 4))
         self.npcs[pos] = NPC(self, model, texture, pos, route)
+        pos = (5, 5)
+        self.npcs[pos] = NPC(self, model, texture, pos, route)
+
+    def is_available(self, pos):
+        return (pos in self.map and
+                pos != self.player.pos and
+                pos not in self.npcs)
 
     def __call__(self, task):
         self.player.update_action()

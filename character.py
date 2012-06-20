@@ -127,13 +127,18 @@ class Character(object):
                 interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                        (c_angle, 0, 0))
                 yield interval
+                if (not self.manager.map.is_available(next_pos) or
+                    not self.manager.is_available(next_pos)):
+                        break
+
             if not walk:
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
-            #TODO: block square
+            self.manager.map.block(next_pos)
             yield interval
             self.pos = next_pos
+            self.manager.map.unblock(self.pos)
         anim.pose(S.player['idle_frame']) #TODO: different for npc
 
     @action('die')
@@ -283,6 +288,8 @@ class Player(Character):
             return
         if action is not None:
             self.actions[action](self)
+        elif tuple(self.move_direction) != (0, 0):
+            self.actions['walk'](self)
 
     def get_next_pos(self):
         #different for NPC and Player
@@ -321,14 +328,15 @@ class Player(Character):
         new_pos = pos[0] + shift[0], pos[1] + shift[1]
         if not walk:
             return new_pos, False
-        if 'walk' in self.manager.map[new_pos]['actions']:
+        if ('walk' in self.manager.map[new_pos]['actions'] and
+            self.manager.map.is_available(new_pos) and
+            self.manager.is_available(new_pos)):
             return new_pos, True
         return new_pos, False
 
     @action('jump')
     def do_jump(self):
-        def pred(info):
-            return 'jump' in info['actions']
+        pred = lambda pos, info: 'jump' in info['actions']
         field = self.manager.map.get_field(self.pos, 2, pred)
         next(field)
         field = deque(sorted(sum(field, [])))
@@ -377,6 +385,11 @@ class Player(Character):
             wr = S.player['walk_range']
             anim.loop(True, wr[0], wr[1])
             yield interval
+        if (not self.manager.map.is_available(pos) or
+            not self.manager.is_available(pos)):
+            actor.pose('anim', S.player['idle_frame'])
+            return
+        self.manager.map.block(pos)
         wr = S.player['pre_jump_range']
         interval = actor.actorInterval(
             'anim',
@@ -388,7 +401,6 @@ class Player(Character):
                     (0, 0, 0), 1, gravityMult=S.player['jump_height'])
         interval.start()
         interval = LerpPosInterval(self.node, 1, pos + (0,))
-        #TODO: block square
         yield interval
         wr = S.player['post_jump_range']
         interval = actor.actorInterval(
@@ -398,6 +410,7 @@ class Player(Character):
         )
         yield interval
         self.pos = pos
+        self.manager.map.unblock(self.pos)
         yield wait(0.1)
         actor.pose('anim', S.player['idle_frame'])
 
@@ -447,7 +460,9 @@ class NPC(Character):
             return None, False
         target = self.target
         end_pos = target if isinstance(target, tuple) else target.pos
-        pred = lambda info: 'walk' in info['actions']
+        pred = lambda pos, info: ('walk' in info['actions'] and
+                                  self.manager.map.is_available(pos) and
+                                  pos not in self.manager.npcs)
         path = self.manager.map.get_path(self.pos, end_pos, pred)
         if not path:
             return None, False
