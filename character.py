@@ -16,6 +16,7 @@ def action(name):
         @wraps(func)
         def wrap(char, *args, **kwargs):
             assert isinstance(char, Character)
+            assert char.action == None
             char.action = name
             gen = func(char, *args, **kwargs)
             assert isinstance(gen, GeneratorType)
@@ -66,7 +67,7 @@ class events:
         self.items = items
 
 
-class Character:
+class Character(object):
     actions = _actions
 
     #(forward, right)
@@ -85,24 +86,104 @@ class Character:
         self.action = None
         self.must_die = False
         self.dead = False
-        self.move_direction = [0, 0] #[forward, right]
         self.manager = manager
         self.node = node = render.attachNewNode(str(id(self)))
+        node.reparentTo(manager.main_node)
+
+    def __bool__(self):
+        return not self.dead
+
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, value):
+        assert type(value) is tuple
+        self._pos = value
+
+    @action('walk')
+    def do_walk(self):
+        #TODO: fix moving to sideways through obstacle
+        yield wait(.05)
+        actor = self.actor
+        anim = actor.getAnimControl('anim')
+        sp = float(S.player['speed'])
+        anim.setPlayRate(sp / 2)
+        wr = S.player['walk_range'] #TODO: different for npc
+        anim.loop(True, wr[0], wr[1])
+        while True:
+            next_pos, walk = self.get_next_pos()
+            if self.must_die or next_pos is None:
+                break
+            shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
+            angle = (self.angle_table[shift] + 180) % 360
+            c_angle = actor.getHpr()[0] % 360
+            d_angle = angle - c_angle
+            if d_angle != 0:
+                if abs(d_angle) > 180:
+                    angle = angle - 360 if d_angle > 0 else angle + 360
+                dur = float(abs(angle - c_angle)) / 360 / sp
+                interval = LerpHprInterval(actor, dur, (angle, 0, 0),
+                                                       (c_angle, 0, 0))
+                yield interval
+            if not walk:
+                break
+            dur = 1.4 / sp if all(shift) else 1.0 / sp
+            interval = LerpPosInterval(self.node, dur, next_pos + (0,))
+            #TODO: block square
+            yield interval
+            self.pos = next_pos
+        anim.pose(S.player['idle_frame']) #TODO: different for npc
+
+    @action('die')
+    def do_die(self):
+        self.must_die = False
+        self.dead = True
+        actor = self.actor
+        wr = S.player['death_range'] #TODO: different for npc
+        interval = actor.actorInterval(
+            'anim',
+            playRate=S.player['death_speed'],
+            startFrame=wr[0], endFrame=wr[1]
+        )
+        yield interval
+
+        #TODO: change this behavior later
+        #TODO: block squares
+        yield wait(1)
+        self.dead = False
+        self.pos = tuple(S.player['init_position']) #TODO: different for npc
+        self.node.setPos(self.pos[0], self.pos[1], 0)
+        actor.pose('anim', S.player['idle_frame']) #TODO: different for npc
+
+    @property
+    def must_die_event(self):
+        return 'die:' + str(id(self))
+
+    def kill(self):
+        self.must_die = True
+        messenger.send(self.must_die_event)
+
+
+class Player(Character):
+
+    def __init__(self, manager):
+        super(Player, self).__init__(manager)
+        self.move_direction = [0, 0] #[forward, right]
         self.actor = actor = Actor(S.model(S.player['model']),
                                     {'anim': S.model(S.player['model'])})
-        self.actor.reparentTo(node)
+        self.actor.reparentTo(self.node)
         actor.setScale(S.model_size(S.player['model']))
+        actor.setTexture(loader.loadTexture(
+                            S.texture(S.player['texture'])), 1)
         self.pos = tuple(S.player['init_position'])
-        node.setPos(self.pos[0], self.pos[1], 0)
+        self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', S.player['idle_frame'])
-        node.reparentTo(manager.main_node)
         actor.setBlend(frameBlend=True)
         self.set_camera()
         self.set_arrow_handlers()
         self.set_control()
-
-    def __bool__(self):
-        return not self.dead
 
     def set_camera(self):
         camera.reparentTo(self.node)
@@ -199,6 +280,7 @@ class Character:
             return
         if self.must_die:
             self.actions['die'](self)
+            return
         if action is not None:
             self.actions[action](self)
 
@@ -242,39 +324,6 @@ class Character:
         if 'walk' in self.manager.map[new_pos]['actions']:
             return new_pos, True
         return new_pos, False
-
-    @action('walk')
-    def do_walk(self):
-        #TODO: fix moving to sideways through obstacle
-        yield wait(.05)
-        actor = self.actor
-        anim = actor.getAnimControl('anim')
-        sp = float(S.player['speed'])
-        anim.setPlayRate(sp / 2)
-        wr = S.player['walk_range']
-        anim.loop(True, wr[0], wr[1])
-        while True:
-            next_pos, walk = self.get_next_pos()
-            if self.must_die or next_pos is None:
-                break
-            shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
-            angle = (self.angle_table[shift] + 180) % 360
-            c_angle = actor.getHpr()[0] % 360
-            d_angle = angle - c_angle
-            if d_angle != 0:
-                if abs(d_angle) > 180:
-                    angle = angle - 360 if d_angle > 0 else angle + 360
-                dur = float(abs(angle - c_angle)) / 360 / sp
-                interval = LerpHprInterval(actor, dur, (angle, 0, 0),
-                                                       (c_angle, 0, 0))
-                yield interval
-            if not walk:
-                break
-            dur = 1.4 / sp if all(shift) else 1.0 / sp
-            interval = LerpPosInterval(self.node, dur, next_pos + (0,))
-            yield interval
-            self.pos = next_pos
-        anim.pose(S.player['idle_frame'])
 
     @action('jump')
     def do_jump(self):
@@ -339,6 +388,7 @@ class Character:
                     (0, 0, 0), 1, gravityMult=S.player['jump_height'])
         interval.start()
         interval = LerpPosInterval(self.node, 1, pos + (0,))
+        #TODO: block square
         yield interval
         wr = S.player['post_jump_range']
         interval = actor.actorInterval(
@@ -351,30 +401,77 @@ class Character:
         yield wait(0.1)
         actor.pose('anim', S.player['idle_frame'])
 
-    @action('die')
-    def do_die(self):
-        self.must_die = False
-        self.dead = True
-        actor = self.actor
-        wr = S.player['death_range']
-        interval = actor.actorInterval(
-            'anim',
-            playRate=S.player['death_speed'],
-            startFrame=wr[0], endFrame=wr[1]
-        )
-        yield interval
 
-        #TODO: change this behavior later
-        yield wait(1)
-        self.dead = False
-        self.pos = tuple(S.player['init_position'])
+class NPC(Character):
+    npc_actions = ('walk', 'hit', 'die',)
+
+    def __init__(self, manager, model_name, texture, pos, route):
+        super(NPC, self).__init__(manager)
+        self.actor = actor = Actor(S.model(model_name),
+                                    {'anim': S.model(model_name)})
+        self.actor.reparentTo(self.node)
+        actor.setScale(S.model_size(model_name))
+        actor.setTexture(loader.loadTexture(
+                            S.texture(texture)), 1)
+        self.pos = pos
         self.node.setPos(self.pos[0], self.pos[1], 0)
-        actor.pose('anim', S.player['idle_frame'])
+        actor.pose('anim', S.npc['idle_frame'])
+        actor.setBlend(frameBlend=True)
+        ##########
+        self.route = deque(route)
+        self.target = route[0]
 
     @property
-    def must_die_event(self):
-        return 'die:' + str(id(self))
+    def pos(self):
+        return self._pos
 
-    def kill(self):
-        self.must_die = True
-        messenger.send(self.must_die_event)
+    @pos.setter
+    def pos(self, value):
+        assert type(value) is tuple
+        if hasattr(self, '_pos'):
+            del self.manager.npcs[self._pos]
+        self._pos = value
+        self.manager.npcs[self._pos] = self
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, value):
+        assert isinstance(value, (tuple, Player))
+        self._target = value
+
+    def get_next_pos(self):
+        if self.get_action() != 'walk':
+            return None, False
+        target = self.target
+        end_pos = target if isinstance(target, tuple) else target.pos
+        pred = lambda info: 'walk' in info['actions']
+        path = self.manager.map.get_path(self.pos, end_pos, pred)
+        if not path:
+            return None, False
+        elif len(path) == 1 and isinstance(target, Player):
+            return path[0], False
+        else:
+            #TODO: moving to sideways if can
+            return path[0], True
+
+    def get_action(self):
+        if isinstance(self.target, Player):
+            raise NotImplemented()
+        else:
+            if self.pos == self.target:
+                self.route.rotate(-1)
+                self.target = self.route[0]
+            return 'walk'
+
+    def update_action(self):
+        action = self.get_action()
+        assert action in self.actions and action in self.npc_actions
+        if self.action is not None:
+            return
+        if self.must_die:
+            self.actions['die'](self)
+            return
+        self.actions[action](self)

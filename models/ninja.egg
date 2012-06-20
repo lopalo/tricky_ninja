@@ -4,7 +4,7 @@
   "x2egg ninja_animation.x ninja_animation.egg"
 }
 <Texture> tref1 {
-  textures/nskinbl.jpg
+  textures/nskinbl.png
 }
 <Group> ninja_animation {
   <Dart> { 1 }

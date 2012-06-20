@@ -1,6 +1,6 @@
-substrate-texture: grass
+substrate_texture: grass
 substrate_actions: free
-#for substrate-texture ident always is 'ss'
+#for substrate_texture ident always is 'ss'
 
 action_groups:
   free: [walk, jump]

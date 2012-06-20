@@ -9,14 +9,14 @@ available_actions = ('walk', 'jump',)
 
 def check_map_data(data):
     stop = False
-    for f in ('substrate-texture', 'definitions',
+    for f in ('substrate_texture', 'definitions',
               'topology', 'action_groups'):
         if f not in data:
             stop = True
             yield f, 'is not specified'
     if stop: return
-    if type(data['substrate-texture']) is not str:
-        yield 'substrate-texture', 'is not a string'
+    if type(data['substrate_texture']) is not str:
+        yield 'substrate_texture', 'is not a string'
     actions = data['substrate_actions']
     if actions is not None and actions not in data['action_groups']:
             yield ('substrate_actions', "unknown action group")
@@ -129,6 +129,7 @@ class Map(object):
         ('left', (-1, 0)),
         ('left-top', (-1, 1))
     ))
+    #TODO: use splitting by '-' for definition corner squares
 
     def __init__(self, name, check=True):
         with open(S.map(name), 'r') as f:
@@ -140,11 +141,10 @@ class Map(object):
             for f, err in errors:
                 msg +='{0}: {1}\n'.format(f, err)
             raise MapDataError(msg)
-        self.substrate_texture = data['substrate-texture']
+        self.substrate_texture = data['substrate_texture']
 
         self.textures = set([self.substrate_texture])
         self.data = {}
-        #TODO: check
         for info in data['definitions'].values():
             actions = info.get('actions')
             if actions is not None:
@@ -157,7 +157,6 @@ class Map(object):
                 if ident == '..':
                     continue
                 elif ident == 'ss':
-                    #TODO: check 'actions' field
                     actions = data['substrate_actions']
                     info = dict(
                         kind='substrate_texture',
@@ -211,6 +210,36 @@ class Map(object):
             yield [c for c, info in wave]
             if n == radius - 1:
                 return
+
+    def find_path(self, start, end, pred=lambda x: True):
+        squares = {}
+        for num, wave in enumerate(self.wave(start)):
+            wave[:] = [i for i in wave if pred(i[1])]
+            for c, info in wave:
+                squares[c] = num
+                if c == end:
+                    return num, squares
+        return None, None
+
+    def get_path(self, start, end, pred=lambda x: True):
+        last_wave_num, squares = self.find_path(start, end, pred)
+        if last_wave_num is None:
+            return
+        path = [end]
+        for num, wave in enumerate(self.wave(end)):
+            for c, info in wave:
+                if c == start:
+                    exit = True
+                    break
+                num_wave = squares.get(c)
+                if num_wave is None:
+                    continue
+                if num_wave == last_wave_num - num - 1:
+                    wave[:] = [(c, info)]
+                    path.append(c)
+        path.reverse()
+        return tuple(path)
+
 
     def block(self, x, y):
         pass

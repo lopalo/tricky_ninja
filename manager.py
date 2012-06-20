@@ -3,7 +3,7 @@ from glob import glob
 from collections import deque
 from panda3d.core import *
 from map import Map
-from character import Character
+from character import Player, NPC
 
 
 class BuildWorldError(Exception):
@@ -22,7 +22,8 @@ class Manager(object):
         self.blocked_squares = set()
         self.map = Map(map_name)
         self.build_world()
-        self.player = Character(self)
+        self.player = Player(self)
+        self.set_npcs()
 
     def build_world(self):
         self._load_textures()
@@ -218,6 +219,17 @@ class Manager(object):
         model.setScale(S.model_size(model_name))
         model.setPosHpr(pos[0], pos[1], 0, angle, 0, 0)
 
+    def set_npcs(self):
+        self.npcs = {}
+        #TODO: change this shit later
+        pos, model, texture = (3, 3), 'ninja', 'nskinbr'
+        route = ((0, 13), (17, 4))
+        self.npcs[pos] = NPC(self, model, texture, pos, route)
+
     def __call__(self, task):
         self.player.update_action()
+        for npc in tuple(self.npcs.values()):
+            npc.update_action()
         return task.cont
+
+
