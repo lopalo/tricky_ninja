@@ -129,7 +129,8 @@ class Map(object):
         ('left', (-1, 0)),
         ('left-top', (-1, 1))
     ))
-    #TODO: use splitting by '-' for definition corner squares
+
+    _reverse_neighbors = dict((v, k) for k, v in _neighbors.items())
 
     def __init__(self, name, check=True):
         with open(S.map(name), 'r') as f:
@@ -207,25 +208,25 @@ class Map(object):
             yield new_wave
             wave = [c for c, info in new_wave]
 
-    def get_field(self, coord, radius, pred=lambda pos, info: True):
+    def get_field(self, coord, radius, pred=lambda pos: True):
         assert radius > 0
         for n, wave in enumerate(self.wave(coord)):
-            wave[:] = [i for i in wave if pred(*i)]
+            wave[:] = [i for i in wave if pred(i[0])]
             yield [c for c, info in wave]
             if n == radius - 1:
                 return
 
-    def find_path(self, start, end, pred=lambda pos, info: True):
+    def find_path(self, start, end, pred=lambda pos: True):
         squares = {}
         for num, wave in enumerate(self.wave(start)):
-            wave[:] = [i for i in wave if pred(*i)]
+            wave[:] = [i for i in wave if pred(i[0])]
             for c, info in wave:
                 squares[c] = num
                 if c == end:
                     return num, squares
         return None, None
 
-    def get_path(self, start, end, pred=lambda pos, info: True):
+    def get_path(self, start, end, pred=lambda pos: True):
         last_wave_num, squares = self.find_path(start, end, pred)
         if last_wave_num is None:
             return
@@ -244,6 +245,23 @@ class Map(object):
         path.reverse()
         return tuple(path)
 
+    def is_corner(self, first, second):
+        diff = second[0] - first[0], second[1] - first[1]
+        return len(self._reverse_neighbors[diff].split('-')) == 2
+
+    def is_free_corner(self, first, second, pred=lambda pos: True):
+        if not self.is_corner(first, second):
+            return False
+        diff = second[0] - first[0], second[1] - first[1]
+        nb_names = self._reverse_neighbors[diff].split('-')
+        for nb_name in nb_names:
+            nb_diff = self._neighbors[nb_name]
+            nb_pos = first[0] + nb_diff[0], first[1] + nb_diff[1]
+            if nb_pos not in self:
+                return False
+            if not pred(nb_pos):
+                return False
+        return True
 
     def block(self, pos):
         assert self[pos] and pos not in self.blocked_squares

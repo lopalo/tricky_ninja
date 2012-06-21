@@ -102,10 +102,17 @@ class Character(object):
         assert type(value) is tuple
         self._pos = value
 
+    def walk_pred(self, pos):
+        map = self.manager.map
+        return ('walk' in map[pos]['actions'] and
+                map.is_available(pos) and
+                self.manager.is_available(pos))
+
     @action('walk')
     def do_walk(self):
         #TODO: fix moving to sideways through obstacle
         yield wait(.05)
+        map = self.manager.map
         actor = self.actor
         anim = actor.getAnimControl('anim')
         sp = float(S.player['speed'])
@@ -127,18 +134,17 @@ class Character(object):
                 interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                        (c_angle, 0, 0))
                 yield interval
-                if (not self.manager.map.is_available(next_pos) or
-                    not self.manager.is_available(next_pos)):
-                        break
+                if not self.walk_pred(next_pos):
+                    break
 
             if not walk:
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
-            self.manager.map.block(next_pos)
+            map.block(next_pos)
             yield interval
             self.pos = next_pos
-            self.manager.map.unblock(self.pos)
+            map.unblock(self.pos)
         anim.pose(S.player['idle_frame']) #TODO: different for npc
 
     @action('die')
@@ -291,11 +297,10 @@ class Player(Character):
         elif tuple(self.move_direction) != (0, 0):
             self.actions['walk'](self)
 
+
     def get_next_pos(self):
-        #different for NPC and Player
-        #for Player it should read direction that was set by arrow events
-        #for NPC it should be a next position of path
         move_dir = tuple(self.move_direction)
+        map = self.manager.map
         pos = self.pos
         if move_dir == (0, 0):
             return None, False
@@ -309,7 +314,7 @@ class Player(Character):
             ('top'),
             ('top-right')
         ))
-        nbs = dict(self.manager.map.neighbors(pos, True, True))
+        nbs = dict(map.neighbors(pos, True, True))
         shift = (0, 0)
         angle = self.cam_angle + 180
 
@@ -324,20 +329,23 @@ class Player(Character):
                     walk = direction in nbs
                     break
                 directions.rotate(1)
-            shift = self.manager.map._neighbors[direction]
+            shift = map._neighbors[direction]
         new_pos = pos[0] + shift[0], pos[1] + shift[1]
         if not walk:
             return new_pos, False
-        if ('walk' in self.manager.map[new_pos]['actions'] and
-            self.manager.map.is_available(new_pos) and
-            self.manager.is_available(new_pos)):
-            return new_pos, True
+
+        if self.walk_pred(new_pos):
+            if not map.is_corner(pos, new_pos):
+                return new_pos, True
+            elif map.is_free_corner(pos, new_pos, self.walk_pred):
+                return new_pos, True
         return new_pos, False
 
     @action('jump')
     def do_jump(self):
-        pred = lambda pos, info: 'jump' in info['actions']
-        field = self.manager.map.get_field(self.pos, 2, pred)
+        map = self.manager.map
+        pred = lambda pos: 'jump' in map[pos]['actions']
+        field = map.get_field(self.pos, 2, pred)
         next(field)
         field = deque(sorted(sum(field, [])))
         if not field:
@@ -385,11 +393,10 @@ class Player(Character):
             wr = S.player['walk_range']
             anim.loop(True, wr[0], wr[1])
             yield interval
-        if (not self.manager.map.is_available(pos) or
-            not self.manager.is_available(pos)):
+        if not self.walk_pred(pos):
             actor.pose('anim', S.player['idle_frame'])
             return
-        self.manager.map.block(pos)
+        map.block(pos)
         wr = S.player['pre_jump_range']
         interval = actor.actorInterval(
             'anim',
@@ -410,7 +417,7 @@ class Player(Character):
         )
         yield interval
         self.pos = pos
-        self.manager.map.unblock(self.pos)
+        map.unblock(self.pos)
         yield wait(0.1)
         actor.pose('anim', S.player['idle_frame'])
 
@@ -458,12 +465,13 @@ class NPC(Character):
     def get_next_pos(self):
         if self.get_action() != 'walk':
             return None, False
+        map = self.manager.map
         target = self.target
         end_pos = target if isinstance(target, tuple) else target.pos
-        pred = lambda pos, info: ('walk' in info['actions'] and
-                                  self.manager.map.is_available(pos) and
-                                  pos not in self.manager.npcs)
-        path = self.manager.map.get_path(self.pos, end_pos, pred)
+        pred = lambda pos: ('walk' in map[pos]['actions'] and
+                            map.is_available(pos) and
+                            pos not in self.manager.npcs)
+        path = map.get_path(self.pos, end_pos, pred)
         if not path:
             return None, False
         elif len(path) == 1 and isinstance(target, Player):
