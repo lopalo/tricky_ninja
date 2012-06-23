@@ -134,10 +134,8 @@ class Character(object):
                 interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                        (c_angle, 0, 0))
                 yield interval
-                if not self.walk_pred(next_pos):
-                    break
 
-            if not walk:
+            if not walk or not self.walk_pred(next_pos):
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
@@ -345,9 +343,7 @@ class Player(Character):
     def do_jump(self):
         map = self.manager.map
         pred = lambda pos: 'jump' in map[pos]['actions']
-        field = map.get_field(self.pos, 2, pred)
-        next(field)
-        field = deque(sorted(sum(field, [])))
+        field = deque(map.get_jump_field(self.pos))
         if not field:
             return
         pointer = loader.loadModel(S.model('plane'))

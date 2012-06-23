@@ -208,13 +208,18 @@ class Map(object):
             yield new_wave
             wave = [c for c, info in new_wave]
 
-    def get_field(self, coord, radius, pred=lambda pos: True):
-        assert radius > 0
-        for n, wave in enumerate(self.wave(coord)):
-            wave[:] = [i for i in wave if pred(i[0])]
-            yield [c for c, info in wave]
-            if n == radius - 1:
-                return
+    def get_jump_field(self, pos):
+        for nb1, info in self.neighbors(pos, True):
+            pred = lambda pos: 'jump' in self[pos]['actions']
+            if self.is_corner(pos, nb1):
+                if ('walk' in info['actions'] and
+                    self.is_free_corner(pos, nb1, pred)):
+                    yield nb1
+            elif 'jump' in info['actions']:
+                diff = nb1[0] - pos[0], nb1[1] - pos[1]
+                nb2 = nb1[0] + diff[0], nb1[1] + diff[1]
+                if nb2 in self and 'walk' in self[nb2]['actions']:
+                    yield nb2
 
     def find_path(self, start, end, pred=lambda pos: True):
         squares = {}
