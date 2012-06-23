@@ -192,6 +192,14 @@ class Map(object):
                 else:
                     yield pos, self[pos]
 
+    def corners(self, coord):
+        keys = self._neighbors.keys()
+        for key in keys[1::2]:
+            offset = self._neighbors[key]
+            pos = coord[0] + offset[0], coord[1] + offset[1]
+            if pos in self:
+                yield pos
+
     def wave(self, coord):
         assert self[coord], coord
         wave = [coord]
@@ -201,12 +209,45 @@ class Map(object):
             for c in wave:
                 for n, info in self.neighbors(c):
                     if n not in visited:
-                        new_wave.append((n, info))
+                        new_wave.append(n)
+                        visited.add(n)
+                for n in self.corners(c):
+                    if n not in visited:
+                        new_wave.append(n)
                         visited.add(n)
             if len(new_wave) == 0:
                 return
             yield new_wave
-            wave = [c for c, info in new_wave]
+            wave = new_wave
+
+    def find_path(self, start, end, pred=lambda pos: True):
+        squares = {}
+        for num, wave in enumerate(self.wave(start)):
+            wave[:] = [i for i in wave if pred(i)]
+            for c in wave:
+                squares[c] = num
+                if c == end:
+                    return num, squares
+        return None, None
+
+    def get_path(self, start, end, pred=lambda pos: True):
+        last_wave_num, squares = self.find_path(start, end, pred)
+        if last_wave_num is None:
+            return
+        path = [end]
+        for num, wave in enumerate(self.wave(end)):
+            for c in wave:
+                if c == start:
+                    exit = True
+                    break
+                num_wave = squares.get(c)
+                if num_wave is None:
+                    continue
+                if num_wave == last_wave_num - num - 1:
+                    wave[:] = [c]
+                    path.append(c)
+        path.reverse()
+        return tuple(path)
 
     def get_jump_field(self, pos):
         for nb1, info in self.neighbors(pos, True):
@@ -220,35 +261,6 @@ class Map(object):
                 nb2 = nb1[0] + diff[0], nb1[1] + diff[1]
                 if nb2 in self and 'walk' in self[nb2]['actions']:
                     yield nb2
-
-    def find_path(self, start, end, pred=lambda pos: True):
-        squares = {}
-        for num, wave in enumerate(self.wave(start)):
-            wave[:] = [i for i in wave if pred(i[0])]
-            for c, info in wave:
-                squares[c] = num
-                if c == end:
-                    return num, squares
-        return None, None
-
-    def get_path(self, start, end, pred=lambda pos: True):
-        last_wave_num, squares = self.find_path(start, end, pred)
-        if last_wave_num is None:
-            return
-        path = [end]
-        for num, wave in enumerate(self.wave(end)):
-            for c, info in wave:
-                if c == start:
-                    exit = True
-                    break
-                num_wave = squares.get(c)
-                if num_wave is None:
-                    continue
-                if num_wave == last_wave_num - num - 1:
-                    wave[:] = [(c, info)]
-                    path.append(c)
-        path.reverse()
-        return tuple(path)
 
     def is_corner(self, first, second):
         diff = second[0] - first[0], second[1] - first[1]
