@@ -200,7 +200,7 @@ class Map(object):
             if pos in self:
                 yield pos
 
-    def wave(self, coord):
+    def wave(self, coord, pred):
         assert self[coord], coord
         wave = [coord]
         visited = set(wave)
@@ -208,11 +208,12 @@ class Map(object):
             new_wave = []
             for c in wave:
                 for n, info in self.neighbors(c):
-                    if n not in visited:
+                    if n not in visited and pred(n):
                         new_wave.append(n)
                         visited.add(n)
                 for n in self.corners(c):
-                    if n not in visited:
+                    if (n not in visited and pred(n) and
+                                self.is_free_corner(c, n, pred)):
                         new_wave.append(n)
                         visited.add(n)
             if len(new_wave) == 0:
@@ -220,22 +221,21 @@ class Map(object):
             yield new_wave
             wave = new_wave
 
-    def find_path(self, start, end, pred=lambda pos: True):
+    def find_path(self, start, end, pred):
         squares = {}
-        for num, wave in enumerate(self.wave(start)):
-            wave[:] = [i for i in wave if pred(i)]
+        for num, wave in enumerate(self.wave(start, pred)):
             for c in wave:
                 squares[c] = num
                 if c == end:
                     return num, squares
         return None, None
 
-    def get_path(self, start, end, pred=lambda pos: True):
+    def get_path(self, start, end, pred):
         last_wave_num, squares = self.find_path(start, end, pred)
         if last_wave_num is None:
             return
         path = [end]
-        for num, wave in enumerate(self.wave(end)):
+        for num, wave in enumerate(self.wave(end, pred)):
             for c in wave:
                 if c == start:
                     exit = True
@@ -267,8 +267,7 @@ class Map(object):
         return len(self._reverse_neighbors[diff].split('-')) == 2
 
     def is_free_corner(self, first, second, pred=lambda pos: True):
-        if not self.is_corner(first, second):
-            return False
+        assert self.is_corner(first, second)
         diff = second[0] - first[0], second[1] - first[1]
         nb_names = self._reverse_neighbors[diff].split('-')
         for nb_name in nb_names:

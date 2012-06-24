@@ -110,7 +110,6 @@ class Character(object):
 
     @action('walk')
     def do_walk(self):
-        #TODO: fix moving to sideways through obstacle
         yield wait(.05)
         map = self.manager.map
         actor = self.actor
@@ -473,7 +472,6 @@ class NPC(Character):
         elif len(path) == 1 and isinstance(target, Player):
             return path[0], False
         else:
-            #TODO: moving to sideways if can
             return path[0], True
 
     def get_action(self):

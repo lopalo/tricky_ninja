@@ -226,6 +226,7 @@ class Manager(object):
         route = ((0, 13), (17, 4))
         self.npcs[pos] = NPC(self, model, texture, pos, route)
         pos = (5, 5)
+        route = ((0, 13), (21, 8))
         self.npcs[pos] = NPC(self, model, texture, pos, route)
 
     def is_available(self, pos):
