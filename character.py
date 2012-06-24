@@ -114,9 +114,9 @@ class Character(object):
         map = self.manager.map
         actor = self.actor
         anim = actor.getAnimControl('anim')
-        sp = float(S.player['speed'])
+        sp = float(self.speed)
         anim.setPlayRate(sp / 2)
-        wr = S.player['walk_range'] #TODO: different for npc
+        wr = S.character['walk_range']
         anim.loop(True, wr[0], wr[1])
         while True:
             next_pos, walk = self.get_next_pos()
@@ -129,7 +129,7 @@ class Character(object):
             if d_angle != 0:
                 if abs(d_angle) > 180:
                     angle = angle - 360 if d_angle > 0 else angle + 360
-                dur = float(abs(angle - c_angle)) / 360 / sp
+                dur = float(abs(angle - c_angle)) / 360 / sp * 2
                 interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                        (c_angle, 0, 0))
                 yield interval
@@ -142,28 +142,29 @@ class Character(object):
             yield interval
             self.pos = next_pos
             map.unblock(self.pos)
-        anim.pose(S.player['idle_frame']) #TODO: different for npc
+        anim.pose(self.idle_frame)
 
     @action('die')
     def do_die(self):
         self.must_die = False
         self.dead = True
         actor = self.actor
-        wr = S.player['death_range'] #TODO: different for npc
+        wr = S.character['death_range']
         interval = actor.actorInterval(
             'anim',
-            playRate=S.player['death_speed'],
+            playRate=S.character['death_speed'],
             startFrame=wr[0], endFrame=wr[1]
         )
         yield interval
 
         #TODO: change this behavior later
         #TODO: block squares
+
         yield wait(1)
         self.dead = False
-        self.pos = tuple(S.player['init_position']) #TODO: different for npc
+        self.pos = tuple(self.init_position)
         self.node.setPos(self.pos[0], self.pos[1], 0)
-        actor.pose('anim', S.player['idle_frame']) #TODO: different for npc
+        actor.pose('anim', self.idle_frame)
 
     @property
     def must_die_event(self):
@@ -178,6 +179,8 @@ class Player(Character):
 
     def __init__(self, manager):
         super(Player, self).__init__(manager)
+        self.speed = S.player['speed']
+        self.idle_frame = S.player['idle_frame']
         self.move_direction = [0, 0] #[forward, right]
         self.actor = actor = Actor(S.model(S.player['model']),
                                     {'anim': S.model(S.player['model'])})
@@ -185,9 +188,9 @@ class Player(Character):
         actor.setScale(S.model_size(S.player['model']))
         actor.setTexture(loader.loadTexture(
                             S.texture(S.player['texture'])), 1)
-        self.pos = tuple(S.player['init_position'])
+        self.pos = self.init_position = tuple(S.player['init_position'])
         self.node.setPos(self.pos[0], self.pos[1], 0)
-        actor.pose('anim', S.player['idle_frame'])
+        actor.pose('anim', self.idle_frame)
         actor.setBlend(frameBlend=True)
         self.set_camera()
         self.set_arrow_handlers()
@@ -371,7 +374,7 @@ class Player(Character):
         if self.must_die:
             return
         actor = self.actor
-        sp = float(S.player['speed'])
+        sp = float(self.speed)
         v = pos[0] - self.pos[0], pos[1] - self.pos[1]
         dist = float(hypot(v[0], v[1]))
         angle = (degrees(atan2(v[1], v[0])) + 90) % 360
@@ -380,16 +383,16 @@ class Player(Character):
         if d_angle != 0:
             if abs(d_angle) > 180:
                 angle = angle - 360 if d_angle > 0 else angle + 360
-            dur = float(abs(angle - c_angle)) / 360 / sp
+            dur = float(abs(angle - c_angle)) / 360 / sp * 2
             interval = LerpHprInterval(actor, dur, (angle, 0, 0),
                                                     (c_angle, 0, 0))
             anim = actor.getAnimControl('anim')
             anim.setPlayRate(sp / 2)
-            wr = S.player['walk_range']
+            wr = S.character['walk_range']
             anim.loop(True, wr[0], wr[1])
             yield interval
         if not self.walk_pred(pos):
-            actor.pose('anim', S.player['idle_frame'])
+            actor.pose('anim', self.speed)
             return
         map.block(pos)
         wr = S.player['pre_jump_range']
@@ -414,7 +417,7 @@ class Player(Character):
         self.pos = pos
         map.unblock(self.pos)
         yield wait(0.1)
-        actor.pose('anim', S.player['idle_frame'])
+        actor.pose('anim', self.idle_frame)
 
 
 class NPC(Character):
@@ -422,6 +425,8 @@ class NPC(Character):
 
     def __init__(self, manager, model_name, texture, pos, route):
         super(NPC, self).__init__(manager)
+        self.speed = S.npc['speed']
+        self.idle_frame = S.npc['idle_frame']
         self.actor = actor = Actor(S.model(model_name),
                                     {'anim': S.model(model_name)})
         self.actor.reparentTo(self.node)
@@ -429,6 +434,7 @@ class NPC(Character):
         actor.setTexture(loader.loadTexture(
                             S.texture(texture)), 1)
         self.pos = pos
+        self.init_position = tuple(S.npc['init_position'])
         self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', S.npc['idle_frame'])
         actor.setBlend(frameBlend=True)
