@@ -237,7 +237,8 @@ class Manager(object):
     def __call__(self, task):
         self.player.update_action()
         for npc in tuple(self.npcs.values()):
-            npc.update_action()
+            if npc:
+                npc.update_action()
         return task.cont
 
 

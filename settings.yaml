@@ -17,24 +17,34 @@ camera:
   horizontal_angle: 60
 
 character:
-  walk_range: [0, 12]
-  death_speed: 1
-  death_range: [165, 170]
+  animation:
+    walk_range: [0, 12]
+    death_speed: 1
+    death_range: [165, 170]
 
 player:
   model: ninja
   texture: nskinbl
   speed: 2
   pointer_texture: pointer
-  pre_jump_range: [103, 106]
-  pre_jump_speed: 0.7
-  post_jump_range: [107, 110]
-  post_jump_speed: 0.7
   jump_height: 0.5
+  animation:
+    pre_jump_range: [103, 106]
+    pre_jump_speed: 0.7
+    post_jump_range: [107, 110]
+    post_jump_speed: 0.7
+    hit_range: [44, 48]
+    hit_speed: 1
+    post_hit_range: [49, 58]
+    post_hit_speed: 0.7
   init_position: [11, 4]
   idle_frame: 28
 
 npc:
-  init_position: [11, 4]
-  speed: 2
+  speed: 1.8
+  animation:
+    hit_range: [59, 63]
+    hit_speed: 0.7
+    post_hit_range: [64, 67]
+    post_hit_speed: 0.7
   idle_frame: 28

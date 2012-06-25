@@ -81,6 +81,7 @@ class Character(object):
         (-1, 1): -135,
         (1, -1): 45
     }
+    reverse_angle_table = dict((v, k) for k, v in angle_table.items())
 
     def __init__(self, manager):
         self.action = None
@@ -90,7 +91,7 @@ class Character(object):
         self.node = node = render.attachNewNode(str(id(self)))
         node.reparentTo(manager.main_node)
 
-    def __bool__(self):
+    def __nonzero__(self):
         return not self.dead
 
     @property
@@ -116,7 +117,7 @@ class Character(object):
         anim = actor.getAnimControl('anim')
         sp = float(self.speed)
         anim.setPlayRate(sp / 2)
-        wr = S.character['walk_range']
+        wr = S.ch_anim['walk_range']
         anim.loop(True, wr[0], wr[1])
         while True:
             next_pos, walk = self.get_next_pos()
@@ -149,10 +150,10 @@ class Character(object):
         self.must_die = False
         self.dead = True
         actor = self.actor
-        wr = S.character['death_range']
+        wr = S.ch_anim['death_range']
         interval = actor.actorInterval(
             'anim',
-            playRate=S.character['death_speed'],
+            playRate=S.ch_anim['death_speed'],
             startFrame=wr[0], endFrame=wr[1]
         )
         yield interval
@@ -161,9 +162,40 @@ class Character(object):
         #TODO: block squares
 
         yield wait(1)
+        init_pos = tuple(self.init_position)
+        if (not self.manager.map.is_available(init_pos) or
+            not self.manager.is_available(init_pos)):
+                return
         self.dead = False
-        self.pos = tuple(self.init_position)
+        self.pos = init_pos
         self.node.setPos(self.pos[0], self.pos[1], 0)
+        actor.pose('anim', self.idle_frame)
+
+    @action('hit')
+    def do_hit(self):
+        actor = self.actor
+        interval = actor.actorInterval(
+            'anim',
+            playRate=self.hit_speed,
+            startFrame=self.hit_range[0],
+            endFrame=self.hit_range[1]
+        )
+        yield interval
+        angle = int((actor.getHpr()[0] % 360) - 90)
+        angle = angle if angle <= 180 else angle - 360
+        diff = self.reverse_angle_table[angle]
+        target_coord = self.pos[0] + diff[0], self.pos[1] - diff[1]
+        if target_coord in self.manager.npcs:
+            self.manager.npcs[target_coord].kill()
+        elif self.manager.player.pos == target_coord:
+            self.manager.player.kill()
+        interval = actor.actorInterval(
+            'anim',
+            playRate=self.post_hit_speed,
+            startFrame=self.post_hit_range[0],
+            endFrame=self.post_hit_range[1]
+        )
+        yield interval
         actor.pose('anim', self.idle_frame)
 
     @property
@@ -171,6 +203,8 @@ class Character(object):
         return 'die:' + str(id(self))
 
     def kill(self):
+        if not self:
+            return
         self.must_die = True
         messenger.send(self.must_die_event)
 
@@ -179,8 +213,14 @@ class Player(Character):
 
     def __init__(self, manager):
         super(Player, self).__init__(manager)
+
         self.speed = S.player['speed']
         self.idle_frame = S.player['idle_frame']
+        self.hit_range = S.pl_anim['hit_range']
+        self.hit_speed = S.pl_anim['hit_speed']
+        self.post_hit_range = S.pl_anim['post_hit_range']
+        self.post_hit_speed = S.pl_anim['post_hit_speed']
+
         self.move_direction = [0, 0] #[forward, right]
         self.actor = actor = Actor(S.model(S.player['model']),
                                     {'anim': S.model(S.player['model'])})
@@ -278,14 +318,17 @@ class Player(Character):
         def space_down():
             self.update_action('jump')
         base.accept('space', space_down)
-        def k_down():
-            self.kill()
-        base.accept('k', k_down)
+        base.accept('k', self.kill)
+        def h_down():
+            self.update_action('hit')
+        base.accept('h', h_down)
 
     def update_action(self, action=None):
         #calls in every frame and by some
         #events('arrows'...)
 
+        if not self:
+            return
         assert action in self.actions or action == None
         if self.action is not None:
             return
@@ -388,17 +431,17 @@ class Player(Character):
                                                     (c_angle, 0, 0))
             anim = actor.getAnimControl('anim')
             anim.setPlayRate(sp / 2)
-            wr = S.character['walk_range']
+            wr = S.ch_anim['walk_range']
             anim.loop(True, wr[0], wr[1])
             yield interval
         if not self.walk_pred(pos):
             actor.pose('anim', self.speed)
             return
         map.block(pos)
-        wr = S.player['pre_jump_range']
+        wr = S.pl_anim['pre_jump_range']
         interval = actor.actorInterval(
             'anim',
-            playRate=S.player['pre_jump_speed'],
+            playRate=S.pl_anim['pre_jump_speed'],
             startFrame=wr[0], endFrame=wr[1]
         )
         yield interval
@@ -407,10 +450,10 @@ class Player(Character):
         interval.start()
         interval = LerpPosInterval(self.node, 1, pos + (0,))
         yield interval
-        wr = S.player['post_jump_range']
+        wr = S.pl_anim['post_jump_range']
         interval = actor.actorInterval(
             'anim',
-            playRate=S.player['post_jump_speed'],
+            playRate=S.pl_anim['post_jump_speed'],
             startFrame=wr[0], endFrame=wr[1]
         )
         yield interval
@@ -425,16 +468,21 @@ class NPC(Character):
 
     def __init__(self, manager, model_name, texture, pos, route):
         super(NPC, self).__init__(manager)
+
         self.speed = S.npc['speed']
         self.idle_frame = S.npc['idle_frame']
+        self.hit_range = S.npc_anim['hit_range']
+        self.hit_speed = S.npc_anim['hit_speed']
+        self.post_hit_range = S.npc_anim['post_hit_range']
+        self.post_hit_speed = S.npc_anim['post_hit_speed']
+
         self.actor = actor = Actor(S.model(model_name),
                                     {'anim': S.model(model_name)})
         self.actor.reparentTo(self.node)
         actor.setScale(S.model_size(model_name))
         actor.setTexture(loader.loadTexture(
                             S.texture(texture)), 1)
-        self.pos = pos
-        self.init_position = tuple(S.npc['init_position'])
+        self.init_position = self.pos = pos
         self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', S.npc['idle_frame'])
         actor.setBlend(frameBlend=True)
