@@ -1,3 +1,4 @@
+import __builtin__
 from direct.showbase.ShowBase import ShowBase
 from manager import Manager
 from settings import Settings
@@ -22,6 +23,6 @@ class App(ShowBase):
             self.manager = None
 
 if __name__ == '__main__':
-    __builtins__.S = Settings('settings.yaml')
+    __builtin__.S = Settings('settings.yaml')
     app = App()
     run()

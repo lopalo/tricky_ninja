@@ -138,6 +138,7 @@ class Character(object):
             if not walk or not self.walk_pred(next_pos):
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
+            #TODO: change pos and unblock in the middle of moving
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
             map.block(next_pos)
             yield interval
@@ -181,6 +182,7 @@ class Character(object):
             endFrame=self.hit_range[1]
         )
         yield interval
+        #TODO: check must_die
         angle = int((actor.getHpr()[0] % 360) - 90)
         angle = angle if angle <= 180 else angle - 360
         diff = self.reverse_angle_table[angle]
@@ -523,7 +525,7 @@ class NPC(Character):
         path = map.get_path(self.pos, end_pos, pred)
         if not path:
             return None, False
-        elif len(path) == 1 and isinstance(target, Player):
+        elif len(path) == 1 and target is self.manager.player:
             return path[0], False
         else:
             return path[0], True
