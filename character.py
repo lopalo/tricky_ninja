@@ -529,9 +529,28 @@ class NPC(Character):
             return path[0], True
 
     def get_action(self):
-        if isinstance(self.target, Player):
-            raise NotImplemented()
+        player = self.manager.player
+        if self.target is player:
+            if not self.in_view_field(player):
+                self.target = player.pos
+                return 'walk'
+            if not player:
+                self.route.rotate(-1)
+                self.target = self.route[0]
+                return 'walk'
+            length = hypot(self.pos[0] - player.pos[0],
+                           self.pos[1] - player.pos[1])
+            if length < 1.5:
+                if self.face_to_player:
+                    return 'hit'
+                else:
+                    return 'walk'
+            else:
+                return 'walk'
         else:
+            if self.in_view_field(player):
+                self.target = player
+                return 'walk'
             if self.pos == self.target:
                 self.route.rotate(-1)
                 self.target = self.route[0]
@@ -546,3 +565,25 @@ class NPC(Character):
             self.actions['die'](self)
             return
         self.actions[action](self)
+
+    def in_view_field(self, char):
+        assert isinstance(char, Character)
+        #TODO: change to a cone
+        waves = self.manager.map.wave(self.pos)
+        field = list(next(waves))
+        field.extend(next(waves))
+        if char.pos in field:
+            return True
+        return False
+
+    @property
+    def face_to_player(self):
+        angle = int((self.actor.getHpr()[0] % 360) - 90)
+        angle = angle if angle <= 180 else angle - 360
+        if angle not in self.reverse_angle_table:
+            return False
+        diff = self.reverse_angle_table[angle]
+        pos = self.pos[0] + diff[0], self.pos[1] - diff[1]
+        if self.manager.player.pos == pos:
+            return True
+        return False

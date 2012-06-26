@@ -12,7 +12,7 @@ class Settings(object):
         with open(path, 'r') as f:
             self.model_sizes = yaml.load(f)
         self.pl_anim = self.player['animation']
-        self.npc_anim = self.player['animation']
+        self.npc_anim = self.npc['animation']
         self.ch_anim = self.character['animation']
 
     def map_texture(self, name):

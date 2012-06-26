@@ -200,7 +200,7 @@ class Map(object):
             if pos in self:
                 yield pos
 
-    def wave(self, coord, pred):
+    def wave(self, coord, pred=lambda x: True):
         assert self[coord], coord
         wave = [coord]
         visited = set(wave)
