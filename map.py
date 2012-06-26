@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import yaml
 
 
@@ -132,10 +132,11 @@ class Map(object):
 
     _reverse_neighbors = dict((v, k) for k, v in _neighbors.items())
 
-    def __init__(self, name, check=True):
-        with open(S.map(name), 'r') as f:
-           data = yaml.load(f)
-           data['topology'].reverse()
+    def __init__(self, name=None, data=None, check=True):
+        if data is None:
+            with open(S.map(name), 'r') as f:
+                data = yaml.load(f)
+        data['topology'].reverse()
         errors = list(check_map_data(data))
         if errors and check:
             msg = "\nMap '{0}'\n".format(name.split('.')[0])
@@ -146,6 +147,7 @@ class Map(object):
         self.substrate_texture = data['substrate_texture']
 
         self.textures = set([self.substrate_texture])
+        self.groups = defaultdict(list)
         self.data = {}
         for info in data['definitions'].values():
             actions = info.get('actions')
@@ -168,6 +170,7 @@ class Map(object):
                     info = data['definitions'][ident]
                     info['ident'] = ident
                 self.data[index/3, num_row] = info
+                self.groups[ident].append((index/3, num_row))
                 if info.get('kind') == 'texture':
                     self.textures.add(info['texture'])
 
@@ -254,12 +257,15 @@ class Map(object):
             pred = lambda pos: 'jump' in self[pos]['actions']
             if self.is_corner(pos, nb1):
                 if ('walk' in info['actions'] and
+                    'jump' in info['actions'] and
                     self.is_free_corner(pos, nb1, pred)):
                     yield nb1
             elif 'jump' in info['actions']:
                 diff = nb1[0] - pos[0], nb1[1] - pos[1]
                 nb2 = nb1[0] + diff[0], nb1[1] + diff[1]
-                if nb2 in self and 'walk' in self[nb2]['actions']:
+                if (nb2 in self and
+                    'walk' in self[nb2]['actions'] and
+                    'jump' in info['actions']):
                     yield nb2
 
     def is_corner(self, first, second):
