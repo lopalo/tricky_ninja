@@ -138,12 +138,15 @@ class Character(object):
             if not walk or not self.walk_pred(next_pos):
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
-            #TODO: change pos and unblock in the middle of moving
-            interval = LerpPosInterval(self.node, dur, next_pos + (0,))
+            mid_pos = (float(self.pos[0] + next_pos[0]) / 2,
+                       float(self.pos[1] + next_pos[1]) / 2)
+            interval = LerpPosInterval(self.node, dur / 2, mid_pos + (0,))
             map.block(next_pos)
             yield interval
             self.pos = next_pos
             map.unblock(self.pos)
+            interval = LerpPosInterval(self.node, dur / 2, next_pos + (0,))
+            yield interval
         anim.pose(self.idle_frame)
 
     @action('die')
@@ -182,7 +185,8 @@ class Character(object):
             endFrame=self.hit_range[1]
         )
         yield interval
-        #TODO: check must_die
+        if self.must_die:
+            return
         angle = int((actor.getHpr()[0] % 360) - 90)
         angle = angle if angle <= 180 else angle - 360
         diff = self.reverse_angle_table[angle]
@@ -450,7 +454,13 @@ class Player(Character):
         interval = ProjectileInterval(actor, (0, 0, 0),
                     (0, 0, 0), 1, gravityMult=S.player['jump_height'])
         interval.start()
-        interval = LerpPosInterval(self.node, 1, pos + (0,))
+        mid_pos = (float(self.pos[0] + pos[0]) / 2,
+                   float(self.pos[1] + pos[1]) / 2)
+        interval = LerpPosInterval(self.node, 0.5, mid_pos + (0,))
+        yield interval
+        self.pos = pos
+        map.unblock(self.pos)
+        interval = LerpPosInterval(self.node, 0.5, pos + (0,))
         yield interval
         wr = S.pl_anim['post_jump_range']
         interval = actor.actorInterval(
@@ -459,8 +469,6 @@ class Player(Character):
             startFrame=wr[0], endFrame=wr[1]
         )
         yield interval
-        self.pos = pos
-        map.unblock(self.pos)
         yield wait(0.1)
         actor.pose('anim', self.idle_frame)
 
