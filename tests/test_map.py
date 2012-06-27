@@ -115,14 +115,14 @@ class TestMap(unittest.TestCase):
         top = [
             'ss ss ss ss st ss ss ss ss',
             'ss ss ss ss ss ss ss ss ss',
-            'ss ss ss ss ss ss ss ss ss',
-            'st fd fd fd ss ss ss ss ss',
-            'ss ss ss ss ss ss ss ss ss',
+            'ss ss fd ss ss ss ss ss ss',
+            'ss fd fd fd fd fd fd fd st',
+            'ss ss fd ss ss ss ss ss ss',
             'ss ss ss ss ss ss ss ss ss',
         ]
         defin = {'st':{}, 'fd': {}}
         map = self.get_map(defin, top)
-        res = map.view_field(map.groups['st'][0], 0, 8, 3, None)
+        res = map.view_field(map.groups['st'][0], 180, 20, 7, None)
         self.assertItemsEqual(map.groups['fd'], res)
 
     def test_view_field3(self):

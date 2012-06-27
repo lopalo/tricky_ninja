@@ -6,6 +6,7 @@ paths:
   maps: maps
 
 map_texture_size: 256
+show_view_field: true #for debugging
 
 camera:
   min_distance: 3

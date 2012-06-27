@@ -581,7 +581,7 @@ class NPC(Character):
     def in_view_field(self, char):
         assert isinstance(char, Character)
         radius, c_angle = self.view_radius, self.view_angle
-        angle = int((self.actor.getHpr()[0] % 360) - 90)
+        angle = int(self.actor.getHpr()[0] - 90) % 360
         field = self.manager.map.view_field(self.pos, angle,
                                     c_angle, radius, None)
         if char.pos in field:
@@ -590,7 +590,7 @@ class NPC(Character):
 
     @property
     def face_to_player(self):
-        angle = int((self.actor.getHpr()[0] % 360) - 90)
+        angle = int(self.actor.getHpr()[0] - 90) % 360
         angle = angle if angle <= 180 else angle - 360
         if angle not in self.reverse_angle_table:
             return False

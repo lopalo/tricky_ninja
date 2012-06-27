@@ -287,14 +287,19 @@ class Map(object):
         return True
 
     def view_field(self, pos, angle, cone_angle, radius, pred):
-        assert 0 <= cone_angle < 180, cone_angle
-        angle = angle if angle <= 180 else angle - 360
+        assert 0 <= angle < 360, angle
+        assert 0 < cone_angle < 180, cone_angle
         st_a, end_a = angle - cone_angle / 2 , angle + cone_angle / 2
         def cone_pred(sq):
             diff = sq[0] - pos[0], sq[1] - pos[1]
             if hypot(diff[0], diff[1]) > radius:
                 return False
-            if not st_a < degrees(atan2(diff[1], diff[0])) < end_a:
+            sq_angle = degrees(atan2(diff[1], diff[0]))
+            if 90 < angle < 270:
+                sq_angle %= 360
+            elif 270 <= angle < 360:
+                sq_angle += 360
+            if not st_a < sq_angle < end_a:
                 return False
             return True
         field = sum(self.wave(pos), [])

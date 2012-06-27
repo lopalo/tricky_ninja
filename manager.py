@@ -3,6 +3,7 @@ from glob import glob
 from collections import deque
 from panda3d.core import *
 from map import Map
+from collections import defaultdict
 from character import Player, NPC
 
 
@@ -24,6 +25,9 @@ class Manager(object):
         self.build_world()
         self.player = Player(self)
         self.set_npcs()
+        if S.show_view_field:
+            self.view_fields = defaultdict(set)
+            taskMgr.doMethodLater(1, self.update_view_fields, 'fields')
 
     def build_world(self):
         self._load_textures()
@@ -237,8 +241,25 @@ class Manager(object):
     def __call__(self, task):
         self.player.update_action()
         for npc in tuple(self.npcs.values()):
-            if npc:
-                npc.update_action()
+            if not npc:
+                continue
+            npc.update_action()
         return task.cont
 
-
+    def update_view_fields(self, task):
+        for npc in self.npcs.values():
+            key = id(npc)
+            for marker in self.view_fields[key]:
+                marker.removeNode()
+            del self.view_fields[key]
+            radius, c_angle = npc.view_radius, npc.view_angle
+            angle = int(npc.actor.getHpr()[0] - 90) % 360
+            field = self.map.view_field(npc.pos, angle,
+                                        c_angle, radius, None)
+            for pos in field:
+                marker = loader.loadModel(S.model('plane'))
+                marker.setHpr(0, -90, 0)
+                marker.reparentTo(self.main_node)
+                marker.setPos(pos[0], pos[1], 0.1)
+                self.view_fields[key].add(marker)
+        return task.again
