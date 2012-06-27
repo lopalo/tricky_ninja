@@ -1,3 +1,4 @@
+from math import atan2, hypot, degrees
 from collections import OrderedDict, defaultdict
 import yaml
 
@@ -284,6 +285,20 @@ class Map(object):
             if not pred(nb_pos):
                 return False
         return True
+
+    def view_field(self, pos, angle, cone_angle, radius, pred):
+        assert 0 <= cone_angle < 180, cone_angle
+        angle = angle if angle <= 180 else angle - 360
+        st_a, end_a = angle - cone_angle / 2 , angle + cone_angle / 2
+        def cone_pred(sq):
+            diff = sq[0] - pos[0], sq[1] - pos[1]
+            if hypot(diff[0], diff[1]) > radius:
+                return False
+            if not st_a < degrees(atan2(diff[1], diff[0])) < end_a:
+                return False
+            return True
+        field = sum(self.wave(pos), [])
+        return [i for i in field if cone_pred(i)]
 
     def block(self, pos):
         assert self[pos] and pos not in self.blocked_squares

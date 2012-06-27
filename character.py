@@ -479,6 +479,8 @@ class NPC(Character):
     def __init__(self, manager, model_name, texture, pos, route):
         super(NPC, self).__init__(manager)
 
+        self.view_radius = S.npc['normal_view_radius']
+        self.view_angle = S.npc['normal_view_angle']
         self.speed = S.npc['speed']
         self.idle_frame = S.npc['idle_frame']
         self.hit_range = S.npc_anim['hit_range']
@@ -578,10 +580,10 @@ class NPC(Character):
 
     def in_view_field(self, char):
         assert isinstance(char, Character)
-        #TODO: change to a cone
-        waves = self.manager.map.wave(self.pos)
-        field = list(next(waves))
-        field.extend(next(waves))
+        radius, c_angle = self.view_radius, self.view_angle
+        angle = int((self.actor.getHpr()[0] % 360) - 90)
+        field = self.manager.map.view_field(self.pos, angle,
+                                    c_angle, radius, None)
         if char.pos in field:
             return True
         return False

@@ -97,5 +97,63 @@ class TestMap(unittest.TestCase):
         path = tuple(map.groups[i][0] for i in steps)
         self.assertEqual(path, res)
 
+    def test_view_field1(self):
+        top = [
+            'ss fd fd fd fd fd fd fd ss',
+            'ss ss fd fd fd fd fd ss ss',
+            'ss ss ss fd fd fd ss ss ss',
+            'ss ss ss ss st ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+        ]
+        defin = {'st':{}, 'fd': {}}
+        map = self.get_map(defin, top)
+        res = map.view_field(map.groups['st'][0], 90, 92, 10, None)
+        self.assertItemsEqual(map.groups['fd'], res)
+
+    def test_view_field2(self):
+        top = [
+            'ss ss ss ss st ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+            'st fd fd fd ss ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+        ]
+        defin = {'st':{}, 'fd': {}}
+        map = self.get_map(defin, top)
+        res = map.view_field(map.groups['st'][0], 0, 8, 3, None)
+        self.assertItemsEqual(map.groups['fd'], res)
+
+    def test_view_field3(self):
+        top = [
+            'ss ss ss ss ss ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+            'ss ss ss fd fd fd ss ss ss',
+            'st fd fd fd fd fd fd ss ss',
+            'ss ss ss fd fd fd ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+        ]
+        defin = {'st':{}, 'fd': {}}
+        map = self.get_map(defin, top)
+        res = map.view_field(map.groups['st'][0], 0, 40, 6, None)
+        self.assertItemsEqual(map.groups['fd'], res)
+
+    def test_view_field4(self):
+        top = [
+            'st ss ss ss ss ss ss ss ss',
+            'ss fd fd fd ss ss ss ss ss',
+            'ss fd fd fd fd ss ss ss ss',
+            'ss fd fd fd fd ss ss ss ss',
+            'ss ss fd fd ss ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
+        ]
+        defin = {'st':{}, 'fd': {}}
+        map = self.get_map(defin, top)
+        res = map.view_field(map.groups['st'][0], 315, 60, 5, None)
+        self.assertItemsEqual(map.groups['fd'], res)
+
 if __name__ == '__main__':
     unittest.main()
+
+

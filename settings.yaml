@@ -42,6 +42,8 @@ player:
 
 npc:
   speed: 1.8
+  normal_view_radius: 7
+  normal_view_angle: 80
   animation:
     hit_range: [59, 63]
     hit_speed: 0.7

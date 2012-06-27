@@ -53,11 +53,13 @@ class TestNPC(unittest.TestCase):
 
     def test_in_view_field(self):
         npc = self.npc
+        npc.pos, npc.view_radius, npc.view_angle = (0, 0), 3, 120
+        npc.actor.getHpr = mock.Mock(return_value=(0, 0, 0))
         pl = self.player
         meth = NPC.__dict__['in_view_field']
-        self.assertTrue(meth(npc, pl))
-        pl.pos = (0, 5)
         self.assertFalse(meth(npc, pl))
+        npc.actor.getHpr = mock.Mock(return_value=(180, 0, 0))
+        self.assertTrue(meth(npc, pl))
 
     def test_get_next_pos(self):
         npc = self.npc
