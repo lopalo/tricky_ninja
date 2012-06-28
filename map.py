@@ -6,7 +6,7 @@ import yaml
 class MapDataError(Exception):
     pass
 
-available_actions = ('walk', 'jump',)
+available_actions = ('walk', 'jump', 'see')
 
 def check_map_data(data):
     stop = False
@@ -204,7 +204,7 @@ class Map(object):
             if pos in self:
                 yield pos
 
-    def wave(self, coord, pred=lambda x: True):
+    def wave(self, coord, pred):
         assert self[coord], coord
         wave = [coord]
         visited = set(wave)
@@ -302,8 +302,30 @@ class Map(object):
             if not st_a < sq_angle < end_a:
                 return False
             return True
-        field = sum(self.wave(pos), [])
-        return [i for i in field if cone_pred(i)]
+        field = set()
+        wave = [pos]
+        visited = set(wave)
+        shadow_wave = []
+        for i in range(radius):
+            new_wave = []
+            new_shadow_wave = []
+            for c in shadow_wave:
+                for nb, info in self.neighbors(c):
+                    if nb not in visited:
+                        visited.add(nb)
+                        new_shadow_wave.append(nb)
+            for c in wave:
+                for nb, info in self.neighbors(c, True):
+                    if nb not in visited:
+                        if not pred(nb):
+                            new_shadow_wave.append(nb)
+                            continue
+                        visited.add(nb)
+                        new_wave.append(nb)
+                        field.add(nb)
+            wave = new_wave
+            shadow_wave = new_shadow_wave
+        return set(i for i in field if cone_pred(i))
 
     def block(self, pos):
         assert self[pos] and pos not in self.blocked_squares

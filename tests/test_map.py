@@ -11,9 +11,9 @@ class TestMap(unittest.TestCase):
             substrate_texture='grass',
             substrate_actions='free',
             action_groups={
-                'walk':['walk'],
-                'jump':['jump'],
-                'free':['jump', 'walk']
+                'walk':['walk', 'see'],
+                'jump':['jump', 'see'],
+                'free':['jump', 'walk', 'see']
             },
             definitions=definitions,
             topology=topology
@@ -108,7 +108,8 @@ class TestMap(unittest.TestCase):
         ]
         defin = {'st':{}, 'fd': {}}
         map = self.get_map(defin, top)
-        res = map.view_field(map.groups['st'][0], 90, 92, 10, None)
+        pred = lambda x: True
+        res = map.view_field(map.groups['st'][0], 90, 92, 10, pred)
         self.assertItemsEqual(map.groups['fd'], res)
 
     def test_view_field2(self):
@@ -122,7 +123,8 @@ class TestMap(unittest.TestCase):
         ]
         defin = {'st':{}, 'fd': {}}
         map = self.get_map(defin, top)
-        res = map.view_field(map.groups['st'][0], 180, 20, 7, None)
+        pred = lambda x: True
+        res = map.view_field(map.groups['st'][0], 180, 20, 7, pred)
         self.assertItemsEqual(map.groups['fd'], res)
 
     def test_view_field3(self):
@@ -136,7 +138,8 @@ class TestMap(unittest.TestCase):
         ]
         defin = {'st':{}, 'fd': {}}
         map = self.get_map(defin, top)
-        res = map.view_field(map.groups['st'][0], 0, 40, 6, None)
+        pred = lambda x: True
+        res = map.view_field(map.groups['st'][0], 0, 40, 6, pred)
         self.assertItemsEqual(map.groups['fd'], res)
 
     def test_view_field4(self):
@@ -150,7 +153,8 @@ class TestMap(unittest.TestCase):
         ]
         defin = {'st':{}, 'fd': {}}
         map = self.get_map(defin, top)
-        res = map.view_field(map.groups['st'][0], 315, 60, 5, None)
+        pred = lambda x: True
+        res = map.view_field(map.groups['st'][0], 315, 60, 5, pred)
         self.assertItemsEqual(map.groups['fd'], res)
 
 if __name__ == '__main__':

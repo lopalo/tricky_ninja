@@ -561,7 +561,7 @@ class NPC(Character):
                 return 'walk'
         else:
             if self.in_view_field(player):
-                self.target = player
+                self.manager.alert(self.pos)
                 return 'walk'
             if self.pos == self.target:
                 self.route.rotate(-1)
@@ -580,10 +580,12 @@ class NPC(Character):
 
     def in_view_field(self, char):
         assert isinstance(char, Character)
+        map = self.manager.map
         radius, c_angle = self.view_radius, self.view_angle
         angle = int(self.actor.getHpr()[0] - 90) % 360
-        field = self.manager.map.view_field(self.pos, angle,
-                                    c_angle, radius, None)
+        pred = lambda pos: 'jump' in map[pos]['actions']
+        field = map.view_field(self.pos, angle,
+                                    c_angle, radius, pred)
         if char.pos in field:
             return True
         return False

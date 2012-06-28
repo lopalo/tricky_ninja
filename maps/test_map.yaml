@@ -3,9 +3,10 @@ substrate_actions: free
 #for substrate_texture ident always is 'ss'
 
 action_groups:
-  free: [walk, jump]
-  jump: [jump]
-  walk: [walk]
+  free: [walk, jump, see]
+  jump: [jump, see]
+  hide: [walk]
+
 
 definitions:
   sa:
@@ -34,9 +35,9 @@ definitions:
     kind: sprite
     texture: tree
     size: 6.0
-    actions: walk
+    actions: hide
   ow:
-    actions: walk
+    actions: hide
   wl:
     actions: null
 

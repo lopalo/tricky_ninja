@@ -1,10 +1,11 @@
 from os import path
 from glob import glob
+from math import hypot
 from collections import deque
 from panda3d.core import *
-from map import Map
 from collections import defaultdict
-from character import Player, NPC
+import map
+import character
 
 
 class BuildWorldError(Exception):
@@ -21,9 +22,9 @@ class Manager(object):
     def __init__(self, map_name):
         self.main_node = render.attachNewNode('main_node')
         self.blocked_squares = set()
-        self.map = Map(map_name)
+        self.map = map.Map(map_name)
         self.build_world()
-        self.player = Player(self)
+        self.player = character.Player(self)
         self.set_npcs()
         if S.show_view_field:
             self.view_fields = defaultdict(set)
@@ -228,10 +229,10 @@ class Manager(object):
         #TODO: change this shit later
         pos, model, texture = (3, 3), 'ninja', 'nskinbr'
         route = ((0, 13), (17, 4))
-        self.npcs[pos] = NPC(self, model, texture, pos, route)
+        self.npcs[pos] = character.NPC(self, model, texture, pos, route)
         pos = (5, 5)
         route = ((0, 13), (21, 8))
-        self.npcs[pos] = NPC(self, model, texture, pos, route)
+        self.npcs[pos] = character.NPC(self, model, texture, pos, route)
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -246,6 +247,17 @@ class Manager(object):
             npc.update_action()
         return task.cont
 
+    def alert(self, pos):
+        for npc in self.npcs.values():
+            if not npc:
+                continue
+            length = hypot(npc.pos[0] - pos[0], npc.pos[1] - pos[1])
+            if length <= S.alert_radius:
+                npc.target = self.player
+                npc.view_radius = S.npc['excited_view_radius']
+                npc.view_angle = S.npc['excited_view_angle']
+
+
     def update_view_fields(self, task):
         for npc in self.npcs.values():
             key = id(npc)
@@ -254,8 +266,9 @@ class Manager(object):
             del self.view_fields[key]
             radius, c_angle = npc.view_radius, npc.view_angle
             angle = int(npc.actor.getHpr()[0] - 90) % 360
+            pred = lambda pos: 'jump' in self.map[pos]['actions']
             field = self.map.view_field(npc.pos, angle,
-                                        c_angle, radius, None)
+                                        c_angle, radius, pred)
             for pos in field:
                 marker = loader.loadModel(S.model('plane'))
                 marker.setHpr(0, -90, 0)

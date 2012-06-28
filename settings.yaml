@@ -7,6 +7,7 @@ paths:
 
 map_texture_size: 256
 show_view_field: true #for debugging
+alert_radius: 5
 
 camera:
   min_distance: 3
@@ -45,6 +46,8 @@ npc:
   speed: 1.8
   normal_view_radius: 7
   normal_view_angle: 80
+  excited_view_radius: 10
+  excited_view_angle: 120
   animation:
     hit_range: [59, 63]
     hit_speed: 0.7
