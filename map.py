@@ -3,6 +3,47 @@ from collections import OrderedDict, defaultdict
 import yaml
 
 
+def segment_crossing(segm1, segm2):
+    x_cross = None
+    x_diff1 = float(segm1[1][0] - segm1[0][0])
+    y_diff1 = float(segm1[1][1] - segm1[0][1])
+    if x_diff1 != 0:
+        a1 = y_diff1 / x_diff1
+        b1 = segm1[0][1] - a1 * segm1[0][0]
+    else:
+        a1 = float('inf')
+        x_cross = segm1[0][0]
+    x_diff2 = float(segm2[1][0] - segm2[0][0])
+    y_diff2 = float(segm2[1][1] - segm2[0][1])
+    if x_diff2 != 0:
+        a2 = y_diff2 / x_diff2
+        b2 = segm2[0][1] - a2 * segm2[0][0]
+    else:
+        a2 = float('inf')
+        x_cross = segm2[0][0]
+    if a1 == a2:
+        return # they are parallel
+    if x_cross is None:
+        x_cross = (b2 - b1) / (a1 - a2)
+    if a1 != float('inf'):
+        y_cross = a1 * x_cross + b1
+    else:
+        y_cross = a2 * x_cross + b2
+    if not (min(segm1[0][0], segm1[1][0]) <= x_cross
+            <= max(segm1[0][0], segm1[1][0])):
+        return
+    if not (min(segm1[0][1], segm1[1][1]) <= y_cross
+            <= max(segm1[0][1], segm1[1][1])):
+        return
+    if not (min(segm2[0][0], segm2[1][0]) <= x_cross
+            <= max(segm2[0][0], segm2[1][0])):
+        return
+    if not (min(segm2[0][1], segm2[1][1]) <= y_cross
+            <= max(segm2[0][1], segm2[1][1])):
+        return
+    return x_cross, y_cross
+
+
 class MapDataError(Exception):
     pass
 
@@ -302,6 +343,8 @@ class Map(object):
             if not st_a < sq_angle < end_a:
                 return False
             return True
+        #TODO: implement raytracing through obstacles using iteration
+        # on sides of squares
         field = set()
         wave = [pos]
         visited = set(wave)

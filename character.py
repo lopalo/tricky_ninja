@@ -162,8 +162,8 @@ class Character(object):
         )
         yield interval
 
-        #TODO: change this behavior later
-        #TODO: block squares
+        #TODO: slow death animation with vanishing
+        #TODO: block 2 free squares and show corpse
 
         yield wait(1)
         init_pos = tuple(self.init_position)
@@ -216,6 +216,7 @@ class Character(object):
 
 
 class Player(Character):
+    #TODO: implement corpse moving
 
     def __init__(self, manager):
         super(Player, self).__init__(manager)
@@ -560,7 +561,9 @@ class NPC(Character):
             else:
                 return 'walk'
         else:
+            #TODO: check if corpse is in view_field
             if self.in_view_field(player):
+                #TODO: if corpse then target is not the player
                 self.manager.alert(self.pos)
                 return 'walk'
             if self.pos == self.target:

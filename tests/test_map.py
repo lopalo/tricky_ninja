@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, '')
 
 import unittest
-from map import Map
+from map import Map, segment_crossing
 
 class TestMap(unittest.TestCase):
 
@@ -156,6 +156,26 @@ class TestMap(unittest.TestCase):
         pred = lambda x: True
         res = map.view_field(map.groups['st'][0], 315, 60, 5, pred)
         self.assertItemsEqual(map.groups['fd'], res)
+
+    def test_segment_crossing(self):
+        segm1, segm2 = ((5, 3), (-1, 3)), ((2, 1), (2, 5))
+        self.assertEqual((2, 3), segment_crossing(segm1, segm2))
+        segm1, segm2 = ((7, 3), (2, 2)), ((2, 3), (7, 4))
+        self.assertIsNone(segment_crossing(segm1, segm2))
+        segm1, segm2 = ((3, 6), (2, 1)), ((2, 3), (5, 1))
+        res = segment_crossing(segm1, segm2)
+        self.assertEqual(2.35, round(res[0], 2))
+        self.assertEqual(2.76, round(res[1], 2))
+        segm1, segm2 = ((6, 1), (3, 3)), ((2, 1), (3, 6))
+        self.assertIsNone(segment_crossing(segm1, segm2))
+        segm1, segm2 = ((6, 1), (6, 8)), ((2, 2), (7, 3))
+        res = segment_crossing(segm1, segm2)
+        self.assertEqual(6, round(res[0], 2))
+        self.assertEqual(2.8, round(res[1], 2))
+        segm1, segm2 = ((6, 3), (6, 8)), ((2, 2), (7, 3))
+        self.assertIsNone(segment_crossing(segm1, segm2))
+        segm1, segm2 = ((-6, 8), (-6, 3)), ((-6, 11), (-6, 2))
+        self.assertIsNone(segment_crossing(segm1, segm2))
 
 if __name__ == '__main__':
     unittest.main()
