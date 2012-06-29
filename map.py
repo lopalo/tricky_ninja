@@ -1,5 +1,5 @@
 from math import atan2, hypot, degrees
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, deque
 import yaml
 
 
@@ -42,6 +42,14 @@ def segment_crossing(segm1, segm2):
             <= max(segm2[0][1], segm2[1][1])):
         return
     return x_cross, y_cross
+
+def square_sides(pos):
+    x, y = pos
+    vertices = deque(((-.5, .5), (.5, .5), (.5, -.5), (-.5, -.5)))
+    for _ in range(4):
+        v1, v2 = tuple(vertices)[:2]
+        yield (x + v1[0], y + v1[1]), (x + v2[0], y + v2[1])
+        vertices.rotate(-1)
 
 
 class MapDataError(Exception):
@@ -245,7 +253,7 @@ class Map(object):
             if pos in self:
                 yield pos
 
-    def wave(self, coord, pred):
+    def wave(self, coord, pred=lambda x: True):
         assert self[coord], coord
         wave = [coord]
         visited = set(wave)
@@ -331,7 +339,7 @@ class Map(object):
         assert 0 <= angle < 360, angle
         assert 0 < cone_angle < 180, cone_angle
         st_a, end_a = angle - cone_angle / 2 , angle + cone_angle / 2
-        def cone_pred(sq):
+        def field_pred(sq):
             diff = sq[0] - pos[0], sq[1] - pos[1]
             if hypot(diff[0], diff[1]) > radius:
                 return False
@@ -342,33 +350,18 @@ class Map(object):
                 sq_angle += 360
             if not st_a < sq_angle < end_a:
                 return False
+            if not pred(sq):
+                obstacles.add(sq)
+                return False
+            for obst in obstacles:
+                for side in square_sides(obst):
+                    if segment_crossing((pos, sq), side) is not None:
+                        return False
             return True
-        #TODO: implement raytracing through obstacles using iteration
-        # on sides of squares
-        field = set()
-        wave = [pos]
-        visited = set(wave)
-        shadow_wave = []
-        for i in range(radius):
-            new_wave = []
-            new_shadow_wave = []
-            for c in shadow_wave:
-                for nb, info in self.neighbors(c):
-                    if nb not in visited:
-                        visited.add(nb)
-                        new_shadow_wave.append(nb)
-            for c in wave:
-                for nb, info in self.neighbors(c, True):
-                    if nb not in visited:
-                        if not pred(nb):
-                            new_shadow_wave.append(nb)
-                            continue
-                        visited.add(nb)
-                        new_wave.append(nb)
-                        field.add(nb)
-            wave = new_wave
-            shadow_wave = new_shadow_wave
-        return set(i for i in field if cone_pred(i))
+
+        obstacles = set()
+        field = sum(self.wave(pos), [])
+        return set(i for i in field if field_pred(i))
 
     def block(self, pos):
         assert self[pos] and pos not in self.blocked_squares
