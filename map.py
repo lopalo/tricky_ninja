@@ -32,13 +32,13 @@ def segment_crossing(segm1, segm2):
     if not (min(segm1[0][0], segm1[1][0]) <= x_cross
             <= max(segm1[0][0], segm1[1][0])):
         return
-    if not (min(segm1[0][1], segm1[1][1]) <= y_cross
+    if not (min(segm1[0][1], segm1[1][1]) <= y_cross # for a vertical segment
             <= max(segm1[0][1], segm1[1][1])):
         return
     if not (min(segm2[0][0], segm2[1][0]) <= x_cross
             <= max(segm2[0][0], segm2[1][0])):
         return
-    if not (min(segm2[0][1], segm2[1][1]) <= y_cross
+    if not (min(segm2[0][1], segm2[1][1]) <= y_cross # for a vertical segment
             <= max(segm2[0][1], segm2[1][1])):
         return
     return x_cross, y_cross

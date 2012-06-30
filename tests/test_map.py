@@ -5,6 +5,7 @@ import unittest
 from map import Map, segment_crossing
 
 class TestMap(unittest.TestCase):
+    maxDiff = None
 
     def get_map(self, definitions, topology):
         data = dict(
@@ -114,7 +115,7 @@ class TestMap(unittest.TestCase):
 
     def test_view_field2(self):
         top = [
-            'ss ss ss ss st ss ss ss ss',
+            'ss ss ss ss ss ss ss ss ss',
             'ss ss ss ss ss ss ss ss ss',
             'ss ss fd ss ss ss ss ss ss',
             'ss fd fd fd fd fd fd fd st',
@@ -176,6 +177,37 @@ class TestMap(unittest.TestCase):
         self.assertIsNone(segment_crossing(segm1, segm2))
         segm1, segm2 = ((-6, 8), (-6, 3)), ((-6, 11), (-6, 2))
         self.assertIsNone(segment_crossing(segm1, segm2))
+
+    def test_view_field_with_obstacles1(self):
+        top = [
+            'ss ss ss ss st ss ss ss ss',
+            'ss ss ss fd fd fd ss ss ss',
+            'ss ss WL fd fd fd fd fd ss',
+            'ss ss ss fd WL WL fd fd fd',
+            'ss ss fd fd ss ss ss fd fd',
+            'ss ss fd ss ss ss ss ss fd',
+        ]
+        defin = dict((i, {}) for i in ('WL', 'st', 'fd'))
+        map = self.get_map(defin, top)
+        pred = lambda pos: map[pos].get('ident') != 'WL'
+        res = map.view_field(map.groups['st'][0], 270, 120, 7, pred)
+        self.assertItemsEqual(map.groups['fd'], res)
+
+    def test_view_field_with_obstacles2(self):
+        top = [
+            'ss fd fd fd fd fd fd fd st',
+            'ss ss fd fd fd fd fd fd fd',
+            'ss ss fd fd fd fd ss WL fd',
+            'ss ss fd fd fd ss ss ss fd',
+            'ss ss ss fd ss ss ss ss fd',
+            'ss ss ss ss ss ss ss ss fd',
+        ]
+        defin = dict((i, {}) for i in ('WL', 'st', 'fd'))
+        map = self.get_map(defin, top)
+        pred = lambda pos: map[pos].get('ident') != 'WL'
+        res = map.view_field(map.groups['st'][0], 230, 120, 7, pred)
+        self.assertItemsEqual(map.groups['fd'], res)
+
 
 if __name__ == '__main__':
     unittest.main()
