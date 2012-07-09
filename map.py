@@ -3,6 +3,9 @@ from collections import OrderedDict, defaultdict, deque
 import yaml
 
 
+AVAILABLE_ACTIONS = ('walk', 'jump', 'see')
+
+
 def segment_crossing(segm1, segm2):
     x_cross = None
     x_diff1 = float(segm1[1][0] - segm1[0][0])
@@ -55,7 +58,49 @@ def square_sides(pos):
 class MapDataError(Exception):
     pass
 
-available_actions = ('walk', 'jump', 'see')
+
+# maps kinds to dicts with fields
+fields_declaration = {
+    'texture': {
+        'texture': {
+            'type': str
+        },
+    },
+    'model': {
+        'model': {
+            'type' : str
+        },
+        'angle': {
+            'type': int,
+            'default': True
+        },
+        'size': {
+            'type': float,
+            'default': True,
+            'positive': True
+        }
+    },
+    'chain_model': {
+        'vertical_model': {
+            'type': str
+        },
+        'left_bottom_model': {
+            'type': str
+        },
+    },
+    'sprite': {
+        'texture': {
+            'type': str
+        },
+        'size': {
+            'type': float,
+            'default': True,
+            'positive': True,
+        }
+    }
+}
+
+
 
 def check_map_data(data):
     stop = False
@@ -79,68 +124,30 @@ def check_map_data(data):
                 break
         else:
             yield 'definitions', "'{0}' is not in topology".format(id)
-        kind = info.get('kind')
-        if kind == 'texture':
-            if 'texture' not in info:
-                yield ('definitions',
-                    "value of '{0}' doesn't have texture name".format(id))
-                continue
-            if type(info['texture']) is not str:
-                yield ('definitions',
-                    "texture name for '{0}' is not a string".format(id))
-        elif kind == 'model':
-            if 'angle' in info and type(info['angle']) is not int:
-                yield ('definitions',
-                    "angle for '{0}' is not an integer".format(id))
-            if 'model' not in info:
-                yield ('definitions',
-                    "value of '{0}' doesn't have model name".format(id))
-                continue
-            if type(info['model']) is not str:
-                yield ('definitions',
-                    "model name for '{0}' is not a string".format(id))
-            if 'size' in info:
-                size = info['size']
-                if type(size) is not float:
-                    yield ('definitions',
-                    "model size for '{0}' is not a float".format(id))
-                elif size <= 0:
-                    yield ('definitions',
-                    "model size for '{0}' must be positive".format(id))
-        elif kind == 'chain_model':
-            for name in ('vertical_model', 'left_bottom_model'):
-                if name not in info:
-                    yield ('definitions',
-                    "value of '{0}' doesn't have {1} name".format(
-                                                            id, name))
-                elif type(info[name]) is not str:
-                    yield ('definitions',
-                    "{0} name for '{1}' is not a string".format
-                                                            (name, id))
-        elif kind == 'sprite':
-            if 'texture' not in info:
-                yield ('definitions',
-                    "value of '{0}' doesn't have texture name".format(id))
-                continue
-            if type(info['texture']) is not str:
-                yield ('definitions',
-                    "texture name for '{0}' is not a string".format(id))
-            if 'size' in info:
-                size = info['size']
-                if type(size) is not float:
-                    yield ('definitions',
-                    "sprite size for '{0}' is not a float".format(id))
-                elif size <= 0:
-                    yield ('definitions',
-                    "sprite size for '{0}' must be positive".format(id))
-        elif kind is None:
-            pass
-        else:
-            yield 'definitions', "unknown kind for '{0}'".format(id)
         actions = info.get('actions')
         if actions is not None and actions not in data['action_groups']:
             yield ('definitions',
                     "unknown action group for '{0}'".format(id))
+        kind = info.get('kind')
+        if kind is None:
+            continue
+        elif kind not in fields_declaration:
+            yield 'definitions', "unknown kind for '{0}'".format(id)
+            continue
+        fields = fields_declaration[kind]
+        for f, i in fields.items():
+            if not i.get('default', False) and f not in info:
+                yield ('definitions',
+                "value of '{0}' doesn't contain '{1}' field".format(id, f))
+            if f not in info:
+                continue
+            if not isinstance(info[f], i['type']):
+                t_name = i['type'].__name__
+                yield ('definitions',
+                "field '{0}' of '{1}' is not {2}".format(f, id, t_name))
+            if i.get('positive') and info[f] <= 0:
+                yield ('definitions',
+                "field '{0}' of '{1}' must be positive".format(f, id))
 
     length = len(data['topology'][0])
     for row in data['topology']:
@@ -163,7 +170,7 @@ def check_map_data(data):
         yield 'action_groups', 'Unused groups ' + str(list(unused))
     for k, v in data['action_groups'].items():
         for a in v:
-            if a not in available_actions:
+            if a not in AVAILABLE_ACTIONS:
                 yield ('action_groups',
                     "'{0}' contains unknown action".format(k))
 
