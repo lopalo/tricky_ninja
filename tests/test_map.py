@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, '')
 
 import unittest
-from map import Map, segment_crossing
+from map_model.map import Map, segment_crossing
 
 class TestMap(unittest.TestCase):
     maxDiff = None

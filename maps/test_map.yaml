@@ -61,3 +61,20 @@ topology:
 - 'ss ss ss ss ss ss ss ss ss ss ss S0 st st sa sa sa sa sa sa sa sa sa ..'
 - '.. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..'
 - '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. sa sa .. .. .. .. .. ..'
+
+routes:
+  r1: [[0, 13], [17, 4], [17, 0]]
+  r2: [[0, 13], [14, 16], [21, 8]]
+
+npcs:
+- count: 2 # < len(route)
+  model_name: ninja
+  texture: nskinbr
+  alert_texture: nskinrd
+  route: r1
+
+- count: 1
+  model_name: ninja
+  texture: nskinbr
+  alert_texture: nskinrd
+  route: r2

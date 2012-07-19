@@ -1,17 +1,17 @@
 from math import hypot
-from collections import defaultdict
-import map
+from random import choice
+from collections import defaultdict, deque
+from map_model.map import Map
 from map_builder import MapBuilder
 import character
 
 
 class Manager(object):
 
-
     def __init__(self, map_name):
         self.main_node = render.attachNewNode('main_node')
         self.blocked_squares = set()
-        self.map = map.Map(map_name)
+        self.map = Map(map_name)
         self.map_builder = MapBuilder(self.map, self.main_node)
         self.map_builder.build()
         self.player = character.Player(self)
@@ -20,16 +20,19 @@ class Manager(object):
             self.view_fields = defaultdict(set)
             taskMgr.doMethodLater(1, self.update_view_fields, 'fields')
 
-
     def set_npcs(self):
         self.npcs = {}
-        #TODO: change this shit later
-        pos, model, texture = (3, 3), 'ninja', 'nskinbr'
-        route = ((0, 13), (17, 4))
-        self.npcs[pos] = character.NPC(self, model, texture, pos, route)
-        pos = (5, 5)
-        route = ((0, 13), (21, 8))
-        self.npcs[pos] = character.NPC(self, model, texture, pos, route)
+        for data in self.map.npcs:
+            for _ in range(data['count']):
+                _data = data.copy()
+                route = deque(_data['route'])
+                free = [i for i in route if i not in self.npcs]
+                assert free, 'all postions are occupated'
+                pos = choice(free)
+                while pos != route[0]:
+                    route.rotate(1)
+                _data['route'] = route
+                character.NPC(self, **_data)
 
     def is_available(self, pos):
         return (pos in self.map and

@@ -1,9 +1,7 @@
 from math import atan2, hypot, degrees
 from collections import OrderedDict, defaultdict, deque
 import yaml
-
-
-AVAILABLE_ACTIONS = ('walk', 'jump', 'see')
+from map_model.check import MapDataError, check_map_data as check_data
 
 
 def segment_crossing(segm1, segm2):
@@ -46,6 +44,7 @@ def segment_crossing(segm1, segm2):
         return
     return x_cross, y_cross
 
+
 def square_sides(pos):
     x, y = pos
     vertices = deque(((-.5, .5), (.5, .5), (.5, -.5), (-.5, -.5)))
@@ -53,126 +52,6 @@ def square_sides(pos):
         v1, v2 = tuple(vertices)[:2]
         yield (x + v1[0], y + v1[1]), (x + v2[0], y + v2[1])
         vertices.rotate(-1)
-
-
-class MapDataError(Exception):
-    pass
-
-
-# maps kinds to dicts with fields
-fields_declaration = {
-    'texture': {
-        'texture': {
-            'type': str
-        },
-    },
-    'model': {
-        'model': {
-            'type' : str
-        },
-        'angle': {
-            'type': int,
-            'default': True
-        },
-        'size': {
-            'type': float,
-            'default': True,
-            'positive': True
-        }
-    },
-    'chain_model': {
-        'vertical_model': {
-            'type': str
-        },
-        'left_bottom_model': {
-            'type': str
-        },
-    },
-    'sprite': {
-        'texture': {
-            'type': str
-        },
-        'size': {
-            'type': float,
-            'default': True,
-            'positive': True,
-        }
-    }
-}
-
-
-
-def check_map_data(data):
-    stop = False
-    for f in ('substrate_texture', 'definitions',
-              'topology', 'action_groups'):
-        if f not in data:
-            stop = True
-            yield f, 'is not specified'
-    if stop: return
-    if type(data['substrate_texture']) is not str:
-        yield 'substrate_texture', 'is not a string'
-    actions = data['substrate_actions']
-    if actions is not None and actions not in data['action_groups']:
-            yield ('substrate_actions', "unknown action group")
-    for id, info in data['definitions'].items():
-        if len(id) != 2:
-            yield ('definitions',
-                "ident '{0}' should contain two characters".format(id))
-        for row in data['topology']:
-            if id in row:
-                break
-        else:
-            yield 'definitions', "'{0}' is not in topology".format(id)
-        actions = info.get('actions')
-        if actions is not None and actions not in data['action_groups']:
-            yield ('definitions',
-                    "unknown action group for '{0}'".format(id))
-        kind = info.get('kind')
-        if kind is None:
-            continue
-        elif kind not in fields_declaration:
-            yield 'definitions', "unknown kind for '{0}'".format(id)
-            continue
-        fields = fields_declaration[kind]
-        for f, i in fields.items():
-            if not i.get('default', False) and f not in info:
-                yield ('definitions',
-                "value of '{0}' doesn't contain '{1}' field".format(id, f))
-            if f not in info:
-                continue
-            if not isinstance(info[f], i['type']):
-                t_name = i['type'].__name__
-                yield ('definitions',
-                "field '{0}' of '{1}' is not {2}".format(f, id, t_name))
-            if i.get('positive') and info[f] <= 0:
-                yield ('definitions',
-                "field '{0}' of '{1}' must be positive".format(f, id))
-
-    length = len(data['topology'][0])
-    for row in data['topology']:
-        if (len(row) + 1) % 3:
-            yield 'topology', 'wrong length of row'
-        if len(row) != length:
-            yield 'topology', 'different count of rows'
-        for index in range(0, length, 3):
-            id = row[index:index+2]
-            if id in ('..', 'ss'):
-                continue
-            if id not in data['definitions']:
-                yield 'topology', 'unknown ident ' + id
-
-    used_action_groups = set(i['actions'] for i in
-                             data['definitions'].values()
-                             if i.get('actions') is not None)
-    unused = set(data['action_groups']) - used_action_groups
-    if unused:
-        yield 'action_groups', 'Unused groups ' + str(list(unused))
-    for k, v in data['action_groups'].items():
-        for a in v:
-            if a not in AVAILABLE_ACTIONS:
-                yield ('action_groups',
-                    "'{0}' contains unknown action".format(k))
 
 
 class Map(object):
@@ -194,17 +73,14 @@ class Map(object):
             with open(S.map(name), 'r') as f:
                 data = yaml.load(f)
         data['topology'].reverse()
-        errors = list(check_map_data(data))
-        if errors and check:
-            msg = "\nMap '{0}'\n".format(name.split('.')[0])
-            for f, err in errors:
-                msg +='{0}: {1}\n'.format(f, err)
-            raise MapDataError(msg)
+        self._name = name
+        self._check = check
+        self._raise_error_message(check_data(data))
         self.blocked_squares = set()
         self.substrate_texture = data['substrate_texture']
 
         self.textures = set([self.substrate_texture])
-        self.groups = defaultdict(list)
+        self.groups = defaultdict(list) # need for tests
         self.data = {}
         for info in data['definitions'].values():
             actions = info.get('actions')
@@ -230,6 +106,44 @@ class Map(object):
                 self.groups[ident].append((index/3, num_row))
                 if info.get('kind') == 'texture':
                     self.textures.add(info['texture'])
+        self.routes = {}
+        for key, value in data.get('routes', {}).items():
+            self.routes[key] = tuple(tuple(i) for i in value)
+        self._raise_error_message(self._check_routes())
+        self.npcs = data.get('npcs', tuple())
+        for npc in self.npcs:
+            npc['route'] = self.routes[npc['route']]
+
+    def _raise_error_message(self, errors):
+        errors = tuple(errors)
+        if errors and self._check:
+            msg = "\nMap '{0}'\n".format(self._name.split('.')[0])
+            for f, err in errors:
+                msg +='{0}: {1}\n'.format(f, err)
+            raise MapDataError(msg)
+
+    def _check_routes(self):
+        for key, route in self.routes.items():
+            check_path = True
+            for num, pos in enumerate(route):
+                if pos not in self:
+                    error = ("{0} position of route '{1}' "
+                            "doesn't exist on the map").format(num, key)
+                    yield 'route', error
+                    check_path = False
+                    continue
+
+            if check_path:
+                pred = lambda pos: 'walk' in self[pos]['actions']
+                route = deque(route)
+                for _ in range(len(route)):
+                    s, e = tuple(route)[:2]
+                    error = ("{0} - {1} interval of route '{2}' "
+                            "is not passable").format(s, e, key)
+                    if self.get_path(s, e, pred) is None:
+                        yield 'route', error
+                    route.rotate(1)
+
 
     def __getitem__(self, coord):
         return self.data.get(coord)

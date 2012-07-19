@@ -477,7 +477,7 @@ class Player(Character):
 class NPC(Character):
     npc_actions = ('walk', 'hit', 'die',)
 
-    def __init__(self, manager, model_name, texture, pos, route):
+    def __init__(self, manager, model_name, texture, route, **spam):
         super(NPC, self).__init__(manager)
 
         self.view_radius = S.npc['normal_view_radius']
@@ -495,7 +495,7 @@ class NPC(Character):
         actor.setScale(S.model_size(model_name))
         actor.setTexture(loader.loadTexture(
                             S.texture(texture)), 1)
-        self.init_position = self.pos = pos
+        self.init_position = self.pos = route[0]
         self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', S.npc['idle_frame'])
         actor.setBlend(frameBlend=True)

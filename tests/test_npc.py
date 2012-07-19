@@ -6,11 +6,13 @@ import unittest
 from collections import deque
 import mock
 from character import NPC, Character
-from map import Map
+from map_model.map import Map
 from manager import Manager
+
+
 class TestNPC(unittest.TestCase):
 
-    @mock.patch('map.Map')
+    @mock.patch('manager.Map')
     @mock.patch('character.Player')
     @mock.patch('character.NPC')
     def setUp(self, map_mock, pl_mock, npc_mock):
