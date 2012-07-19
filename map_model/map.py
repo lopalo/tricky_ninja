@@ -109,10 +109,8 @@ class Map(object):
         self.routes = {}
         for key, value in data.get('routes', {}).items():
             self.routes[key] = tuple(tuple(i) for i in value)
-        self._raise_error_message(self._check_routes())
         self.npcs = data.get('npcs', tuple())
-        for npc in self.npcs:
-            npc['route'] = self.routes[npc['route']]
+        self._raise_error_message(self._check_routes())
 
     def _raise_error_message(self, errors):
         errors = tuple(errors)
@@ -143,7 +141,13 @@ class Map(object):
                     if self.get_path(s, e, pred) is None:
                         yield 'route', error
                     route.rotate(1)
-
+        for num, npc in enumerate(self.npcs):
+            r = npc['route']
+            max_count = len(self.routes[r]) - 1
+            error = ("{0}: max count for "
+                     "route '{1}' is {2}").format(num, r, max_count)
+            if npc['count'] > max_count:
+                yield 'npc', error
 
     def __getitem__(self, coord):
         return self.data.get(coord)

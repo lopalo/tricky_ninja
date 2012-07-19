@@ -67,7 +67,7 @@ routes:
   r2: [[0, 13], [14, 16], [21, 8]]
 
 npcs:
-- count: 2 # < len(route)
+- count: 2
   model_name: ninja
   texture: nskinbr
   alert_texture: nskinrd

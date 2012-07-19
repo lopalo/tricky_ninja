@@ -25,7 +25,7 @@ class Manager(object):
         for data in self.map.npcs:
             for _ in range(data['count']):
                 _data = data.copy()
-                route = deque(_data['route'])
+                route = deque(self.map.routes[data['route']])
                 free = [i for i in route if i not in self.npcs]
                 assert free, 'all postions are occupated'
                 pos = choice(free)
