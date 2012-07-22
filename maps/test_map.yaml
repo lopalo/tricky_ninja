@@ -1,3 +1,5 @@
+start_position: [11, 4]
+
 substrate_texture: grass
 substrate_actions: free
 #for substrate_texture ident always is 'ss'

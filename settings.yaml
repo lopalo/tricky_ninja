@@ -39,7 +39,6 @@ player:
     hit_speed: 1
     post_hit_range: [49, 58]
     post_hit_speed: 0.7
-  init_position: [11, 4]
   idle_frame: 28
 
 npc:

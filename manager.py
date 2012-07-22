@@ -14,7 +14,7 @@ class Manager(object):
         self.map = Map(map_name)
         self.map_builder = MapBuilder(self.map, self.main_node)
         self.map_builder.build()
-        self.player = character.Player(self)
+        self.player = character.Player(self, self.map.start_pos)
         self.set_npcs()
         if S.show_view_field:
             self.view_fields = defaultdict(set)

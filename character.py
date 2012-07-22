@@ -227,7 +227,7 @@ class Character(object):
 class Player(Character):
     #TODO: implement corpse moving
 
-    def __init__(self, manager):
+    def __init__(self, manager, pos):
         super(Player, self).__init__(manager)
 
         self.speed = S.player['speed']
@@ -244,7 +244,7 @@ class Player(Character):
         actor.setScale(S.model_size(S.player['model']))
         actor.setTexture(loader.loadTexture(
                             S.texture(S.player['texture'])), 1)
-        self.pos = self.init_position = tuple(S.player['init_position'])
+        self.pos = self.init_position = tuple(pos)
         self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', self.idle_frame)
         actor.setBlend(frameBlend=True)
