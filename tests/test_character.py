@@ -19,10 +19,16 @@ class TestCharacter(unittest.TestCase):
         __builtin__.render = mock.Mock()
         __builtin__.taskMgr = mock.Mock()
         manager = mock.Mock()
+        manager.npcs = {}
         self.char = char = character.Character(manager)
         char.actor = actor = mock.Mock()
         actor.getHpr = mock.Mock(return_value=(90, 30, 30))
         char.speed = 1
+        char.hit_speed = 1
+        char.post_hit_speed = 2
+        char.hit_range = (4, 10)
+        char.post_hit_range = (12, 18)
+        char.idle_frame = 2323
         char.pos = (3, 3)
 
     @mock.patch('character.LerpHprInterval', interval_mock)
@@ -54,6 +60,31 @@ class TestCharacter(unittest.TestCase):
         self.assertEqual(3, char.manager.map.block.call_count)
         self.assertEqual(3, char.manager.map.unblock.call_count)
 
+    def test_hit(self):
+        char = self.char
+        char.manager.npcs[3, 4] = target = mock.Mock()
+        gen = char.do_hit()
+        for _ in gen:
+            pass
+        exp = [
+            mock.call('anim', playRate=1, startFrame=4, endFrame=10),
+            mock.call('anim', playRate=2, startFrame=12, endFrame=18)
+        ]
+        self.assertListEqual(exp, char.actor.actorInterval.call_args_list)
+        self.assertEqual(0, target.kill.call_count)
+        char.action = None
+        char.actor.actorInterval.reset_mock()
+        char.manager.npcs[4, 3] = target
+        self.assertEqual(0, target.kill.call_count)
+        gen = char.do_hit()
+        for _ in gen:
+            pass
+        exp = [
+            mock.call('anim', playRate=1, startFrame=4, endFrame=10),
+            mock.call('anim', playRate=2, startFrame=12, endFrame=18)
+        ]
+        self.assertListEqual(exp, char.actor.actorInterval.call_args_list)
+        self.assertEqual(1, target.kill.call_count)
 
 if __name__ == '__main__':
     unittest.main()
