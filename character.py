@@ -8,6 +8,13 @@ from direct.interval.ProjectileInterval import ProjectileInterval
 from direct.interval.ActorInterval import ActorInterval
 from direct.actor.Actor import Actor
 
+
+_testing = False
+
+def set_testing(value):
+    global _testing
+    _testing = value
+
 _actions = {}
 
 def action(name):
@@ -20,6 +27,8 @@ def action(name):
             char.action = name
             gen = func(char, *args, **kwargs)
             assert isinstance(gen, GeneratorType)
+            if _testing:
+                return gen
             _runner(char, gen, None)
         _actions[name] = wrap
         return wrap

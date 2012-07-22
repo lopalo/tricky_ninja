@@ -1,5 +1,6 @@
 import __builtin__
 from direct.showbase.ShowBase import ShowBase
+from panda3d.core import ConfigVariableString
 from manager import Manager
 from settings import Settings
 
@@ -24,5 +25,6 @@ class App(ShowBase):
 
 if __name__ == '__main__':
     __builtin__.S = Settings('settings.yaml')
+    ConfigVariableString("show-frame-rate-meter").setValue('#t')
     app = App()
     run()
