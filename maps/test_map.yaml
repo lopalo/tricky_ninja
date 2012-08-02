@@ -75,8 +75,8 @@ npcs:
   alert_texture: nskinrd
   route: r1
 
-- count: 1
-  model_name: ninja
-  texture: nskinbr
-  alert_texture: nskinrd
-  route: r2
+# - count: 1
+#   model_name: ninja
+#   texture: nskinbr
+#   alert_texture: nskinrd
+#   route: r2

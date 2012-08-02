@@ -17,7 +17,8 @@ class TestMap(unittest.TestCase):
                 'free':['jump', 'walk', 'see']
             },
             definitions=definitions,
-            topology=topology
+            topology=topology,
+            start_position=(0, 0),
         )
         return Map(data=data, check=False)
 

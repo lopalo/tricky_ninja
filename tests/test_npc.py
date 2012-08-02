@@ -23,7 +23,8 @@ class TestNPC(unittest.TestCase):
         S.alert_radius = 3
         S.npc = dict(
             excited_view_radius=3,
-            excited_view_angle=88
+            excited_view_angle=88,
+            excited_speed=45,
         )
 
         manager = Manager('map')
@@ -53,7 +54,8 @@ class TestNPC(unittest.TestCase):
                 'free':['jump', 'walk']
             },
             definitions={},
-            topology=top
+            topology=top,
+            start_position=(0, 0),
         )
         manager.map = Map(data=data, check=False)
 
@@ -132,13 +134,16 @@ class TestNPC(unittest.TestCase):
         npc1.target = npc2.target = None
         npc1.view_rasius = npc2.view_radius = 1
         npc1.view_angle = npc2.view_angle = 50
+        npc1.speed = npc2.speed = 1
         npc1.in_view_field = mock.Mock(return_value=True)
         meth = NPC.__dict__['get_action']
         self.assertEqual('walk', meth(npc1))
         self.assertEqual(3, npc1.view_radius)
         self.assertEqual(88, npc1.view_angle)
+        self.assertEqual(45, npc1.speed)
         self.assertEqual(3, npc2.view_radius)
         self.assertEqual(88, npc2.view_angle)
+        self.assertEqual(45, npc2.speed)
         self.assertIs(pl, npc1.target)
         self.assertIs(pl, npc2.target)
 
@@ -149,14 +154,17 @@ class TestNPC(unittest.TestCase):
         npc1.target = npc2.target = None
         npc1.view_rasius = npc2.view_radius = 1
         npc1.view_angle = npc2.view_angle = 50
+        npc1.speed = npc2.speed = 1
         npc1.in_view_field = mock.Mock(return_value=True)
         meth = NPC.__dict__['get_action']
         npc2.pos = (5, 0)
         self.assertEqual('walk', meth(npc1))
         self.assertEqual(3, npc1.view_radius)
         self.assertEqual(88, npc1.view_angle)
+        self.assertEqual(45, npc1.speed)
         self.assertEqual(1, npc2.view_radius)
         self.assertEqual(50, npc2.view_angle)
+        self.assertEqual(1, npc2.speed)
         self.assertIs(pl, npc1.target)
         self.assertIsNone(npc2.target)
 

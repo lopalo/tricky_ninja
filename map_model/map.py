@@ -77,7 +77,7 @@ class Map(object):
         self._check = check
         self._raise_error_message(check_data(data))
         self.blocked_squares = set()
-        self.start_pos = data['start_position'] # TODO: add check
+        self.start_pos = data['start_position']
         self.substrate_texture = data['substrate_texture']
 
         self.textures = set([self.substrate_texture])

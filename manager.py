@@ -47,14 +47,14 @@ class Manager(object):
             npc.update_action()
         return task.cont
 
-    def alert(self, pos):
+    def alert(self, pos, target_pos=None):
         for npc in self.npcs.values():
             if not npc:
                 continue
             length = hypot(npc.pos[0] - pos[0], npc.pos[1] - pos[1])
             if length <= S.alert_radius:
-                #TODO: change speed of walk
-                npc.target = self.player
+                npc.target = target_pos or self.player
+                npc.speed = S.npc['excited_speed']
                 npc.view_radius = S.npc['excited_view_radius']
                 npc.view_angle = S.npc['excited_view_angle']
 

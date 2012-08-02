@@ -11,7 +11,7 @@ class MapDataError(Exception):
 def check_map_data(data):
     stop = False
     for f in ('substrate_texture', 'definitions',
-              'topology', 'action_groups'):
+              'topology', 'action_groups', 'start_position'):
         if f not in data:
             stop = True
             yield f, 'is not specified'
