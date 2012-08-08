@@ -581,10 +581,10 @@ class NPC(Character):
             return 'walk'
 
     def update_action(self):
-        action = self.get_action()
-        assert action in self.actions and action in self.npc_actions
         if self.action is not None:
             return
+        action = self.get_action()
+        assert action in self.actions and action in self.npc_actions
         if self.must_die:
             self.actions['die'](self)
             return

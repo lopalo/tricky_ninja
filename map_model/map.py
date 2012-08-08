@@ -264,11 +264,17 @@ class Map(object):
     def view_field(self, pos, angle, cone_angle, radius, pred):
         assert 0 <= angle < 360, angle
         assert 0 < cone_angle < 180, cone_angle
-        st_a, end_a = angle - cone_angle / 2 , angle + cone_angle / 2
-        def field_pred(sq):
+
+        def radius_pred(sq):
+            """ Need for constraint of inflation of a wave """
             diff = sq[0] - pos[0], sq[1] - pos[1]
             if hypot(diff[0], diff[1]) > radius:
                 return False
+            return True
+
+        st_a, end_a = angle - cone_angle / 2 , angle + cone_angle / 2
+        def field_pred(sq):
+            diff = sq[0] - pos[0], sq[1] - pos[1]
             sq_angle = degrees(atan2(diff[1], diff[0]))
             if 90 < angle < 270:
                 sq_angle %= 360
@@ -286,7 +292,8 @@ class Map(object):
             return True
 
         obstacles = set()
-        field = sum(self.wave(pos), [])
+        field = sum(self.wave(pos, radius_pred), [])
+        #TODO: optimize (limit wave by radius)
         return set(i for i in field if field_pred(i))
 
     def block(self, pos):

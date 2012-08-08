@@ -60,6 +60,7 @@ class Manager(object):
 
 
     def update_view_fields(self, task):
+        """ It is a very expensive funciton. Use only for debugging """
         for npc in self.npcs.values():
             key = id(npc)
             for marker in self.view_fields[key]:
