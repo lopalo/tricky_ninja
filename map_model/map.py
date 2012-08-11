@@ -1,4 +1,5 @@
-from math import atan2, hypot, degrees
+from math import atan2, hypot, degrees, sqrt
+from heapq import heappush, heappop
 from collections import OrderedDict, defaultdict, deque
 import yaml
 from map_model.check import MapDataError, check_map_data as check_data
@@ -171,14 +172,6 @@ class Map(object):
                 else:
                     yield pos, self[pos]
 
-    def corners(self, coord):
-        keys = self._neighbors.keys()
-        for key in keys[1::2]:
-            offset = self._neighbors[key]
-            pos = coord[0] + offset[0], coord[1] + offset[1]
-            if pos in self:
-                yield pos
-
     def wave(self, coord, pred=lambda x: True):
         assert self[coord], coord
         wave = [coord]
@@ -186,13 +179,8 @@ class Map(object):
         while True:
             new_wave = []
             for c in wave:
-                for n, info in self.neighbors(c):
+                for n, info in self.neighbors(c, True):
                     if n not in visited and pred(n):
-                        new_wave.append(n)
-                        visited.add(n)
-                for n in self.corners(c):
-                    if (n not in visited and pred(n) and
-                                self.is_free_corner(c, n, pred)):
                         new_wave.append(n)
                         visited.add(n)
             if len(new_wave) == 0:
@@ -200,33 +188,33 @@ class Map(object):
             yield new_wave
             wave = new_wave
 
-    def find_path(self, start, end, pred):
-        squares = {}
-        for num, wave in enumerate(self.wave(start, pred)):
-            for c in wave:
-                squares[c] = num
-                if c == end:
-                    return num, squares
-        return None, None
-
     def get_path(self, start, end, pred):
-        last_wave_num, squares = self.find_path(start, end, pred)
-        if last_wave_num is None:
-            return
-        path = [end]
-        for num, wave in enumerate(self.wave(end, pred)):
-            for c in wave:
-                if c == start:
-                    exit = True
-                    break
-                num_wave = squares.get(c)
-                if num_wave is None:
+        open_lst = [(0 , 0, start)]
+        visited = {start: None}
+        while open_lst:
+            cost, length, sq = heappop(open_lst)
+            if sq == end:
+                break
+            for n, info in self.neighbors(sq, True):
+                if n in visited or not pred(n):
                     continue
-                if num_wave == last_wave_num - num - 1:
-                    wave[:] = [c]
-                    path.append(c)
+                is_corner = self.is_corner(sq, n)
+                if is_corner and not self.is_free_corner(sq, n, pred):
+                    continue
+                step_length = sqrt(2) if is_corner else 1
+                nlength = length + step_length
+                cost = length + hypot(end[0] - n[0], end[1] - n[1])
+                heappush(open_lst, (cost, length, n))
+                visited[n] = sq
+        if end not in visited:
+            return
+        parent = visited[end]
+        path = [end]
+        while parent is not None:
+            path.append(parent)
+            parent = visited[parent]
         path.reverse()
-        return tuple(path)
+        return tuple(path[1:])
 
     def get_jump_field(self, pos):
         for nb1, info in self.neighbors(pos, True):
@@ -249,7 +237,7 @@ class Map(object):
         return len(self._reverse_neighbors[diff].split('-')) == 2
 
     def is_free_corner(self, first, second, pred=lambda pos: True):
-        assert self.is_corner(first, second)
+        assert self.is_corner(first, second), (first, second)
         diff = second[0] - first[0], second[1] - first[1]
         nb_names = self._reverse_neighbors[diff].split('-')
         for nb_name in nb_names:
@@ -265,16 +253,11 @@ class Map(object):
         assert 0 <= angle < 360, angle
         assert 0 < cone_angle < 180, cone_angle
 
-        def radius_pred(sq):
-            """ Need for constraint of inflation of a wave """
-            diff = sq[0] - pos[0], sq[1] - pos[1]
-            if hypot(diff[0], diff[1]) > radius:
-                return False
-            return True
-
         st_a, end_a = angle - cone_angle / 2 , angle + cone_angle / 2
         def field_pred(sq):
             diff = sq[0] - pos[0], sq[1] - pos[1]
+            if hypot(diff[0], diff[1]) > radius:
+                return False
             sq_angle = degrees(atan2(diff[1], diff[0]))
             if 90 < angle < 270:
                 sq_angle %= 360
@@ -292,9 +275,7 @@ class Map(object):
             return True
 
         obstacles = set()
-        field = sum(self.wave(pos, radius_pred), [])
-        #TODO: optimize (limit wave by radius)
-        return set(i for i in field if field_pred(i))
+        return sum(self.wave(pos, field_pred), [])
 
     def block(self, pos):
         assert self[pos] and pos not in self.blocked_squares

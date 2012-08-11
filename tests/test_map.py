@@ -36,16 +36,16 @@ class TestMap(unittest.TestCase):
         map = self.get_map(defin, top)
         pred = lambda pos: map[pos].get('ident') != 'WL'
         waves = map.wave(map.groups['st'][0], pred)
-        self.assertEqual([(2, 3), (1, 2), (1, 3)], next(waves))
+        self.assertEqual([(2, 3), (3, 3), (1, 1), (1, 2), (1, 3)], next(waves))
         self.assertEqual([
-            (2, 4), (3, 3), (3, 4),
-            (1, 1), (0, 2), (0, 1),
-            (0, 3)
-        ], next(waves))
+            (2, 4), (3, 4), (4, 4), (4, 3),
+            (2, 0), (1, 0), (0, 0), (0, 1),
+            (0, 2), (0, 3), (0, 4)
+        ] , next(waves))
         self.assertEqual([
-            (2, 5), (3, 5), (4, 3),
-            (4, 4), (4, 5), (1, 0),
-            (0, 0), (0, 4)
+            (2, 5), (3, 5), (1, 5),
+            (4, 5), (5, 5), (5, 4),
+            (5, 3), (0, 5)
         ], next(waves))
 
     def test_get_field_jump1(self):
@@ -82,8 +82,8 @@ class TestMap(unittest.TestCase):
         top = [
             'ss ss ss ss ss ss ss ss',
             'ss WL WL ss ss ss ss ss',
-            'ss a5 a6 a7 a8 a9 b1 ss',
-            'a4 ss ss ss .. .. ss b2',
+            'ss ss ss a7 a8 a9 b1 ss',
+            'a4 a5 a6 ss .. .. ss b2',
             'a3 WL WL .. b7 ss .. b3',
             'a2 a1 st .. ss b6 b5 b4',
         ]
