@@ -11,6 +11,7 @@ class Manager(object):
     def __init__(self, map_name):
         self.main_node = render.attachNewNode('main_node')
         self.blocked_squares = set()
+        self.bodies = {}
         self.map = Map(map_name)
         self.map_builder = MapBuilder(self.map, self.main_node)
         self.map_builder.build()
@@ -34,15 +35,27 @@ class Manager(object):
                 _data['route'] = route
                 character.NPC(self, **_data)
 
+    def _body_occupied(self, pos):
+        for p1, p2 in self.bodies:
+            if p1 == pos or p2 == pos:
+                return True
+        return False
+
     def is_available(self, pos):
         return (pos in self.map and
                 pos != self.player.pos and
-                pos not in self.npcs)
+                pos not in self.npcs and
+                not self._body_occupied(pos))
 
     def __call__(self, task):
         self.player.update_action()
         for npc in tuple(self.npcs.values()):
             if not npc:
+                del self.npcs[npc._pos]
+                body = character.Body(npc, self)
+                if body.poses is None:
+                    continue
+                self.bodies[body._poses] = body
                 continue
             npc.update_action()
         return task.cont

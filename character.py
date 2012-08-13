@@ -1,9 +1,12 @@
+import sys
 from functools import wraps
 from collections import deque
 from math import cos, sin, radians, atan2, degrees, hypot
 from types import GeneratorType
-from direct.interval.LerpInterval import (LerpPosInterval,
-                                LerpHprInterval, LerpNodePathInterval)
+from direct.interval.LerpInterval import (
+    LerpPosInterval, LerpHprInterval,
+    LerpNodePathInterval, LerpColorScaleInterval
+)
 from direct.interval.ProjectileInterval import ProjectileInterval
 from direct.interval.ActorInterval import ActorInterval
 from direct.actor.Actor import Actor
@@ -15,10 +18,10 @@ def set_testing(value):
     global _testing
     _testing = value
 
-_actions = {}
 
 def action(name):
-    assert name not in _actions
+    actions = sys._getframe(1).f_locals['actions']
+    assert name not in actions
     def wrapper(func):
         @wraps(func)
         def wrap(char, *args, **kwargs):
@@ -30,7 +33,7 @@ def action(name):
             if _testing:
                 return gen
             _runner(char, gen, None)
-        _actions[name] = wrap
+        actions[name] = wrap
         return wrap
     return wrapper
 
@@ -77,7 +80,7 @@ class events:
 
 
 class Character(object):
-    actions = _actions
+    actions = {}
 
     #(forward, right)
     angle_table = {
@@ -109,7 +112,7 @@ class Character(object):
 
     @pos.setter
     def pos(self, value):
-        assert type(value) is tuple
+        assert value in self.manager.map
         self._pos = value
 
     def walk_pred(self, pos):
@@ -158,32 +161,6 @@ class Character(object):
             yield interval
         anim.pose(self.idle_frame)
 
-    @action('die')
-    def do_die(self):
-        self.must_die = False
-        self.dead = True
-        actor = self.actor
-        wr = S.ch_anim['death_range']
-        interval = actor.actorInterval(
-            'anim',
-            playRate=S.ch_anim['death_speed'],
-            startFrame=wr[0], endFrame=wr[1]
-        )
-        yield interval
-
-        #TODO: slow death animation with vanishing
-        #TODO: block 2 free squares and show corpse
-
-        yield wait(1)
-        init_pos = tuple(self.init_position)
-        if (not self.manager.map.is_available(init_pos) or
-            not self.manager.is_available(init_pos)):
-                return
-        self.dead = False
-        self.pos = init_pos
-        self.node.setPos(self.pos[0], self.pos[1], 0)
-        actor.pose('anim', self.idle_frame)
-
     @action('hit')
     def do_hit(self):
         actor = self.actor
@@ -225,6 +202,7 @@ class Character(object):
 
 
 class Player(Character):
+    actions = Character.actions.copy()
     #TODO: implement corpse moving
 
     def __init__(self, manager, pos):
@@ -242,6 +220,7 @@ class Player(Character):
                                     {'anim': S.model(S.player['model'])})
         self.actor.reparentTo(self.node)
         actor.setScale(S.model_size(S.player['model']))
+        actor.setTransparency(True)
         actor.setTexture(loader.loadTexture(
                             S.texture(S.player['texture'])), 1)
         self.pos = self.init_position = tuple(pos)
@@ -451,7 +430,7 @@ class Player(Character):
             anim.loop(True, wr[0], wr[1])
             yield interval
         if not self.walk_pred(pos):
-            actor.pose('anim', self.speed)
+            actor.pose('anim', self.idle_frame)
             return
         map.block(pos)
         wr = S.pl_anim['pre_jump_range']
@@ -482,9 +461,33 @@ class Player(Character):
         yield wait(0.1)
         actor.pose('anim', self.idle_frame)
 
+    @action('die')
+    def do_die(self):
+        actor = self.actor
+        wr, ds = S.ch_anim['death_range'], S.ch_anim['death_speed']
+        interval = actor.actorInterval(
+            'anim', playRate=ds,
+            startFrame=wr[0], endFrame=wr[1]
+        )
+        interval.start()
+        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
+        yield interval
+        yield wait(1)
+        init_pos = tuple(self.init_position)
+        if (not self.manager.map.is_available(init_pos) or
+            not self.manager.is_available(init_pos)):
+                return
+        self.must_die = False
+        self.dead = False
+        self.pos = init_pos
+        self.node.setPos(self.pos[0], self.pos[1], 0)
+        actor.pose('anim', self.idle_frame)
+        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 1))
+        yield interval
+
 
 class NPC(Character):
-    npc_actions = ('walk', 'hit', 'die',)
+    actions = Character.actions.copy()
 
     def __init__(self, manager, model_name, texture, route, **spam):
         super(NPC, self).__init__(manager)
@@ -501,6 +504,7 @@ class NPC(Character):
         self.actor = actor = Actor(S.model(model_name),
                                     {'anim': S.model(model_name)})
         self.actor.reparentTo(self.node)
+        actor.setTransparency(True)
         actor.setScale(S.model_size(model_name))
         actor.setTexture(loader.loadTexture(
                             S.texture(texture)), 1)
@@ -518,7 +522,7 @@ class NPC(Character):
 
     @pos.setter
     def pos(self, value):
-        assert type(value) is tuple
+        assert value in self.manager.map
         if hasattr(self, '_pos'):
             del self.manager.npcs[self._pos]
         self._pos = value
@@ -584,7 +588,7 @@ class NPC(Character):
         if self.action is not None:
             return
         action = self.get_action()
-        assert action in self.actions and action in self.npc_actions
+        assert action in self.actions
         if self.must_die:
             self.actions['die'](self)
             return
@@ -613,3 +617,57 @@ class NPC(Character):
         if self.manager.player.pos == pos:
             return True
         return False
+
+    @action('die')
+    def do_die(self):
+        actor = self.actor
+        wr, ds = S.ch_anim['death_range'], S.ch_anim['death_speed']
+        anim_interval = actor.actorInterval(
+            'anim', playRate=ds,
+            startFrame=wr[0], endFrame=wr[1]
+        )
+        anim_interval.start()
+        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
+        yield interval
+        anim_interval.finish()
+        self.must_die = False
+        self.dead = True
+
+class Body(object):
+
+    def __init__(self, npc, manager):
+        self.npc = npc
+        self.actor = actor = npc.actor
+        self.manager = manager
+        for n, info in manager.map.neighbors(npc.pos, True):
+            if npc.walk_pred(n):
+                second_pos = n
+                #TODO: implement model rotation considering Y shift
+                break
+        else:
+            # lucky player
+            actor.delete()
+            return
+        self.poses = frozenset((npc.pos, second_pos))
+        actor.pose('anim', S.npc['body_frame'])
+        ds, bs = S.ch_anim['death_speed'], S.npc['body_shift']
+        actor.setY(actor, bs)
+        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 1))
+        interval.start()
+
+    @property
+    def poses(self):
+        return getattr(self, '_poses', None)
+
+    @poses.setter
+    def poses(self, value):
+        assert type(value) is frozenset
+        for pos in value:
+            assert pos in self.manager.map
+        if hasattr(self, '_poses'):
+            del self.manager.npcs[self._poses]
+        self._poses = value
+        self.manager.bodies[self._poses] = self
+
+    def bind(self, player):
+        pass
