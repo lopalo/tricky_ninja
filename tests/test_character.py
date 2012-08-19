@@ -18,7 +18,8 @@ class TestCharacter(unittest.TestCase):
         __builtin__.S = mock.MagicMock()
         __builtin__.render = mock.Mock()
         __builtin__.loader = mock.Mock()
-        manager = mock.Mock()
+        manager = mock.MagicMock()
+        manager.map.__contains__ = mock.Mock(return_value=True)
         manager.npcs = {}
         self.char = char = character.Character(manager)
         char.actor = actor = mock.Mock()
@@ -107,6 +108,7 @@ class TestPlayer(unittest.TestCase):
         __builtin__.base = mock.Mock()
         __builtin__.camera = mock.Mock()
         manager = mock.Mock()
+        manager.map.__contains__ = mock.Mock(return_value=True)
         manager.npcs = {}
         self.pl = pl = character.Player(manager, (3, 3))
         pl.actor.getHpr = mock.Mock(return_value=(45, 30, 30))

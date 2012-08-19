@@ -28,16 +28,6 @@ class TestNPC(unittest.TestCase):
         )
 
         manager = Manager('map')
-        self.player = Character(manager)
-        self.player.pos = (2, 2)
-        manager.player = self.player
-        self.npc1 = Character(manager)
-        self.npc1.pos = (1, 1)
-        self.npc1.actor = mock.Mock()
-        self.npc2 = Character(manager)
-        self.npc2.pos = (3, 1)
-        self.npc2.actor = mock.Mock()
-        manager.npcs = {(1, 1): self.npc1, (3, 1): self.npc2}
         top = [
             'ss ss ss ss ss ss',
             'ss ss ss ss ss ss',
@@ -58,6 +48,17 @@ class TestNPC(unittest.TestCase):
             start_position=(0, 0),
         )
         manager.map = Map(data=data, check=False)
+
+        self.player = Character(manager)
+        self.player.pos = (2, 2)
+        manager.player = self.player
+        self.npc1 = Character(manager)
+        self.npc1.pos = (1, 1)
+        self.npc1.actor = mock.Mock()
+        self.npc2 = Character(manager)
+        self.npc2.pos = (3, 1)
+        self.npc2.actor = mock.Mock()
+        manager.npcs = {(1, 1): self.npc1, (3, 1): self.npc2}
 
     def test_face_to_player(self):
         npc = self.npc1

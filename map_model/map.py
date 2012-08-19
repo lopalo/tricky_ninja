@@ -249,6 +249,14 @@ class Map(object):
                 return False
         return True
 
+    def check_square(self, origin, target, pred):
+        if pred(target):
+            if not self.is_corner(origin, target):
+                return True
+            elif self.is_free_corner(origin, target, pred):
+                return True
+        return False
+
     def view_field(self, pos, angle, cone_angle, radius, pred):
         assert 0 <= angle < 360, angle
         assert 0 < cone_angle < 180, cone_angle

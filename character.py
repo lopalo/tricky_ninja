@@ -99,6 +99,7 @@ class Character(object):
         self.action = None
         self.must_die = False
         self.dead = False
+        self.fall_forward = True
         self.manager = manager
         self.node = node = render.attachNewNode(str(id(self)))
         node.reparentTo(manager.main_node)
@@ -117,9 +118,16 @@ class Character(object):
 
     def walk_pred(self, pos):
         map = self.manager.map
-        return ('walk' in map[pos]['actions'] and
-                map.is_available(pos) and
+        return (map.is_available(pos) and
+                'walk' in map[pos]['actions'] and
                 self.manager.is_available(pos))
+
+    def angle_to_pos(self, diff): # diff = 0 is forward
+        angle = int(self.actor.getHpr()[0] + diff - 90) % 360
+        angle = angle if angle <= 180 else angle - 360
+        diff = self.reverse_angle_table[angle]
+        pos = self.pos[0] + diff[0], self.pos[1] - diff[1]
+        return pos
 
     @action('walk')
     def do_walk(self):
@@ -173,14 +181,12 @@ class Character(object):
         yield interval
         if self.must_die:
             return
-        angle = int((actor.getHpr()[0] % 360) - 90)
-        angle = angle if angle <= 180 else angle - 360
-        diff = self.reverse_angle_table[angle]
-        target_coord = self.pos[0] + diff[0], self.pos[1] - diff[1]
+        angle = int(actor.getHpr()[0] - 90) % 360
+        target_coord = self.angle_to_pos(0)
         if target_coord in self.manager.npcs:
-            self.manager.npcs[target_coord].kill()
+            self.manager.npcs[target_coord].kill(angle)
         elif self.manager.player.pos == target_coord:
-            self.manager.player.kill()
+            self.manager.player.kill(angle)
         interval = actor.actorInterval(
             'anim',
             playRate=self.post_hit_speed,
@@ -194,10 +200,16 @@ class Character(object):
     def must_die_event(self):
         return 'die:' + str(id(self))
 
-    def kill(self):
+    def kill(self, hit_angle):
         if not self:
             return
         self.must_die = True
+        self_angle = int(((self.actor.getHpr()[0] - 90) % 360))
+        hit_angle = int(hit_angle % 360)
+        diff = abs(self_angle - hit_angle)
+        if diff > 180:
+            diff = abs(diff - 360)
+        self.fall_forward = diff < 90
         messenger.send(self.must_die_event)
 
 
@@ -372,11 +384,8 @@ class Player(Character):
         if not walk:
             return new_pos, False
 
-        if self.walk_pred(new_pos):
-            if not map.is_corner(pos, new_pos):
-                return new_pos, True
-            elif map.is_free_corner(pos, new_pos, self.walk_pred):
-                return new_pos, True
+        if map.check_square(pos, new_pos, self.walk_pred):
+            return new_pos, True
         return new_pos, False
 
     @action('jump')
@@ -464,10 +473,12 @@ class Player(Character):
     @action('die')
     def do_die(self):
         actor = self.actor
-        wr, ds = S.ch_anim['death_range'], S.ch_anim['death_speed']
+        ds = S.ch_anim['death_speed']
+        dr = (S.ch_anim['forward_death_range'] if self.fall_forward
+                                else S.ch_anim['backward_death_range'])
         interval = actor.actorInterval(
             'anim', playRate=ds,
-            startFrame=wr[0], endFrame=wr[1]
+            startFrame=dr[0], endFrame=dr[1]
         )
         interval.start()
         interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
@@ -608,23 +619,19 @@ class NPC(Character):
 
     @property
     def face_to_player(self):
-        angle = int(self.actor.getHpr()[0] - 90) % 360
-        angle = angle if angle <= 180 else angle - 360
-        if angle not in self.reverse_angle_table:
-            return False
-        diff = self.reverse_angle_table[angle]
-        pos = self.pos[0] + diff[0], self.pos[1] - diff[1]
-        if self.manager.player.pos == pos:
+        if self.manager.player.pos == self.angle_to_pos(0):
             return True
         return False
 
     @action('die')
     def do_die(self):
         actor = self.actor
-        wr, ds = S.ch_anim['death_range'], S.ch_anim['death_speed']
+        ds = S.ch_anim['death_speed']
+        dr = (S.ch_anim['forward_death_range'] if self.fall_forward
+                                else S.ch_anim['backward_death_range'])
         anim_interval = actor.actorInterval(
             'anim', playRate=ds,
-            startFrame=wr[0], endFrame=wr[1]
+            startFrame=dr[0], endFrame=dr[1]
         )
         anim_interval.start()
         interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
@@ -632,26 +639,37 @@ class NPC(Character):
         anim_interval.finish()
         self.must_die = False
         self.dead = True
+        yield wait(.5)
 
 class Body(object):
 
     def __init__(self, npc, manager):
         self.npc = npc
-        self.actor = actor = npc.actor
+        actor = npc.actor
+
         self.manager = manager
-        for n, info in manager.map.neighbors(npc.pos, True):
-            if npc.walk_pred(n):
-                second_pos = n
-                #TODO: implement model rotation considering Y shift
-                break
+        map = manager.map
+
+        pos = npc.angle_to_pos(0 if npc.fall_forward else 180)
+        if map.check_square(npc.pos, pos, npc.walk_pred):
+            second_pos = pos
         else:
-            # lucky player
-            actor.delete()
-            return
-        self.poses = frozenset((npc.pos, second_pos))
-        actor.pose('anim', S.npc['body_frame'])
+            for n, info in manager.map.neighbors(npc.pos, True):
+                if map.check_square(npc.pos, n, npc.walk_pred):
+                    second_pos = n
+                    break
+            else:
+                # lucky player
+                npc.node.removeNode() # doesn't work in multithreading mode
+                return
+        self.poses = (npc.pos, second_pos) # order is important
+        npc.actor.pose('anim', S.npc['body_frame'])
         ds, bs = S.ch_anim['death_speed'], S.npc['body_shift']
-        actor.setY(actor, bs)
+        actor.setHpr(-90, 0, 0)
+        actor.setX(bs)
+        angle = degrees(atan2(second_pos[1] - npc.pos[1],
+                              second_pos[0] - npc.pos[0]))
+        npc.node.setHpr(angle, 0, 0)
         interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 1))
         interval.start()
 
@@ -661,7 +679,7 @@ class Body(object):
 
     @poses.setter
     def poses(self, value):
-        assert type(value) is frozenset
+        assert type(value) is tuple
         for pos in value:
             assert pos in self.manager.map
         if hasattr(self, '_poses'):

@@ -22,7 +22,8 @@ character:
   animation:
     walk_range: [0, 12]
     death_speed: 0.3
-    death_range: [165, 170]
+    backward_death_range: [165, 170]
+    forward_death_range: [175, 182]
 
 player:
   # [14, 29] range for moving corpes (backward)
@@ -56,4 +57,4 @@ npc:
     post_hit_speed: 0.7
   idle_frame: 28
   body_frame: 170
-  body_shift: -8
+  body_shift: -2

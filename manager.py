@@ -36,8 +36,8 @@ class Manager(object):
                 character.NPC(self, **_data)
 
     def _body_occupied(self, pos):
-        for p1, p2 in self.bodies:
-            if p1 == pos or p2 == pos:
+        for poses in self.bodies:
+            if pos in poses:
                 return True
         return False
 
