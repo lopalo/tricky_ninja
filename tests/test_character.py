@@ -47,17 +47,16 @@ class TestCharacter(unittest.TestCase):
         ret = next(gen)
         self.assertIsInstance(ret, character.wait)
         self.assertEqual(.05, ret.seconds)
+        walking_states = []
         for _ in gen:
-            pass
+            walking_states.append(char.walking)
+        self.assertListEqual([False, True, True, False, True], walking_states)
         exp = [
             mock.call(actor, 0.5, (180, 0, 0), (90, 0, 0)),
-            mock.call(char.node, 0.5, (3.0, 3.5, 0)),
-            mock.call(char.node, 0.5, (3, 4, 0)),
-            mock.call(char.node, 0.5, (3.5, 4.0, 0)),
-            mock.call(char.node, 0.5, (4, 4, 0)),
+            mock.call(char.node, 1.0, (3, 4, 0)),
+            mock.call(char.node, 1.0, (4, 4, 0)),
             mock.call(actor, 0.25, (45, 0, 0), (90, 0, 0)),
-            mock.call(char.node, 0.7, (4.5, 3.5, 0)),
-            mock.call(char.node, 0.7, (5, 3, 0))
+            mock.call(char.node, 1.4, (5, 3, 0))
         ]
         self.assertListEqual(exp, self.interval_mock.call_args_list)
         exp = [mock.call(True, 100, 200)]

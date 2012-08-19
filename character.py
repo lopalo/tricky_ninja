@@ -100,6 +100,7 @@ class Character(object):
         self.must_die = False
         self.dead = False
         self.fall_forward = True
+        self.walking = False
         self.manager = manager
         self.node = node = render.attachNewNode(str(id(self)))
         node.reparentTo(manager.main_node)
@@ -155,18 +156,18 @@ class Character(object):
                                                        (c_angle, 0, 0))
                 yield interval
 
+            if isinstance(self, Player) and not self.get_next_pos()[0]:
+                break
             if not walk or not self.walk_pred(next_pos):
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
-            mid_pos = (float(self.pos[0] + next_pos[0]) / 2,
-                       float(self.pos[1] + next_pos[1]) / 2)
-            interval = LerpPosInterval(self.node, dur / 2, mid_pos + (0,))
+            interval = LerpPosInterval(self.node, dur, next_pos + (0,))
             map.block(next_pos)
+            self.walking = True
             yield interval
             self.pos = next_pos
             map.unblock(self.pos)
-            interval = LerpPosInterval(self.node, dur / 2, next_pos + (0,))
-            yield interval
+            self.walking = False
         anim.pose(self.idle_frame)
 
     @action('hit')
@@ -551,12 +552,16 @@ class NPC(Character):
     def get_next_pos(self):
         if self.get_action() != 'walk':
             return None, False
-        map = self.manager.map
+        manager = self.manager
+        map = manager.map
         target = self.target
         end_pos = target if isinstance(target, tuple) else target.pos
+        # TODO: maybe remove corpse occupation check
         pred = lambda pos: ('walk' in map[pos]['actions'] and
                             map.is_available(pos) and
-                            pos not in self.manager.npcs)
+                            (pos not in manager.npcs or
+                            manager.npcs[pos].walking) and
+                            not manager._body_occupied(pos))
         path = map.get_path(self.pos, end_pos, pred)
         if not path:
             return None, False

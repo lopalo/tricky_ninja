@@ -43,14 +43,14 @@ class Manager(object):
 
     def is_available(self, pos):
         return (pos in self.map and
-                pos != self.player.pos and
-                pos not in self.npcs and
+                (pos != self.player.pos or self.player.walking) and
+                (pos not in self.npcs or self.npcs[pos].walking) and
                 not self._body_occupied(pos))
 
     def __call__(self, task):
         self.player.update_action()
         for npc in tuple(self.npcs.values()):
-            if not npc:
+            if not npc and npc.action is None:
                 del self.npcs[npc._pos]
                 body = character.Body(npc, self)
                 if body.poses is None:
