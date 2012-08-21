@@ -27,7 +27,6 @@ character:
 
 player:
   # [14, 29] range for moving corpes (backward)
-  model: ninja
   texture: nskinbl
   speed: 2
   pointer_texture: pointer

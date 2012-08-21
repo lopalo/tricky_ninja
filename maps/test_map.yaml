@@ -70,13 +70,11 @@ routes:
 
 npcs:
 - count: 2
-  model_name: ninja
   texture: nskinbr
   alert_texture: nskinrd
   route: r1
 
 # - count: 1
-#   model_name: ninja
 #   texture: nskinbr
 #   alert_texture: nskinrd
 #   route: r2

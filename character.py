@@ -80,6 +80,7 @@ class events:
 
 
 class Character(object):
+    model = 'ninja'
     actions = {}
 
     #(forward, right)
@@ -141,6 +142,8 @@ class Character(object):
         wr = S.ch_anim['walk_range']
         anim.loop(True, wr[0], wr[1])
         while True:
+            if sp != float(self.speed): # npc can change speed
+                break
             next_pos, walk = self.get_next_pos()
             if self.must_die or next_pos is None:
                 break
@@ -229,10 +232,10 @@ class Player(Character):
         self.post_hit_speed = S.pl_anim['post_hit_speed']
 
         self.move_direction = [0, 0] #[forward, right]
-        self.actor = actor = Actor(S.model(S.player['model']),
-                                    {'anim': S.model(S.player['model'])})
+        self.actor = actor = Actor(S.model(self.model),
+                                    {'anim': S.model(self.model)})
         self.actor.reparentTo(self.node)
-        actor.setScale(S.model_size(S.player['model']))
+        actor.setScale(S.model_size(self.model))
         actor.setTransparency(True)
         actor.setTexture(loader.loadTexture(
                             S.texture(S.player['texture'])), 1)
@@ -501,7 +504,7 @@ class Player(Character):
 class NPC(Character):
     actions = Character.actions.copy()
 
-    def __init__(self, manager, model_name, texture, route, **spam):
+    def __init__(self, manager, texture, route, **spam):
         super(NPC, self).__init__(manager)
 
         self.view_radius = S.npc['normal_view_radius']
@@ -513,11 +516,11 @@ class NPC(Character):
         self.post_hit_range = S.npc_anim['post_hit_range']
         self.post_hit_speed = S.npc_anim['post_hit_speed']
 
-        self.actor = actor = Actor(S.model(model_name),
-                                    {'anim': S.model(model_name)})
+        self.actor = actor = Actor(S.model(self.model),
+                                    {'anim': S.model(self.model)})
         self.actor.reparentTo(self.node)
         actor.setTransparency(True)
-        actor.setScale(S.model_size(model_name))
+        actor.setScale(S.model_size(self.model))
         actor.setTexture(loader.loadTexture(
                             S.texture(texture)), 1)
         self.init_position = self.pos = route[0]
@@ -561,7 +564,7 @@ class NPC(Character):
                             map.is_available(pos) and
                             (pos not in manager.npcs or
                             manager.npcs[pos].walking) and
-                            not manager._body_occupied(pos))
+                            pos not in manager.bodies)
         path = map.get_path(self.pos, end_pos, pred)
         if not path:
             return None, False
@@ -690,7 +693,8 @@ class Body(object):
         if hasattr(self, '_poses'):
             del self.manager.npcs[self._poses]
         self._poses = value
-        self.manager.bodies[self._poses] = self
+        self.manager.bodies[self._poses[0]] = self
+        self.manager.bodies[self._poses[1]] = self
 
     def bind(self, player):
         pass

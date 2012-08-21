@@ -44,9 +44,6 @@ npc = {
     'count': {
         'type': int
     },
-    'model_name': {
-        'type': str
-    },
     'texture': {
         'type': str
     },

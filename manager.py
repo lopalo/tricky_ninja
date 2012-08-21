@@ -35,27 +35,18 @@ class Manager(object):
                 _data['route'] = route
                 character.NPC(self, **_data)
 
-    def _body_occupied(self, pos):
-        for poses in self.bodies:
-            if pos in poses:
-                return True
-        return False
-
     def is_available(self, pos):
         return (pos in self.map and
                 (pos != self.player.pos or self.player.walking) and
                 (pos not in self.npcs or self.npcs[pos].walking) and
-                not self._body_occupied(pos))
+                pos not in self.bodies)
 
     def __call__(self, task):
         self.player.update_action()
         for npc in tuple(self.npcs.values()):
             if not npc and npc.action is None:
                 del self.npcs[npc._pos]
-                body = character.Body(npc, self)
-                if body.poses is None:
-                    continue
-                self.bodies[body._poses] = body
+                character.Body(npc, self)
                 continue
             npc.update_action()
         return task.cont
