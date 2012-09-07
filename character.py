@@ -124,6 +124,10 @@ class Character(object):
                 'walk' in map[pos]['actions'] and
                 self.manager.is_available(pos))
 
+    @property
+    def actor_angle(self):
+        return int(self.actor.getHpr()[0] - 90) % 360
+
     def angle_to_pos(self, diff): # diff = 0 is forward
         angle = int(self.actor.getHpr()[0] + diff - 90) % 360
         angle = angle if angle <= 180 else angle - 360
@@ -133,6 +137,8 @@ class Character(object):
 
     @action('walk')
     def do_walk(self):
+        # 'yield wait()' need for reading right direction
+        # if player pressed 2 arrow keys
         yield wait(.05)
         map = self.manager.map
         actor = self.actor
@@ -159,9 +165,9 @@ class Character(object):
                                                        (c_angle, 0, 0))
                 yield interval
 
-            if isinstance(self, Player) and not self.get_next_pos()[0]:
-                break
             if not walk or not self.walk_pred(next_pos):
+                break
+            if isinstance(self, Player) and not self.get_next_pos()[0]:
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
@@ -185,7 +191,7 @@ class Character(object):
         yield interval
         if self.must_die:
             return
-        angle = int(actor.getHpr()[0] - 90) % 360
+        angle = self.actor_angle
         target_coord = self.angle_to_pos(0)
         if target_coord in self.manager.npcs:
             self.manager.npcs[target_coord].kill(angle)
@@ -200,30 +206,28 @@ class Character(object):
         yield interval
         actor.pose('anim', self.idle_frame)
 
-    @property
-    def must_die_event(self):
-        return 'die:' + str(id(self))
-
     def kill(self, hit_angle):
         if not self:
             return
         self.must_die = True
-        self_angle = int(((self.actor.getHpr()[0] - 90) % 360))
         hit_angle = int(hit_angle % 360)
-        diff = abs(self_angle - hit_angle)
+        diff = abs(self.actor_angle - hit_angle)
         if diff > 180:
             diff = abs(diff - 360)
         self.fall_forward = diff < 90
-        messenger.send(self.must_die_event)
 
 
 class Player(Character):
     actions = Character.actions.copy()
-    #TODO: implement corpse moving
+
+    release_body_event = 'release_body_event'
+    continue_move_body_event = 'continue_move_body_event'
+    must_die_event = 'must_die_event'
 
     def __init__(self, manager, pos):
         super(Player, self).__init__(manager)
 
+        self.captured_body = False
         self.speed = S.player['speed']
         self.idle_frame = S.player['idle_frame']
         self.hit_range = S.pl_anim['hit_range']
@@ -286,30 +290,35 @@ class Player(Character):
         recalc()
 
     def set_arrow_handlers(self):
+        def common_handler():
+            if self.captured_body:
+                messenger.send(self.continue_move_body_event)
+            else:
+                self.update_action('walk')
         def up():
             self.move_direction[0] = 1
-            self.update_action('walk')
+            common_handler()
         def up_up():
             self.move_direction[0] = 0
         base.accept('arrow_up', up)
         base.accept('arrow_up-up', up_up)
         def down():
             self.move_direction[0] = -1
-            self.update_action('walk')
+            common_handler()
         def down_up():
             self.move_direction[0] = 0
         base.accept('arrow_down', down)
         base.accept('arrow_down-up', down_up)
         def right():
             self.move_direction[1] = 1
-            self.update_action('walk')
+            common_handler()
         def right_up():
             self.move_direction[1] = 0
         base.accept('arrow_right', right)
         base.accept('arrow_right-up', right_up)
         def left():
             self.move_direction[1] = -1
-            self.update_action('walk')
+            common_handler()
         def left_up():
             self.move_direction[1] = 0
         base.accept('arrow_left', left)
@@ -333,6 +342,20 @@ class Player(Character):
         def h_down():
             self.update_action('hit')
         base.accept('h', h_down)
+        def b_down():
+            self.captured_body = True
+            self.update_action('move_body')
+        base.accept('b', b_down)
+        def b_up():
+            self.captured_body = False
+            messenger.send(self.release_body_event)
+        base.accept('b-up', b_up)
+
+    def kill(self, hit_angle):
+        if not self:
+            return
+        super(Player, self).kill(hit_angle)
+        messenger.send(self.must_die_event)
 
     def update_action(self, action=None):
         #calls in every frame and by some
@@ -350,7 +373,6 @@ class Player(Character):
             self.actions[action](self)
         elif tuple(self.move_direction) != (0, 0):
             self.actions['walk'](self)
-
 
     def get_next_pos(self):
         move_dir = tuple(self.move_direction)
@@ -476,6 +498,8 @@ class Player(Character):
 
     @action('die')
     def do_die(self):
+        self.dead = True
+        self.must_die = False
         actor = self.actor
         ds = S.ch_anim['death_speed']
         dr = (S.ch_anim['forward_death_range'] if self.fall_forward
@@ -491,14 +515,79 @@ class Player(Character):
         init_pos = tuple(self.init_position)
         if (not self.manager.map.is_available(init_pos) or
             not self.manager.is_available(init_pos)):
-                return
-        self.must_die = False
+                return # TODO: maybe delete player
         self.dead = False
         self.pos = init_pos
         self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', self.idle_frame)
         interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 1))
         yield interval
+
+    @action('move_body')
+    def do_move_body(self):
+        map = self.manager.map
+        bpos = self.angle_to_pos(0)
+        if not bpos in self.manager.bodies:
+            return
+        body = self.manager.bodies[bpos]
+        if not body.check_poses(bpos, self.actor_angle):
+            return
+        body.hide() # should be faster than pick-up animation
+        actor = self.actor
+        anim = actor.getAnimControl('anim')
+        interval = actor.actorInterval(
+            'anim',
+            playRate=S.pl_anim['pick_up_speed'],
+            startFrame=S.pl_anim['pick_up_range'][0],
+            endFrame=S.pl_anim['pick_up_range'][1]
+        )
+        yield interval
+        body.bind(self)
+        while not self.must_die and self.captured_body:
+            val = yield events(self.must_die_event, self.release_body_event,
+                                                self.continue_move_body_event)
+            if val != self.continue_move_body_event:
+                break
+            yield wait(.05)
+            sp = float(S.player['body_moving_speed'])
+            anim.setPlayRate(sp / 2)
+            wr = S.pl_anim['body_moving_range']
+            anim.loop(True, wr[0], wr[1])
+            while not self.must_die and self.captured_body:
+                next_pos, walk = self.get_next_pos()
+                if self.must_die or next_pos is None:
+                    break
+                shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
+                new_bpos = self.pos[0] - shift[1], self.pos[1] - shift[0]
+                angle = self.angle_table[shift] % 360
+                if not body.check_poses(new_bpos, angle - 90):
+                    break
+                c_angle = actor.getHpr()[0] % 360
+                d_angle = angle - c_angle
+                if d_angle != 0:
+                    if abs(d_angle) > 180:
+                        angle = angle - 360 if d_angle > 0 else angle + 360
+                    dur = float(abs(angle - c_angle)) / 360 / sp * 8
+                    interval = LerpHprInterval(actor, dur, (angle, 0, 0),
+                                                        (c_angle, 0, 0))
+                    yield interval
+                body.update_poses()
+                if not walk or not self.walk_pred(next_pos):
+                    break
+                if not self.get_next_pos()[0]:
+                    break
+                dur = 1.4 / sp if all(shift) else 1.0 / sp
+                interval = LerpPosInterval(self.node, dur, next_pos + (0,))
+                map.block(next_pos)
+                self.walking = True
+                yield interval
+                self.pos = next_pos
+                map.unblock(self.pos)
+                self.walking = False
+                body.update_poses()
+            anim.pose(S.player['body_captured_frame'])
+        yield body.hide(False)
+        body.unbind()
 
 
 class NPC(Character):
@@ -586,7 +675,7 @@ class NPC(Character):
             length = hypot(self.pos[0] - player.pos[0],
                            self.pos[1] - player.pos[1])
             if length < 1.5:
-                if self.face_to_player:
+                if self.face_to_player and player:
                     return 'hit'
                 else:
                     return 'walk'
@@ -594,7 +683,7 @@ class NPC(Character):
                 return 'walk'
         else:
             #TODO: check if corpse is in view_field
-            if self.in_view_field(player):
+            if player and self.in_view_field(player):
                 #TODO: if corpse then target is not the player
                 self.manager.alert(self.pos)
                 return 'walk'
@@ -617,9 +706,8 @@ class NPC(Character):
         assert isinstance(char, Character)
         map = self.manager.map
         radius, c_angle = self.view_radius, self.view_angle
-        angle = int(self.actor.getHpr()[0] - 90) % 360
         pred = lambda pos: 'jump' in map[pos]['actions']
-        field = map.view_field(self.pos, angle,
+        field = map.view_field(self.pos, self.actor_angle,
                                     c_angle, radius, pred)
         if char.pos in field:
             return True
@@ -654,7 +742,6 @@ class Body(object):
     def __init__(self, npc, manager):
         self.npc = npc
         actor = npc.actor
-
         self.manager = manager
         map = manager.map
 
@@ -671,15 +758,14 @@ class Body(object):
                 npc.node.removeNode() # doesn't work in multithreading mode
                 return
         self.poses = (npc.pos, second_pos) # order is important
-        npc.actor.pose('anim', S.npc['body_frame'])
-        ds, bs = S.ch_anim['death_speed'], S.npc['body_shift']
+        actor.pose('anim', S.npc['body_frame'])
+        bs = S.npc['body_shift']
         actor.setHpr(-90, 0, 0)
         actor.setX(bs)
         angle = degrees(atan2(second_pos[1] - npc.pos[1],
                               second_pos[0] - npc.pos[0]))
         npc.node.setHpr(angle, 0, 0)
-        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 1))
-        interval.start()
+        self.show()
 
     @property
     def poses(self):
@@ -691,10 +777,63 @@ class Body(object):
         for pos in value:
             assert pos in self.manager.map
         if hasattr(self, '_poses'):
-            del self.manager.npcs[self._poses]
+            del self.manager.bodies[self._poses[0]]
+            del self.manager.bodies[self._poses[1]]
         self._poses = value
         self.manager.bodies[self._poses[0]] = self
         self.manager.bodies[self._poses[1]] = self
 
+    def hide(self, start=True):
+        ds = S.ch_anim['death_speed']
+        interval = LerpColorScaleInterval(self.npc.actor, 1 / ds / 7,
+                                                        (1, 1, 1, 0))
+        if not start:
+            return interval
+        interval.start()
+
+    def show(self):
+        ds = S.ch_anim['death_speed']
+        interval = LerpColorScaleInterval(self.npc.actor, 1 / ds / 7,
+                                                        (1, 1, 1, 1))
+        interval.start()
+
+    def get_poses(self, first_pos=None, angle=None):
+        main_node = self.manager.main_node
+        if first_pos is None:
+            _pos = self.npc.node.getPos(main_node)
+            first_pos = int(round(_pos[0])), int(round(_pos[1]))
+        if angle is None:
+            angle = self.npc.node.getHpr(main_node)[0]
+        angle = int(round(angle)) % 360
+        angle = angle if angle <= 180 else angle - 360
+        diff = self.npc.reverse_angle_table[angle]
+        second_pos = (int(round(first_pos[0] + diff[0])),
+                      int(round(first_pos[1] - diff[1])))
+        return (first_pos, second_pos)
+
+    def check_poses(self, first_pos, angle):
+        for pos in self.get_poses(first_pos, angle):
+            if pos in self.poses:
+                continue
+            if not self.npc.walk_pred(pos):
+                return False
+        return True
+
+    def update_poses(self):
+        self.poses = self.get_poses()
+
     def bind(self, player):
-        pass
+        node = self.npc.node
+        pos = player.angle_to_pos(0)
+        node.setPos(pos[0], pos[1], 0)
+        node.setHpr(player.actor_angle, 0, 0)
+        node.wrtReparentTo(player.actor)
+        self.show()
+
+    def unbind(self):
+        node = self.npc.node
+        poses = self.get_poses()
+        node.wrtReparentTo(self.manager.main_node)
+        self.poses = poses
+        node.setPos(poses[0][0], poses[0][1], 0)
+        self.show()

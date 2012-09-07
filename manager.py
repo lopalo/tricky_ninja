@@ -33,7 +33,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                character.NPC(self, **_data)
+                character.NPC(self, **_data).must_die = True #for testing
 
     def is_available(self, pos):
         return (pos in self.map and

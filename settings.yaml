@@ -26,7 +26,6 @@ character:
     forward_death_range: [175, 182]
 
 player:
-  # [14, 29] range for moving corpes (backward)
   texture: nskinbl
   speed: 2
   pointer_texture: pointer
@@ -40,7 +39,12 @@ player:
     hit_speed: 1
     post_hit_range: [49, 58]
     post_hit_speed: 0.7
+    body_moving_range: [14, 29]
+    pick_up_speed: 0.5
+    pick_up_range: [82, 92]
   idle_frame: 28
+  body_captured_frame: 14
+  body_moving_speed: 6 #1
 
 npc:
   speed: 1.5
