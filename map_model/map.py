@@ -294,3 +294,54 @@ class Map(object):
 
     def unblock(self, pos):
         self.blocked_squares.remove(pos)
+
+    def get_radial_path(self, center_pos, from_pos, to_pos, pred, radius):
+        assert from_pos != to_pos, (from_pos, to_pos)
+        assert from_pos in self, from_pos
+        f_rel_pos = from_pos[0] - center_pos[0], from_pos[1] - center_pos[1]
+        t_rel_pos = to_pos[0] - center_pos[0], to_pos[1] - center_pos[1]
+        rel_poses = deque(self._neighbors.values())
+        for _ in range(len(rel_poses)):
+            if rel_poses[0] == f_rel_pos:
+                break
+            rel_poses.rotate(1)
+        rel_poses.popleft()
+        first_path = []
+        second_path = []
+        for path in first_path, second_path:
+            for rel_pos in rel_poses:
+                #FIXME: check intermediate squares and write test
+                rad_poses, prev_pos = [], center_pos
+                for _ in range(radius):
+                    pos = prev_pos[0] + rel_pos[0], prev_pos[1] + rel_pos[1]
+                    if pred(pos):
+                        rad_poses.append(pos)
+                    else:
+                        break
+                    prev_pos = pos
+                if len(rad_poses) == radius:
+                    path.append(tuple(rad_poses))
+                else:
+                    break
+                if to_pos in rad_poses:
+                    break
+            rel_poses.reverse()
+        _first_path = [i[0] for i in first_path]
+        _second_path = [i[0] for i in second_path]
+        first_path, second_path = tuple(first_path), tuple(second_path)
+        if to_pos in _first_path and to_pos in _second_path:
+            if len(first_path) < len(second_path):
+                return first_path
+            else:
+                return second_path
+        elif to_pos in _first_path:
+            return first_path
+        elif to_pos in _second_path:
+            return second_path
+        else:
+            if len(first_path) > len(second_path):
+                return first_path
+            else:
+                return second_path
+
+

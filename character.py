@@ -150,7 +150,7 @@ class Character(object):
         while True:
             if sp != float(self.speed): # npc can change speed
                 break
-            next_pos, walk = self.get_next_pos()
+            next_pos = self.get_next_pos()
             if self.must_die or next_pos is None:
                 break
             shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
@@ -165,9 +165,9 @@ class Character(object):
                                                        (c_angle, 0, 0))
                 yield interval
 
-            if not walk or not self.walk_pred(next_pos):
+            if not map.check_square(self.pos, next_pos, self.walk_pred):
                 break
-            if isinstance(self, Player) and not self.get_next_pos()[0]:
+            if isinstance(self, Player) and self.get_next_pos() is None:
                 break
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
@@ -379,7 +379,7 @@ class Player(Character):
         map = self.manager.map
         pos = self.pos
         if move_dir == (0, 0):
-            return None, False
+            return
         directions = deque((
             ('right'),
             ('right-bottom'),
@@ -402,17 +402,11 @@ class Player(Character):
                 start, end = a, a + 45
                 if start <= angle < end:
                     direction = directions[0]
-                    walk = direction in nbs
                     break
                 directions.rotate(1)
             shift = map._neighbors[direction]
         new_pos = pos[0] + shift[0], pos[1] + shift[1]
-        if not walk:
-            return new_pos, False
-
-        if map.check_square(pos, new_pos, self.walk_pred):
-            return new_pos, True
-        return new_pos, False
+        return new_pos
 
     @action('jump')
     def do_jump(self):
@@ -525,6 +519,7 @@ class Player(Character):
 
     @action('move_body')
     def do_move_body(self):
+        #TODO: write test before refactoring
         map = self.manager.map
         bpos = self.angle_to_pos(0)
         if not bpos in self.manager.bodies:
@@ -554,27 +549,42 @@ class Player(Character):
             wr = S.pl_anim['body_moving_range']
             anim.loop(True, wr[0], wr[1])
             while not self.must_die and self.captured_body:
-                next_pos, walk = self.get_next_pos()
+                next_pos = self.get_next_pos()
                 if self.must_die or next_pos is None:
                     break
                 shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
+                # new body pos after rotation but berfore moving
                 new_bpos = self.pos[0] - shift[1], self.pos[1] - shift[0]
-                angle = self.angle_table[shift] % 360
-                if not body.check_poses(new_bpos, angle - 90):
+                if body.poses[0] != new_bpos:
+                    bpath = map.get_radial_path(self.pos, body.poses[0],
+                                                new_bpos, self.walk_pred, 2)
+                    if not bpath:
+                        break
+                    for bposes in bpath:
+                        first_bpos, second_bpos = bposes
+                        if (not self.walk_pred(first_bpos) or
+                            not self.walk_pred(second_bpos)):
+                                break
+                        #first_bpos is pos to which player should rotate
+                        shift = first_bpos[1] - self.pos[1], first_bpos[0] - self.pos[0]
+                        ###  #TODO: move this part to separate generator
+                        angle = (self.angle_table[shift] + 180) % 360
+                        c_angle = actor.getHpr()[0] % 360
+                        d_angle = angle - c_angle
+                        if d_angle != 0:
+                            if abs(d_angle) > 180:
+                                angle = angle - 360 if d_angle > 0 else angle + 360
+                            dur = float(abs(angle - c_angle)) / 360 / sp * 8
+                            interval = LerpHprInterval(actor, dur, (angle, 0, 0),
+                                                                (c_angle, 0, 0))
+                            yield interval
+                        ###
+                        body.update_poses()
+                    if first_bpos != new_bpos:
+                        break
+                if not map.check_square(self.pos, next_pos, self.walk_pred):
                     break
-                c_angle = actor.getHpr()[0] % 360
-                d_angle = angle - c_angle
-                if d_angle != 0:
-                    if abs(d_angle) > 180:
-                        angle = angle - 360 if d_angle > 0 else angle + 360
-                    dur = float(abs(angle - c_angle)) / 360 / sp * 8
-                    interval = LerpHprInterval(actor, dur, (angle, 0, 0),
-                                                        (c_angle, 0, 0))
-                    yield interval
-                body.update_poses()
-                if not walk or not self.walk_pred(next_pos):
-                    break
-                if not self.get_next_pos()[0]:
+                if self.get_next_pos() is None:
                     break
                 dur = 1.4 / sp if all(shift) else 1.0 / sp
                 interval = LerpPosInterval(self.node, dur, next_pos + (0,))
@@ -643,7 +653,7 @@ class NPC(Character):
 
     def get_next_pos(self):
         if self.get_action() != 'walk':
-            return None, False
+            return
         manager = self.manager
         map = manager.map
         target = self.target
@@ -656,11 +666,8 @@ class NPC(Character):
                             pos not in manager.bodies)
         path = map.get_path(self.pos, end_pos, pred)
         if not path:
-            return None, False
-        elif len(path) == 1 and target is self.manager.player:
-            return path[0], False
-        else:
-            return path[0], True
+            return
+        return path[0]
 
     def get_action(self):
         player = self.manager.player
@@ -828,6 +835,7 @@ class Body(object):
         node.setPos(pos[0], pos[1], 0)
         node.setHpr(player.actor_angle, 0, 0)
         node.wrtReparentTo(player.actor)
+        self.update_poses()
         self.show()
 
     def unbind(self):

@@ -41,7 +41,7 @@ class TestCharacter(unittest.TestCase):
         char = self.char
         actor = char.actor
         char.walk_pred = mock.Mock(return_value=True)
-        seff = (((3, 4), True), ((4, 4), True), ((5, 3), True))
+        seff = ((3, 4), (4, 4), (5, 3))
         char.get_next_pos = mock.Mock(side_effect=seff)
         gen = char.do_walk()
         ret = next(gen)

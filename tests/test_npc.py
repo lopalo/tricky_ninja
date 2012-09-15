@@ -87,12 +87,12 @@ class TestNPC(unittest.TestCase):
         npc.get_action = mock.Mock(return_value='walk')
         npc.target = (0, 3)
         meth = NPC.__dict__['get_next_pos']
-        self.assertEqual(((0, 2), True), meth(npc))
+        self.assertEqual((0, 2), meth(npc))
         npc.target = pl
         pl.pos = (3, 0)
-        self.assertEqual(((2, 0), True), meth(npc))
+        self.assertEqual((2, 0), meth(npc))
         pl.pos = (1, 0)
-        self.assertEqual(((1, 0), False), meth(npc))
+        self.assertEqual((1, 0), meth(npc))
 
     def test_get_action(self):
         npc = self.npc1

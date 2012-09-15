@@ -209,6 +209,32 @@ class TestMap(unittest.TestCase):
         res = map.view_field(map.groups['st'][0], 230, 120, 7, pred)
         self.assertItemsEqual(map.groups['fd'], res)
 
+    def test_get_radial_path(self):
+        top = [
+            'ss ss ss ss ss ss ss ss',
+            'ss 55 ss .. ss ss ss ss',
+            'ss ss to ss ss ss ss ss',
+            'ss 44 44 cc fr ss ss ss',
+            'ss ss 33 22 11 ss ss ss',
+            'ss 33 ss 22 ss 11 ss ss',
+        ]
+
+        defin = dict((i, {}) for i in ('cc', 'fr', 'to', '11',
+                                       '22', '33', '44', '55'))
+        map = self.get_map(defin, top)
+        pred = lambda pos: pos in map
+        cc = map.groups['cc'][0]
+        fr = map.groups['fr'][0]
+        to = map.groups['to'][0]
+        path = map.get_radial_path(cc, fr, to, pred, 2)
+        self.assertEqual((
+            ((4, 1), (5, 0)),
+            ((3, 1), (3, 0)),
+            ((2, 1), (1, 0)),
+            ((2, 2), (1, 2)),
+            ((2, 3), (1, 4))
+        ), path)
+
 
 if __name__ == '__main__':
     unittest.main()
