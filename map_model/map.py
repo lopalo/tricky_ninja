@@ -295,6 +295,18 @@ class Map(object):
     def unblock(self, pos):
         self.blocked_squares.remove(pos)
 
+    def _get_line(self, fpos, spos):
+        """ [start, end) """
+        d = spos[0] - fpos[0], spos[1] - fpos[1]
+        assert d[0] == d[1] or not d[0] or not d[1], (fpos, spos)
+        cur_pos = fpos
+        while cur_pos != spos:
+            yield cur_pos
+            x = cur_pos[0] + (d[0] / abs(d[0]) if d[0] else 0)
+            y = cur_pos[1] + (d[1] / abs(d[1]) if d[1] else 0)
+            cur_pos = x, y
+
+
     def get_radial_path(self, center_pos, from_pos, to_pos, pred, radius):
         assert from_pos != to_pos, (from_pos, to_pos)
         assert from_pos in self, from_pos
@@ -305,43 +317,45 @@ class Map(object):
             if rel_poses[0] == f_rel_pos:
                 break
             rel_poses.rotate(1)
-        rel_poses.popleft()
+        start_rel = rel_poses.popleft()
+        start_step = tuple((center_pos[0] + n * start_rel[0],
+                            center_pos[1] + n * start_rel[1])
+                            for n in range(1, radius + 1))
         first_path = []
         second_path = []
         for path in first_path, second_path:
+            prev_step = start_step
             for rel_pos in rel_poses:
-                #FIXME: check intermediate squares and write test
                 rad_poses, prev_pos = [], center_pos
-                for _ in range(radius):
+                for num in range(radius):
                     pos = prev_pos[0] + rel_pos[0], prev_pos[1] + rel_pos[1]
-                    if pred(pos):
+                    prev_step_pos = prev_step[num]
+                    line = self._get_line(pos, prev_step_pos)
+                    if all(pred(i) for i in line):
                         rad_poses.append(pos)
                     else:
                         break
                     prev_pos = pos
                 if len(rad_poses) == radius:
-                    path.append(tuple(rad_poses))
+                    path.append(rad_poses[0])
                 else:
                     break
-                if to_pos in rad_poses:
+                if to_pos in path:
                     break
+                prev_step = rad_poses
             rel_poses.reverse()
-        _first_path = [i[0] for i in first_path]
-        _second_path = [i[0] for i in second_path]
         first_path, second_path = tuple(first_path), tuple(second_path)
-        if to_pos in _first_path and to_pos in _second_path:
+        if to_pos in first_path and to_pos in second_path:
             if len(first_path) < len(second_path):
                 return first_path
             else:
                 return second_path
-        elif to_pos in _first_path:
+        elif to_pos in first_path:
             return first_path
-        elif to_pos in _second_path:
+        elif to_pos in second_path:
             return second_path
         else:
             if len(first_path) > len(second_path):
                 return first_path
             else:
                 return second_path
-
-

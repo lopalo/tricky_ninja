@@ -212,7 +212,7 @@ class TestMap(unittest.TestCase):
     def test_get_radial_path(self):
         top = [
             'ss ss ss ss ss ss ss ss',
-            'ss 55 ss .. ss ss ss ss',
+            'ss 55 ss ss .. ss ss ss',
             'ss ss to ss ss ss ss ss',
             'ss 44 44 cc fr ss ss ss',
             'ss ss 33 22 11 ss ss ss',
@@ -227,13 +227,7 @@ class TestMap(unittest.TestCase):
         fr = map.groups['fr'][0]
         to = map.groups['to'][0]
         path = map.get_radial_path(cc, fr, to, pred, 2)
-        self.assertEqual((
-            ((4, 1), (5, 0)),
-            ((3, 1), (3, 0)),
-            ((2, 1), (1, 0)),
-            ((2, 2), (1, 2)),
-            ((2, 3), (1, 4))
-        ), path)
+        self.assertEqual(((4, 1), (3, 1), (2, 1), (2, 2), (2, 3)), path)
 
 
 if __name__ == '__main__':

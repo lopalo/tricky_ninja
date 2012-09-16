@@ -560,13 +560,16 @@ class Player(Character):
                                                 new_bpos, self.walk_pred, 2)
                     if not bpath:
                         break
-                    for bposes in bpath:
-                        first_bpos, second_bpos = bposes
-                        if (not self.walk_pred(first_bpos) or
-                            not self.walk_pred(second_bpos)):
-                                break
-                        #first_bpos is pos to which player should rotate
-                        shift = first_bpos[1] - self.pos[1], first_bpos[0] - self.pos[0]
+                    prev_bpos = body.poses[0]
+                    for cur_bpos in bpath:
+                        if not map.get_radial_path(self.pos,
+                                                   prev_bpos,
+                                                   cur_bpos,
+                                                   self.walk_pred,
+                                                   2):
+                            break
+                        #cur_bpos is pos to which player should rotate
+                        shift = cur_bpos[1] - self.pos[1], cur_bpos[0] - self.pos[0]
                         ###  #TODO: move this part to separate generator
                         angle = (self.angle_table[shift] + 180) % 360
                         c_angle = actor.getHpr()[0] % 360
@@ -579,8 +582,9 @@ class Player(Character):
                                                                 (c_angle, 0, 0))
                             yield interval
                         ###
+                        prev_bpos = cur_bpos
                         body.update_poses()
-                    if first_bpos != new_bpos:
+                    if cur_bpos != new_bpos:
                         break
                 if not map.check_square(self.pos, next_pos, self.walk_pred):
                     break
