@@ -100,6 +100,7 @@ class TestPlayer(unittest.TestCase):
 
     @mock.patch('character.Actor')
     def setUp(self, actor):
+        self.interval_mock.reset_mock()
         character.set_testing(True)
         __builtin__.S = mock.MagicMock()
         __builtin__.render = mock.Mock()
@@ -109,6 +110,7 @@ class TestPlayer(unittest.TestCase):
         manager = mock.Mock()
         manager.map.__contains__ = mock.Mock(return_value=True)
         manager.npcs = {}
+        manager.bodies = {}
         self.pl = pl = character.Player(manager, (3, 3))
         pl.actor.getHpr = mock.Mock(return_value=(45, 30, 30))
         pl.actor.getAnimControl.return_value = self.anim_mock = mock.Mock()
@@ -119,6 +121,10 @@ class TestPlayer(unittest.TestCase):
             'pre_jump_speed': 4,
             'post_jump_range': (12, 30),
             'post_jump_speed': 2,
+            'pick_up_speed': 10,
+            'pick_up_range': (109, 201),
+            'body_moving_speed': 34,
+            'body_moving_range': (1329, 2373)
         }
         S.ch_anim = {'walk_range': (343, 400)}
 
@@ -168,5 +174,49 @@ class TestPlayer(unittest.TestCase):
         self.assertListEqual(exp, p.actor.actorInterval.call_args_list)
         self.assertEqual(1, p.manager.map.block.call_count)
 
+    @mock.patch('character.LerpHprInterval', interval_mock)
+    @mock.patch('character.LerpPosInterval', interval_mock)
+    def test_body_moving(self):
+        p = self.pl
+        p.walk_pred = mock.Mock(return_value=True)
+        p.manager.bodies[4, 2] = body = mock.Mock()
+        body.poses = (4, 2)
+        gen = p.do_move_body()
+        p.must_die, p.captured_body = False, True
+        next(gen)
+        self.assertEqual(1, body.hide.call_count)
+        self.assertEqual(0, body.bind.call_count)
+        ret = next(gen)
+        self.assertEqual(1, body.bind.call_count)
+        self.assertIsInstance(ret, character.events)
+        self.assertEqual((p.must_die_event,
+                          p.release_body_event,
+                          p.continue_move_body_event), ret.items)
+        seff = ((4, 3), (5, 3))
+        p.get_next_pos = mock.Mock(side_effect=seff)
+        rpath = mock.Mock(return_value=((3, 2), (2, 2), (2, 3)))
+        p.manager.map.get_radial_path = rpath
+        gen.send(p.continue_move_body_event)
+        next(gen)
+        next(gen)
+        p.manager.map.get_radial_path = mock.Mock(return_value=[])
+        ret = next(gen)
+        self.assertNotIsInstance(ret, character.events)
+        p.get_next_pos = mock.Mock(return_value=None)
+        ret = next(gen)
+        self.assertIsInstance(ret, character.events)
+        gen.send(p.must_die_event)
+        self.assertEqual(3, body.update_poses.call_count)
+        self.assertEqual(2, body.hide.call_count)
+        self.assertEqual(0, body.unbind.call_count)
+        with self.assertRaises(StopIteration):
+            next(gen)
+        self.assertEqual(1, body.unbind.call_count)
+        exp = [
+            mock.call(p.actor, 1.0, (0, 0, 0), (45, 0, 0)),
+            mock.call(p.actor, 2.0, (-45, 0, 0), (45, 0, 0)),
+            mock.call(p.node, 1.4, (4, 3, 0))
+        ]
+        self.assertListEqual(exp, self.interval_mock.call_args_list)
 if __name__ == '__main__':
     unittest.main()
