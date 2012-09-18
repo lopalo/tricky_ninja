@@ -3,7 +3,7 @@ sys.path.insert(0, '')
 
 import __builtin__
 import unittest
-from collections import deque
+from collections import deque, defaultdict
 import mock
 import character
 
@@ -123,9 +123,10 @@ class TestPlayer(unittest.TestCase):
             'post_jump_speed': 2,
             'pick_up_speed': 10,
             'pick_up_range': (109, 201),
-            'body_moving_speed': 34,
             'body_moving_range': (1329, 2373)
         }
+        S.player = defaultdict(int)
+        S.player['body_moving_speed'] = .2
         S.ch_anim = {'walk_range': (343, 400)}
 
     @mock.patch('character.LerpHprInterval', interval_mock)
@@ -213,9 +214,9 @@ class TestPlayer(unittest.TestCase):
             next(gen)
         self.assertEqual(1, body.unbind.call_count)
         exp = [
-            mock.call(p.actor, 1.0, (0, 0, 0), (45, 0, 0)),
-            mock.call(p.actor, 2.0, (-45, 0, 0), (45, 0, 0)),
-            mock.call(p.node, 1.4, (4, 3, 0))
+            mock.call(p.actor, 1.25, (0, 0, 0), (45, 0, 0)),
+            mock.call(p.actor, 2.5, (-45, 0, 0), (45, 0, 0)),
+            mock.call(p.node, 5.0, (4, 3, 0))
         ]
         self.assertListEqual(exp, self.interval_mock.call_args_list)
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                character.NPC(self, **_data).must_die = True #for testing
+                character.NPC(self, **_data)
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -82,3 +82,5 @@ class Manager(object):
                 marker.setPos(pos[0], pos[1], 0.1)
                 self.view_fields[key].add(marker)
         return task.again
+
+    #TODO: implement showing path of npcs for debugging

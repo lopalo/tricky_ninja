@@ -30,6 +30,7 @@ def action(name):
             char.action = name
             gen = func(char, *args, **kwargs)
             assert isinstance(gen, GeneratorType)
+            gen = _stack(gen)
             if _testing:
                 return gen
             _runner(char, gen, None)
@@ -65,6 +66,38 @@ def _runner(char, gen, send_value=None):
             base.acceptOnce(i, callback, [i])
     else:
         raise Exception('Unsupported type ' + type(yielded).__name__)
+
+
+def _stack(gen):
+    stack = []
+    cur_gen = gen
+    send_value = None
+    while True:
+        try:
+            yielded = cur_gen.send(send_value)
+            if isinstance(yielded, GeneratorType):
+                stack.append(cur_gen)
+                cur_gen = yielded
+                send_value = None
+            elif isinstance(yielded, ret):
+                if not stack:
+                    raise Exception('Generator has not a parent')
+                cur_gen = stack.pop()
+                send_value = yielded.value
+            else:
+                send_value = yield yielded
+        except StopIteration:
+            if stack:
+                cur_gen = stack.pop()
+                send_value = None
+            else:
+                return
+
+
+class ret:
+
+    def __init__(self, val):
+        self.value = val
 
 
 class wait:
@@ -135,6 +168,22 @@ class Character(object):
         pos = self.pos[0] + diff[0], self.pos[1] - diff[1]
         return pos
 
+    def _rotate_to(self, to_pos=None, angle=None, speed=None):
+        assert to_pos or angle
+        if angle is None:
+            shift = to_pos[1] - self.pos[1], to_pos[0] - self.pos[0]
+            angle = (self.angle_table[shift] + 180) % 360
+        c_angle = self.actor.getHpr()[0] % 360
+        d_angle = angle - c_angle
+        sp = speed or self.speed
+        if d_angle != 0:
+            if abs(d_angle) > 180:
+                angle = angle - 360 if d_angle > 0 else angle + 360
+            dur = float(abs(angle - c_angle)) / 360 / sp * 2
+            interval = LerpHprInterval(self.actor, dur, (angle, 0, 0),
+                                                    (c_angle, 0, 0))
+            yield interval
+
     @action('walk')
     def do_walk(self):
         # 'yield wait()' need for reading right direction
@@ -153,22 +202,13 @@ class Character(object):
             next_pos = self.get_next_pos()
             if self.must_die or next_pos is None:
                 break
-            shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
-            angle = (self.angle_table[shift] + 180) % 360
-            c_angle = actor.getHpr()[0] % 360
-            d_angle = angle - c_angle
-            if d_angle != 0:
-                if abs(d_angle) > 180:
-                    angle = angle - 360 if d_angle > 0 else angle + 360
-                dur = float(abs(angle - c_angle)) / 360 / sp * 2
-                interval = LerpHprInterval(actor, dur, (angle, 0, 0),
-                                                       (c_angle, 0, 0))
-                yield interval
+            yield self._rotate_to(next_pos)
 
             if not map.check_square(self.pos, next_pos, self.walk_pred):
                 break
             if isinstance(self, Player) and self.get_next_pos() is None:
                 break
+            shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
             dur = 1.4 / sp if all(shift) else 1.0 / sp
             interval = LerpPosInterval(self.node, dur, next_pos + (0,))
             map.block(next_pos)
@@ -215,6 +255,20 @@ class Character(object):
         if diff > 180:
             diff = abs(diff - 360)
         self.fall_forward = diff < 90
+
+    def _falling(self):
+        actor = self.actor
+        ds = S.ch_anim['death_speed']
+        dr = (S.ch_anim['forward_death_range'] if self.fall_forward
+                                else S.ch_anim['backward_death_range'])
+        anim_interval = actor.actorInterval(
+            'anim', playRate=ds,
+            startFrame=dr[0], endFrame=dr[1]
+        )
+        anim_interval.start()
+        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
+        yield interval
+        yield ret(anim_interval)
 
 
 class Player(Character):
@@ -445,19 +499,11 @@ class Player(Character):
         v = pos[0] - self.pos[0], pos[1] - self.pos[1]
         dist = float(hypot(v[0], v[1]))
         angle = (degrees(atan2(v[1], v[0])) + 90) % 360
-        c_angle = actor.getHpr()[0] % 360
-        d_angle = angle - c_angle
-        if d_angle != 0:
-            if abs(d_angle) > 180:
-                angle = angle - 360 if d_angle > 0 else angle + 360
-            dur = float(abs(angle - c_angle)) / 360 / sp * 2
-            interval = LerpHprInterval(actor, dur, (angle, 0, 0),
-                                                    (c_angle, 0, 0))
-            anim = actor.getAnimControl('anim')
-            anim.setPlayRate(sp / 2)
-            wr = S.ch_anim['walk_range']
-            anim.loop(True, wr[0], wr[1])
-            yield interval
+        anim = actor.getAnimControl('anim')
+        anim.setPlayRate(sp / 2)
+        wr = S.ch_anim['walk_range']
+        anim.loop(True, wr[0], wr[1])
+        yield self._rotate_to(angle=angle)
         if not self.walk_pred(pos):
             actor.pose('anim', self.idle_frame)
             return
@@ -494,17 +540,7 @@ class Player(Character):
     def do_die(self):
         self.dead = True
         self.must_die = False
-        actor = self.actor
-        ds = S.ch_anim['death_speed']
-        dr = (S.ch_anim['forward_death_range'] if self.fall_forward
-                                else S.ch_anim['backward_death_range'])
-        interval = actor.actorInterval(
-            'anim', playRate=ds,
-            startFrame=dr[0], endFrame=dr[1]
-        )
-        interval.start()
-        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
-        yield interval
+        yield self._falling()
         yield wait(1)
         init_pos = tuple(self.init_position)
         if (not self.manager.map.is_available(init_pos) or
@@ -513,13 +549,55 @@ class Player(Character):
         self.dead = False
         self.pos = init_pos
         self.node.setPos(self.pos[0], self.pos[1], 0)
-        actor.pose('anim', self.idle_frame)
-        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 1))
+        self.actor.pose('anim', self.idle_frame)
+        ds = S.ch_anim['death_speed']
+        interval = LerpColorScaleInterval(self.actor, 1 / ds / 7, (1, 1, 1, 1))
         yield interval
+
+    def _body_moving_step(self, body):
+        sp = float(S.player['body_moving_speed'])
+        map = self.manager.map
+        next_pos = self.get_next_pos()
+        if self.must_die or next_pos is None:
+            yield ret(False)
+        shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
+        # new body pos after rotation but berfore moving
+        new_bpos = self.pos[0] - shift[1], self.pos[1] - shift[0]
+        if body.poses[0] != new_bpos:
+            bpath = map.get_radial_path(self.pos, body.poses[0],
+                                        new_bpos, self.walk_pred, 2)
+            if not bpath:
+                yield ret(False)
+            prev_bpos = body.poses[0]
+            for cur_bpos in bpath:
+                if not map.get_radial_path(self.pos,
+                                            prev_bpos,
+                                            cur_bpos,
+                                            self.walk_pred,
+                                            2):
+                    break
+                #cur_bpos is pos to which player should rotate
+                yield self._rotate_to(cur_bpos, speed=sp)
+                prev_bpos = cur_bpos
+                body.update_poses()
+            if cur_bpos != new_bpos:
+                yield ret(False)
+        if not map.check_square(self.pos, next_pos, self.walk_pred):
+            yield ret(False)
+        if self.get_next_pos() is None:
+            yield ret(False)
+        dur = 1.4 / sp if all(shift) else 1.0 / sp
+        interval = LerpPosInterval(self.node, dur, next_pos + (0,))
+        map.block(next_pos)
+        self.walking = True
+        yield interval
+        self.pos = next_pos
+        map.unblock(self.pos)
+        self.walking = False
+        body.update_poses()
 
     @action('move_body')
     def do_move_body(self):
-        #TODO: write test before refactoring
         map = self.manager.map
         bpos = self.angle_to_pos(0)
         if not bpos in self.manager.bodies:
@@ -549,56 +627,9 @@ class Player(Character):
             wr = S.pl_anim['body_moving_range']
             anim.loop(True, wr[0], wr[1])
             while not self.must_die and self.captured_body:
-                next_pos = self.get_next_pos()
-                if self.must_die or next_pos is None:
+                ok = yield self._body_moving_step(body)
+                if not ok:
                     break
-                shift = next_pos[1] - self.pos[1], next_pos[0] - self.pos[0]
-                # new body pos after rotation but berfore moving
-                new_bpos = self.pos[0] - shift[1], self.pos[1] - shift[0]
-                if body.poses[0] != new_bpos:
-                    bpath = map.get_radial_path(self.pos, body.poses[0],
-                                                new_bpos, self.walk_pred, 2)
-                    if not bpath:
-                        break
-                    prev_bpos = body.poses[0]
-                    for cur_bpos in bpath:
-                        if not map.get_radial_path(self.pos,
-                                                   prev_bpos,
-                                                   cur_bpos,
-                                                   self.walk_pred,
-                                                   2):
-                            break
-                        #cur_bpos is pos to which player should rotate
-                        shift = cur_bpos[1] - self.pos[1], cur_bpos[0] - self.pos[0]
-                        ###  #TODO: move this part to separate generator
-                        angle = (self.angle_table[shift] + 180) % 360
-                        c_angle = actor.getHpr()[0] % 360
-                        d_angle = angle - c_angle
-                        if d_angle != 0:
-                            if abs(d_angle) > 180:
-                                angle = angle - 360 if d_angle > 0 else angle + 360
-                            dur = float(abs(angle - c_angle)) / 360 / sp * 8
-                            interval = LerpHprInterval(actor, dur, (angle, 0, 0),
-                                                                (c_angle, 0, 0))
-                            yield interval
-                        ###
-                        prev_bpos = cur_bpos
-                        body.update_poses()
-                    if cur_bpos != new_bpos:
-                        break
-                if not map.check_square(self.pos, next_pos, self.walk_pred):
-                    break
-                if self.get_next_pos() is None:
-                    break
-                dur = 1.4 / sp if all(shift) else 1.0 / sp
-                interval = LerpPosInterval(self.node, dur, next_pos + (0,))
-                map.block(next_pos)
-                self.walking = True
-                yield interval
-                self.pos = next_pos
-                map.unblock(self.pos)
-                self.walking = False
-                body.update_poses()
             anim.pose(S.player['body_captured_frame'])
         yield body.hide(False)
         body.unbind()
@@ -732,17 +763,7 @@ class NPC(Character):
 
     @action('die')
     def do_die(self):
-        actor = self.actor
-        ds = S.ch_anim['death_speed']
-        dr = (S.ch_anim['forward_death_range'] if self.fall_forward
-                                else S.ch_anim['backward_death_range'])
-        anim_interval = actor.actorInterval(
-            'anim', playRate=ds,
-            startFrame=dr[0], endFrame=dr[1]
-        )
-        anim_interval.start()
-        interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
-        yield interval
+        anim_interval = yield self._falling()
         anim_interval.finish()
         self.must_die = False
         self.dead = True
