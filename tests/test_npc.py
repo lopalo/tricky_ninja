@@ -5,7 +5,8 @@ import __builtin__
 import unittest
 from collections import deque
 import mock
-from character import NPC, Character
+from character.char import Character
+from character.npc import NPC
 from map_model.map import Map
 from manager import Manager
 
@@ -13,8 +14,8 @@ from manager import Manager
 class TestNPC(unittest.TestCase):
 
     @mock.patch('manager.Map')
-    @mock.patch('character.Player')
-    @mock.patch('character.NPC')
+    @mock.patch('manager.Player')
+    @mock.patch('manager.NPC')
     def setUp(self, map_mock, pl_mock, npc_mock):
         __builtin__.S = mock.MagicMock()
         __builtin__.render = mock.Mock()

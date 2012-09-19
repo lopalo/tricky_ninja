@@ -3,7 +3,9 @@ from random import choice
 from collections import defaultdict, deque
 from map_model.map import Map
 from map_builder import MapBuilder
-import character
+from character.player import Player
+from character.npc import NPC
+from character.body import Body
 
 
 class Manager(object):
@@ -15,7 +17,7 @@ class Manager(object):
         self.map = Map(map_name)
         self.map_builder = MapBuilder(self.map, self.main_node)
         self.map_builder.build()
-        self.player = character.Player(self, self.map.start_pos)
+        self.player = Player(self, self.map.start_pos)
         self.set_npcs()
         if S.show_view_field:
             self.view_fields = defaultdict(set)
@@ -33,7 +35,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                character.NPC(self, **_data)
+                NPC(self, **_data).must_die = True
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -46,7 +48,7 @@ class Manager(object):
         for npc in tuple(self.npcs.values()):
             if not npc and npc.action is None:
                 del self.npcs[npc._pos]
-                character.Body(npc, self)
+                Body(npc, self)
                 continue
             npc.update_action()
         return task.cont
