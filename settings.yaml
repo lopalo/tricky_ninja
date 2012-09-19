@@ -6,7 +6,8 @@ paths:
   maps: maps
 
 map_texture_size: 256
-show_view_field: false #for debugging
+show_view_field: false # for debugging
+show_pathes: true # for debugging
 alert_radius: 5
 
 camera:
@@ -27,7 +28,7 @@ character:
 
 player:
   texture: nskinbl
-  speed: 2
+  speed: 3 #2
   pointer_texture: pointer
   jump_height: 0.5
   animation:

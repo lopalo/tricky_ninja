@@ -22,6 +22,9 @@ class Manager(object):
         if S.show_view_field:
             self.view_fields = defaultdict(set)
             taskMgr.doMethodLater(1, self.update_view_fields, 'fields')
+        if S.show_pathes:
+            self.pathes = defaultdict(set)
+            taskMgr.doMethodLater(1, self.update_pathes, 'pathes')
 
     def set_npcs(self):
         self.npcs = {}
@@ -35,7 +38,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                NPC(self, **_data).must_die = True
+                NPC(self, **_data)
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -85,4 +88,30 @@ class Manager(object):
                 self.view_fields[key].add(marker)
         return task.again
 
-    #TODO: implement showing path of npcs for debugging
+    def update_pathes(self, task):
+        """ It is a very expensive funciton. Use only for debugging """
+
+        map = self.map
+        for npc in self.npcs.values():
+            key = id(npc)
+            for marker in self.pathes[key]:
+                marker.removeNode()
+            del self.pathes[key]
+            target = npc.target
+            end_pos = target if isinstance(target, tuple) else target.pos
+            pred = lambda pos: ('walk' in map[pos]['actions'] and
+                                map.is_available(pos) and
+                                (pos not in self.npcs or
+                                self.npcs[pos].walking) and
+                                pos not in self.bodies)
+            path = map.get_path(npc.pos, end_pos, pred)
+            if path is None:
+                continue
+
+            for pos in path:
+                marker = loader.loadModel(S.model('plane'))
+                marker.setHpr(0, -90, 0)
+                marker.reparentTo(self.main_node)
+                marker.setPos(pos[0], pos[1], 0.1)
+                self.pathes[key].add(marker)
+        return task.again
