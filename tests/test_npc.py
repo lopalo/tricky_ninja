@@ -21,11 +21,11 @@ class TestNPC(unittest.TestCase):
         __builtin__.render = mock.Mock()
 
         S.show_view_field = False
-        S.alert_radius = 3
         S.npc = dict(
             excited_view_radius=3,
             excited_view_angle=88,
             excited_speed=45,
+            alert_radius=3
         )
 
         manager = Manager('map')

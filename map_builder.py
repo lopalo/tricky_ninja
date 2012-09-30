@@ -46,7 +46,7 @@ class MapBuilder(object):
                 coord
             )
             elif kind == 'sprite':
-                sprite = loader.loadModel(S.model('plane'))
+                sprite = self._create_plane()
                 texture = loader.loadTexture(S.texture(info['texture']))
                 texture.setWrapU(Texture.WMClamp)
                 texture.setWrapV(Texture.WMClamp)
@@ -58,6 +58,7 @@ class MapBuilder(object):
                 sprite.setScale(size)
                 sprite.setPos(coord[0], coord[1], size / 2)
                 sprite.setBillboardAxis()
+                sprite.setAttrib(LightRampAttrib.makeDefault())
 
             self._set_texture(None, None, coord, True)
 
@@ -77,7 +78,7 @@ class MapBuilder(object):
                     if i.getXSize() != i.getYSize():
                         raise MapTextureError(
                             'Parts must be square ({0})'.format(txt_name))
-                    size = S.map_texture_size
+                    size = S.graphics['map_texture_size']
                     image = PNMImage(size, size)
                     image.addAlpha()
                     image.quickFilterFrom(i)
@@ -98,10 +99,15 @@ class MapBuilder(object):
                         'Wrong name of main part ({0})'.format(txt_name))
                 self.map_textures[txt_name] = PNMImage(texture)
 
+    def _create_plane(self):
+        pl_maker = CardMaker('plane')
+        pl_maker.setFrame(-0.5, 0.5, -0.5, 0.5)
+        plane = render.attachNewNode(pl_maker.generate())
+        return plane
 
     def _set_texture(self, txt_name, ident, pos, only_ss=False):
         ss_textures = self.map_textures[self.map.substrate_texture]
-        size = S.map_texture_size
+        size = S.graphics['map_texture_size']
         result_image = PNMImage(size, size)
         result_image.addAlpha()
         w, h = size / 2, size / 2
@@ -168,7 +174,7 @@ class MapBuilder(object):
                 img = textures
                 result_image.blendSubImage(img, 0, 0, 0, 0, size, size)
 
-        plane = loader.loadModel(S.model('plane'))
+        plane = self._create_plane()
         texture = Texture()
         texture.load(result_image)
         texture.setWrapU(Texture.WMClamp)

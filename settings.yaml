@@ -5,10 +5,17 @@ paths:
   model_sizes: models/sizes.yaml
   maps: maps
 
-map_texture_size: 256
 show_view_field: false # for debugging
 show_pathes: true # for debugging
-alert_radius: 5
+
+graphics:
+  map_texture_size: 256
+  light_hpr: [-90, -40, 0]
+  light_color: [1, 1, 1, 1]
+  ambient_light_color: [0.4, 0.4, 0.4, 1]
+  #TODO: move this to user's settings
+  enable_shadows: true
+  enable_cartoon: true
 
 camera:
   min_distance: 3
@@ -45,9 +52,10 @@ player:
     pick_up_range: [82, 92]
   idle_frame: 28
   body_captured_frame: 14
-  body_moving_speed: 6 #1
+  body_moving_speed: 3 #1
 
 npc:
+  alert_radius: 5
   speed: 1.5
   excited_speed: 2.3
   normal_view_radius: 7

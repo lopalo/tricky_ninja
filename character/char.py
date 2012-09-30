@@ -161,6 +161,7 @@ class Character(object):
             startFrame=dr[0], endFrame=dr[1]
         )
         anim_interval.start()
+        actor.setTransparency(True)
         interval = LerpColorScaleInterval(actor, 1 / ds / 7, (1, 1, 1, 0))
         yield interval
         yield ret(anim_interval)

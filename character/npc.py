@@ -1,9 +1,6 @@
 from collections import deque
 from math import cos, sin, radians, atan2, degrees, hypot
-from direct.interval.LerpInterval import (
-    LerpPosInterval,
-    LerpColorScaleInterval
-)
+from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.ActorInterval import ActorInterval
 from direct.actor.Actor import Actor
 
@@ -30,7 +27,7 @@ class NPC(Character):
         self.actor = actor = Actor(S.model(self.model),
                                     {'anim': S.model(self.model)})
         self.actor.reparentTo(self.node)
-        actor.setTransparency(True)
+        actor.setTransparency(False)
         actor.setScale(S.model_size(self.model))
         actor.setTexture(loader.loadTexture(
                             S.texture(texture)), 1)

@@ -1,6 +1,10 @@
 from math import hypot
 from random import choice
 from collections import defaultdict, deque
+
+from direct.filter.CommonFilters import CommonFilters
+from panda3d.core import *
+
 from map_model.map import Map
 from map_builder import MapBuilder
 from character.player import Player
@@ -19,6 +23,8 @@ class Manager(object):
         self.map_builder.build()
         self.player = Player(self, self.map.start_pos)
         self.set_npcs()
+        self.setup_graphics()
+
         if S.show_view_field:
             self.view_fields = defaultdict(set)
             taskMgr.doMethodLater(1, self.update_view_fields, 'fields')
@@ -38,7 +44,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                NPC(self, **_data)
+                NPC(self, **_data).dead = True
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -61,11 +67,31 @@ class Manager(object):
             if not npc:
                 continue
             length = hypot(npc.pos[0] - pos[0], npc.pos[1] - pos[1])
-            if length <= S.alert_radius:
+            if length <= S.npc['alert_radius']:
                 npc.target = target_pos or self.player
                 npc.speed = S.npc['excited_speed']
                 npc.view_radius = S.npc['excited_view_radius']
                 npc.view_angle = S.npc['excited_view_angle']
+
+    def setup_graphics(self):
+        self.main_node.setShaderAuto()
+        mnode = self.main_node
+        alight = AmbientLight('alight')
+        alight.setColor(VBase4(*S.graphics['ambient_light_color']))
+        alnp = mnode.attachNewNode(alight)
+        mnode.setLight(alnp)
+
+        dlight = DirectionalLight('dlight')
+        dlight.setColor(VBase4(*S.graphics['light_color']))
+        dlnp = mnode.attachNewNode(dlight)
+        dlnp.setHpr(*S.graphics['light_hpr'])
+        mnode.setLight(dlnp)
+        if S.graphics['enable_shadows']:
+            dlight.setShadowCaster(True, 512, 512)
+        self.filters = CommonFilters(base.win, base.cam)
+        if S.graphics['enable_cartoon']:
+            mnode.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
+            self.filters.setCartoonInk(1)
 
 
     def update_view_fields(self, task):

@@ -51,6 +51,7 @@ class Body(object):
         self.manager.bodies[self._poses[1]] = self
 
     def hide(self, start=True):
+        self.npc.actor.setTransparency(True)
         ds = S.ch_anim['death_speed']
         interval = LerpColorScaleInterval(self.npc.actor, 1 / ds / 7,
                                                         (1, 1, 1, 0))
@@ -62,6 +63,10 @@ class Body(object):
         ds = S.ch_anim['death_speed']
         interval = LerpColorScaleInterval(self.npc.actor, 1 / ds / 7,
                                                         (1, 1, 1, 1))
+        def callback():
+            self.npc.actor.setTransparency(False)
+        interval.setDoneEvent('body_showed')
+        base.acceptOnce('body_showed', callback)
         interval.start()
 
     def get_poses(self, first_pos=None, angle=None):

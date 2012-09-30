@@ -35,7 +35,7 @@ class Player(Character):
                                     {'anim': S.model(self.model)})
         self.actor.reparentTo(self.node)
         actor.setScale(S.model_size(self.model))
-        actor.setTransparency(True)
+        actor.setTransparency(False)
         actor.setTexture(loader.loadTexture(
                             S.texture(S.player['texture'])), 1)
         self.pos = self.init_position = tuple(pos)
@@ -294,6 +294,7 @@ class Player(Character):
         ds = S.ch_anim['death_speed']
         interval = LerpColorScaleInterval(self.actor, 1 / ds / 7, (1, 1, 1, 1))
         yield interval
+        self.actor.setTransparency(False)
 
     def _body_moving_step(self, body):
         sp = float(S.player['body_moving_speed'])
@@ -312,10 +313,10 @@ class Player(Character):
             prev_bpos = body.poses[0]
             for cur_bpos in bpath:
                 if not map.get_radial_path(self.pos,
-                                            prev_bpos,
-                                            cur_bpos,
-                                            self.walk_pred,
-                                            2):
+                                           prev_bpos,
+                                           cur_bpos,
+                                           self.walk_pred,
+                                           2):
                     break
                 #cur_bpos is pos to which player should rotate
                 yield self._rotate_to(cur_bpos, speed=sp)
