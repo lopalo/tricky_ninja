@@ -9,18 +9,19 @@ class MapDataError(Exception):
 
 
 def check_map_data(data):
+    all_actions = set(AVAILABLE_ACTIONS)
     stop = False
     for f in ('substrate_texture', 'definitions',
-              'topology', 'action_groups', 'start_position'):
+              'topology', 'start_position'):
         if f not in data:
             stop = True
             yield f, 'is not specified'
     if stop: return
     if type(data['substrate_texture']) is not str:
         yield 'substrate_texture', 'is not a string'
-    actions = data['substrate_actions']
-    if actions is not None and actions not in data['action_groups']:
-            yield ('substrate_actions', "unknown action group")
+    actions = set(data.get('substrate_actions', []))
+    if actions - all_actions:
+            yield ('substrate_actions', "unknown action")
     for id, info in data['definitions'].items():
         if len(id) != 2:
             yield ('definitions',
@@ -30,10 +31,9 @@ def check_map_data(data):
                 break
         else:
             yield 'definitions', "'{0}' is not in topology".format(id)
-        actions = info.get('actions')
-        if actions is not None and actions not in data['action_groups']:
-            yield ('definitions',
-                    "unknown action group for '{0}'".format(id))
+        actions = set(info.get('actions', []))
+        if actions - all_actions:
+            yield ('definitions', "unknown action for '{0}'".format(id))
         kind = info.get('kind')
         if kind is None:
             continue
@@ -68,17 +68,6 @@ def check_map_data(data):
             if id not in data['definitions']:
                 yield 'topology', 'unknown ident ' + id
 
-    used_action_groups = set(i['actions'] for i in
-                             data['definitions'].values()
-                             if i.get('actions') is not None)
-    unused = set(data['action_groups']) - used_action_groups
-    if unused:
-        yield 'action_groups', 'Unused groups ' + str(list(unused))
-    for k, v in data['action_groups'].items():
-        for a in v:
-            if a not in AVAILABLE_ACTIONS:
-                yield ('action_groups',
-                    "'{0}' contains unknown action".format(k))
 
     for num, npc in enumerate(data.get('npcs', tuple())):
         for f, i in fdecl.npc.items():

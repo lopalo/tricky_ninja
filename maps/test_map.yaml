@@ -1,47 +1,43 @@
 start_position: [11, 4]
 
 substrate_texture: grass
-substrate_actions: free
+substrate_actions: [walk, jump, see]
 #for substrate_texture ident always is 'ss'
-
-action_groups:
-  free: [walk, jump, see]
-  jump: [jump, see]
-  hide: [walk]
-
 
 definitions:
   sa:
     kind: texture
     texture: sand
-    actions: free
+    actions: [walk, jump, see]
   st:
     kind: texture
     texture: stone
-    actions: free
+    actions: [walk, jump, see]
   S0:
     kind: model
     model: stone
     angle: 128
-    actions: jump
+    actions: [jump, see]
   S1:
     kind: model
     model: stone
     angle: 23
     size: 1.5
+    actions: []
   ff:
     kind: chain_model
     vertical_model: fence
     left_bottom_model: fence-corner
+    actions: []
   tr:
     kind: sprite
     texture: tree
     size: 6.0
-    actions: hide
+    actions: [walk]
   ow:
-    actions: hide
+    actions: [walk]
   wl:
-    actions: null
+    actions: []
 
 topology:
 - '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'

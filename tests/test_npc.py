@@ -16,11 +16,14 @@ class TestNPC(unittest.TestCase):
     @mock.patch('manager.Map')
     @mock.patch('manager.Player')
     @mock.patch('manager.NPC')
-    def setUp(self, map_mock, pl_mock, npc_mock):
+    @mock.patch('manager.CommonFilters')
+    def setUp(self, map_mock, pl_mock, npc_mock, filters):
         __builtin__.S = mock.MagicMock()
         __builtin__.render = mock.Mock()
+        __builtin__.base = mock.Mock()
 
         S.show_view_field = False
+        S.show_pathes = False
         S.npc = dict(
             excited_view_radius=3,
             excited_view_angle=88,
@@ -38,12 +41,7 @@ class TestNPC(unittest.TestCase):
         ]
         data = dict(
             substrate_texture='grass',
-            substrate_actions='free',
-            action_groups={
-                'walk':['walk'],
-                'jump':['jump'],
-                'free':['jump', 'walk']
-            },
+            substrate_actions=['jump', 'walk'],
             definitions={},
             topology=top,
             start_position=(0, 0),

@@ -84,22 +84,15 @@ class Map(object):
         self.textures = set([self.substrate_texture])
         self.groups = defaultdict(list) # need for tests
         self.data = {}
-        for info in data['definitions'].values():
-            actions = info.get('actions')
-            if actions is not None:
-                info['actions'] = data['action_groups'][actions]
-            else:
-                info['actions'] = tuple()
         for num_row, row in enumerate(data['topology']):
             for index in range(0, len(data['topology'][0]), 3):
                 ident = row[index:index+2]
                 if ident == '..':
                     continue
                 elif ident == 'ss':
-                    actions = data['substrate_actions']
                     info = dict(
                         kind='substrate_texture',
-                        actions=data['action_groups'][actions]
+                        actions=data['substrate_actions']
                     )
                 else:
                     info = data['definitions'][ident]

@@ -10,12 +10,7 @@ class TestMap(unittest.TestCase):
     def get_map(self, definitions, topology):
         data = dict(
             substrate_texture='grass',
-            substrate_actions='free',
-            action_groups={
-                'walk':['walk', 'see'],
-                'jump':['jump', 'see'],
-                'free':['jump', 'walk', 'see']
-            },
+            substrate_actions=['jump', 'walk', 'see'],
             definitions=definitions,
             topology=topology,
             start_position=(0, 0),
@@ -58,7 +53,7 @@ class TestMap(unittest.TestCase):
             'ss ss ss .. ss ss ss ss',
         ]
 
-        defin = {'st':{}, 'WL': {'actions': 'walk'}}
+        defin = {'st':{}, 'WL': {'actions': ['walk', 'see']}}
         map = self.get_map(defin, top)
         field = list(map.get_jump_field(map.groups['st'][0]))
         self.assertEqual([(2, 4), (0, 2), (1, 3)], field)
@@ -73,7 +68,7 @@ class TestMap(unittest.TestCase):
             'ss ss ss .. ss ss ss ss',
         ]
 
-        defin = {'st':{}, 'WL': {'actions': 'jump'}}
+        defin = {'st':{}, 'WL': {'actions': ['jump', 'see']}}
         map = self.get_map(defin, top)
         field = list(map.get_jump_field(map.groups['st'][0]))
         self.assertEqual([(2, 4), (2, 0), (1, 1), (0, 2), (1, 3)], field)
