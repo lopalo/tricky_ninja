@@ -84,6 +84,7 @@ class Map(object):
         self.textures = set([self.substrate_texture])
         self.groups = defaultdict(list) # need for tests
         self.data = {}
+        self.definitions = data['definitions']
         for num_row, row in enumerate(data['topology']):
             for index in range(0, len(data['topology'][0]), 3):
                 ident = row[index:index+2]
@@ -95,7 +96,7 @@ class Map(object):
                         actions=data['substrate_actions']
                     )
                 else:
-                    info = data['definitions'][ident]
+                    info = self.definitions[ident]
                     info['ident'] = ident
                 self.data[index/3, num_row] = info
                 self.groups[ident].append((index/3, num_row))
@@ -146,6 +147,12 @@ class Map(object):
 
     def __getitem__(self, coord):
         return self.data.get(coord)
+
+    def __delitem__(self, coord):
+        del self.data[coord]
+
+    def __setitem__(self, coord, group):
+        self.data[coord] = group
 
     def __iter__(self):
         return self.data.items().__iter__()

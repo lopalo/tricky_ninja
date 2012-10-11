@@ -21,46 +21,67 @@ class MapBuilder(object):
 
     def build(self):
         self._load_textures()
+        self._substrate = {}
+        self._models = {}
         for coord, info in self.map:
-            kind = info.get('kind')
-            if kind in ('substrate_texture', None):
-                pass
-            elif kind == 'texture':
-                self._set_texture(info['texture'], info['ident'], coord)
+            model, substr = self._draw_square(coord, info)
+            self._models[coord] = model
+            self._substrate[coord] = substr
+
+    def redraw_9_squares(self, coord, info):
+        lst = tuple(self.map.neighbors(coord, all=True)) + ((coord, info),)
+        for c, info in lst:
+            model = self._models.pop(c, None)
+            if model is not None:
+                model.removeNode()
+            substr = self._substrate.pop(c, None)
+            if substr is not None:
+                substr.removeNode()
+            if info is None:
                 continue
-            elif kind == 'model':
-                model = loader.loadModel(S.model(info['model']))
-                model.reparentTo(self.main_node)
-                angle = info.get('angle', 0)
-                model.setHpr(angle, 0, 0)
-                if 'size' in info:
-                    model.setScale(info['size'])
-                else:
-                    model.setScale(S.model_size(info['model']))
-                model.setPos(coord[0], coord[1], 0)
-            elif kind == 'chain_model':
-                self._set_chain_model(
+            model, substr = self._draw_square(c, info)
+            self._models[c] = model
+            self._substrate[c] = substr
+
+    def _draw_square(self, coord, info):
+        kind = info.get('kind')
+        if kind in ('substrate_texture', None):
+            model = None
+        elif kind == 'texture':
+            return self._set_texture(info['texture'], info['ident'], coord), None
+        elif kind == 'model':
+            model = loader.loadModel(S.model(info['model']))
+            model.reparentTo(self.main_node)
+            angle = info.get('angle', 0)
+            model.setHpr(angle, 0, 0)
+            if 'size' in info:
+                model.setScale(info['size'])
+            else:
+                model.setScale(S.model_size(info['model']))
+            model.setPos(coord[0], coord[1], 0)
+        elif kind == 'chain_model':
+            model = self._set_chain_model(
                 info['vertical_model'],
                 info['left_bottom_model'],
                 info['ident'],
                 coord
             )
-            elif kind == 'sprite':
-                sprite = self._create_plane()
-                texture = loader.loadTexture(S.texture(info['texture']))
-                texture.setWrapU(Texture.WMClamp)
-                texture.setWrapV(Texture.WMClamp)
-                sprite.setTexture(texture)
-                sprite.reparentTo(self.main_node)
-                sprite.setTransparency(True)
-                sprite.reparentTo(self.main_node)
-                size = info.get('size', 1.0)
-                sprite.setScale(size)
-                sprite.setPos(coord[0], coord[1], size / 2)
-                sprite.setBillboardAxis()
-                sprite.setAttrib(LightRampAttrib.makeDefault())
+        elif kind == 'sprite':
+            model = self._create_plane()
+            texture = loader.loadTexture(S.texture(info['texture']))
+            texture.setWrapU(Texture.WMClamp)
+            texture.setWrapV(Texture.WMClamp)
+            model.setTexture(texture)
+            model.reparentTo(self.main_node)
+            model.setTransparency(True)
+            model.reparentTo(self.main_node)
+            size = info.get('size', 1.0)
+            model.setScale(size)
+            model.setPos(coord[0], coord[1], size / 2)
+            model.setBillboardAxis()
+            model.setAttrib(LightRampAttrib.makeDefault())
 
-            self._set_texture(None, None, coord, True)
+        return model, self._set_texture(None, None, coord, True)
 
     def _load_textures(self):
         self.map_textures = {}
@@ -184,6 +205,7 @@ class MapBuilder(object):
         plane.reparentTo(self.main_node)
         plane.setTransparency(True)
         plane.setPos(pos[0], pos[1], 0)
+        return plane
 
     def _set_chain_model(self, vm, lbm, ident, pos):
         nbs = dict(self.map.neighbors(pos, yield_names=True))
@@ -218,3 +240,4 @@ class MapBuilder(object):
         model.reparentTo(self.main_node)
         model.setScale(S.model_size(model_name))
         model.setPosHpr(pos[0], pos[1], 0, angle, 0, 0)
+        return model

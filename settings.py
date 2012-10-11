@@ -1,15 +1,20 @@
 import os
 import yaml
 
-class Settings(object):
+class BaseSettings(object):
 
     def __init__(self, path):
         with open(path, 'r') as f:
             data = yaml.load(f)
         self.__dict__.update(data)
-        self._path = os.path.dirname(__file__)
-        path = os.path.join(self._path, self.paths['model_sizes'])
-        with open(path, 'r') as f:
+        self._path = os.path.abspath(os.path.dirname(__file__))
+
+class Settings(BaseSettings):
+
+    def __init__(self, path):
+        super(Settings, self).__init__(path)
+        mz_path = os.path.join(self._path, self.paths['model_sizes'])
+        with open(mz_path, 'r') as f:
             self.model_sizes = yaml.load(f)
         self.pl_anim = self.player['animation']
         self.npc_anim = self.npc['animation']

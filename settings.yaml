@@ -36,7 +36,7 @@ character:
 player:
   texture: nskinbl
   speed: 3 #2
-  pointer_texture: pointer
+  pointer_texture: blue_pointer
   jump_height: 0.5
   animation:
     pre_jump_range: [103, 106]

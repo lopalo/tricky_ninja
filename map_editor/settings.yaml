@@ -1,0 +1,16 @@
+border: 0.5 # x position of edit panel
+
+camera:
+  init_pos: [10, 2]
+  init_height: 30
+  init_vertical_angle: -90
+  min_height: 3
+  max_height: 30
+  height_step: 1
+  horizontal_move_step: 0.1
+  vertical_angle_step: 3
+  horizontal_angle: 60
+
+pointer:
+  move_camera_border: 0.1 # defines the region in which mouse cursor moves the camera
+
