@@ -51,7 +51,8 @@ class EditPanel:
 
     def set_group_by_kind(self):
         self._delete_until('kind_selection')
-        kind = self.editor.current_group.get('kind')
+        group = self.editor.current_group
+        kind = group.get('kind')
         if kind is not None:
             fields = get_definition()[kind]
             for fname, info in fields.items():
@@ -61,6 +62,7 @@ class EditPanel:
                 else:
                     self._add_row(fname, RowWidget(self, fname, **info))
         #TODO: set actions widget
+        self.editor.map_builder.redraw_group(group['ident'])
 
 
     def select_group(self, ident):
@@ -75,6 +77,7 @@ class Label:
 
 
 class SelectGroupWidget:
+    """ Should be created once when editor is loaded and current group is None"""
 
     def __init__(self, edit_panel):
         self.edit_panel = edit_panel
@@ -94,6 +97,8 @@ class SelectGroupWidget:
 
     def set_value(self, group_id):
         self.edit_panel.set_current_group(group_id or None)
+
+    #TODO: append to list new group
 
 
 class SelectKindWidget:
@@ -124,10 +129,10 @@ class SelectKindWidget:
                 continue
             self.group[fname] = info['type']()
         self.edit_panel.set_group_by_kind()
-        self.edit_panel.editor.map_builder.redraw_group(self.group['ident'])
 
 
 class ComboboxWidget:
+    """Cannot contain empty value"""
 
     def __init__(self, edit_panel, fname, type, variants_dir, **kwargs):
         self.edit_panel = edit_panel
@@ -148,7 +153,7 @@ class ComboboxWidget:
                                        scale=ES.edit_panel['widget_scale'],
                                        sortOrder=1)
         if init_item is None:
-            self.set_value(items[0])
+            self.group[self.fname] = self.type(items[0])
 
     def set_value(self, value):
         self.group[self.fname] = self.type(value)
@@ -163,8 +168,9 @@ class RowWidget:
         self.fname = fname
         self.type = type
         self.default = default
-        #TODO: on focus disable arrows
         self.widget = DirectEntry(command=self.change_text,
+                                  focusInCommand=self.focus_in,
+                                  focusOutCommand=self.focus_out,
                                   initialText=str(self.group.get(fname, '')),
                                   numLines=1,
                                   width=ES.edit_panel['row_width'],
@@ -178,4 +184,10 @@ class RowWidget:
         else:
             self.group[self.fname] = self.type(text)
         self.edit_panel.editor.map_builder.redraw_group(self.group['ident'])
+
+    def focus_in(self):
+        self.edit_panel.editor.remove_arrow_handlers()
+
+    def focus_out(self):
+        self.edit_panel.editor.set_camera_control(only_arrows=True)
 

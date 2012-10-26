@@ -16,6 +16,7 @@ class Editor(ShowBase):
         self.disableMouse()
         self.stop_loop = False
         self.current_group = None
+        self._group_markers = set()
         base.accept('escape', self.esc_handler)
         self.map = Map(map_name)
         self.map_builder = MapBuilder(self.map, render)
@@ -23,9 +24,10 @@ class Editor(ShowBase):
         self.edit_panel = EditPanel(self)
         self.pointer = Pointer(self)
         taskMgr.add(self.pointer.update, 'update_pointer')
+        self.camera_node = render.attachNewNode('camera_node')
         self.set_camera_control()
 
-    def set_camera_control(self):
+    def set_camera_control(self, only_arrows=False):
         pitch = -ES.camera['horizontal_angle']
         yaw = ES.camera['init_vertical_angle']
         min_h = ES.camera['min_height']
@@ -33,13 +35,14 @@ class Editor(ShowBase):
         height = ES.camera['init_height']
         pos = ES.camera['init_pos']
         hstep = ES.camera['height_step']
-        self.camera_node = camera_node = render.attachNewNode('camera_node')
-        camera.reparentTo(camera_node)
-        def init():
-            camera_node.setPosHpr(pos[0], pos[1], height, 90 + yaw, 0, 0)
-            camera.setPosHpr(0, 0, 0, 0, pitch, 0)
-        init()
-        base.accept('home', init)
+        camera_node = self.camera_node
+        if not only_arrows:
+            camera.reparentTo(camera_node)
+            def init():
+                camera_node.setPosHpr(pos[0], pos[1], height, 90 + yaw, 0, 0)
+                camera.setPosHpr(0, 0, 0, 0, pitch, 0)
+            init()
+            base.accept('home', init)
         def incr_angle():
             camera_node.setH(camera_node, ES.camera['vertical_angle_step'])
         base.accept('arrow_left', incr_angle)
@@ -57,6 +60,16 @@ class Editor(ShowBase):
         base.accept('arrow_down', decr_height)
         base.accept('arrow_down-repeat', decr_height)
 
+    def remove_arrow_handlers(self):
+        base.ignore('arrow_left')
+        base.ignore('arrow_left-repeat')
+        base.ignore('arrow_right')
+        base.ignore('arrow_right-repeat')
+        base.ignore('arrow_up')
+        base.ignore('arrow_up-repeat')
+        base.ignore('arrow_down')
+        base.ignore('arrow_down-repeat')
+
     def select_group(self, ident):
         self.edit_panel.select_group(ident)
 
@@ -65,8 +78,23 @@ class Editor(ShowBase):
         self._mark_group()
 
     def _mark_group(self):
-        #TODO: mark of group
-        pass
+        for marker in self._group_markers:
+            marker.removeNode()
+        self._group_markers.clear()
+        if self.current_group is None:
+            return
+        for pos in self.map.groups[self.current_group['ident']]:
+            marker = loader.loadModel(S.model('plane'))
+            texture = loader.loadTexture(S.texture('black_pointer'))
+            marker.setTexture(texture)
+            marker.setTransparency(True)
+            marker.setHpr(0, -90, 0)
+            marker.reparentTo(render)
+            marker.setPos(pos[0], pos[1], 0.1)
+            marker.setBin("fixed", 40)
+            marker.setDepthTest(False)
+            marker.setDepthWrite(False)
+            self._group_markers.add(marker)
 
 
     def esc_handler(self):
