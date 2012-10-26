@@ -43,9 +43,28 @@ class MapBuilder(object):
             self._models[c] = model
             self._substrate[c] = substr
 
+    def redraw_group(self, group_id):
+        map = self.map
+        to_redraw = set(map.groups[group_id])
+        for c in tuple(to_redraw):
+            to_redraw.update(sq for sq, info in map.neighbors(c, all=True))
+        for c in to_redraw:
+            model = self._models.pop(c, None)
+            if model is not None:
+                model.removeNode()
+            substr = self._substrate.pop(c, None)
+            if substr is not None:
+                substr.removeNode()
+            if map[c] is None:
+                continue
+            model, substr = self._draw_square(c, map[c])
+            self._models[c] = model
+            self._substrate[c] = substr
+
+
     def _draw_square(self, coord, info):
-        kind = info.get('kind')
-        if kind in ('substrate_texture', None):
+        kind = info['kind']
+        if kind in ('substrate_texture', 'empty'):
             model = None
         elif kind == 'texture':
             return self._set_texture(info['texture'], info['ident'], coord), None

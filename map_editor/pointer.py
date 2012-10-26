@@ -1,6 +1,7 @@
 from panda3d.core import *
 
 class Pointer:
+    #TODO: show current position on screen for creating routes
 
     def __init__(self, editor):
         self.editor = editor
@@ -13,10 +14,15 @@ class Pointer:
         pointer.setTransparency(True)
         pointer.setHpr(0, -90, 0)
         pointer.reparentTo(render)
+        pointer.setBin("fixed", 40)
+        pointer.setDepthTest(False)
+        pointer.setDepthWrite(False)
 
         self.plane = plane = Plane((0, 0, 0), (1, 1, 0), (1, 0, 0))
 
         base.accept('mouse1', self.on_left_click)
+        base.accept('mouse2', self.on_right_click)
+        base.accept('lcontrol', self.on_right_click)
 
     @property
     def pos(self):
@@ -28,15 +34,23 @@ class Pointer:
         return int(pos[0]), int(pos[1])
 
     def on_left_click(self):
+        map = self.editor.map
         if not self.map_pointer:
             return
         cur_g = self.editor.current_group
         if cur_g is None:
-            if self.map_pos in self.editor.map:
-                del self.editor.map[self.map_pos]
+            if self.map_pos in map:
+                map.groups[map[self.map_pos]['ident']].remove(self.map_pos)
+                del map[self.map_pos]
         else:
-            self.editor.map[self.map_pos] = cur_g
+            map[self.map_pos] = cur_g
+            map.groups[cur_g['ident']].append(self.map_pos)
         self.editor.map_builder.redraw_9_squares(self.map_pos, cur_g)
+
+    def on_right_click(self):
+        map = self.editor.map
+        group_id = map[self.map_pos]['ident'] if self.map_pos in map else None
+        self.editor.select_group(group_id)
 
     def update(self, task):
         if not base.mouseWatcherNode.hasMouse():

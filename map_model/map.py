@@ -83,24 +83,24 @@ class Map(object):
 
         self.textures = set([self.substrate_texture])
         self.groups = defaultdict(list) # need for tests
-        self.data = {}
-        self.definitions = data['definitions']
+        self._data = {}
+        definitions = self.definitions = data['definitions']
+        #TODO: implement backward converting when saving
+        definitions['ss'] = dict(
+            kind='substrate_texture',
+            actions=data['substrate_actions']
+        )
         for num_row, row in enumerate(data['topology']):
             for index in range(0, len(data['topology'][0]), 3):
                 ident = row[index:index+2]
                 if ident == '..':
                     continue
-                elif ident == 'ss':
-                    info = dict(
-                        kind='substrate_texture',
-                        actions=data['substrate_actions']
-                    )
                 else:
-                    info = self.definitions[ident]
+                    info = definitions[ident]
                     info['ident'] = ident
-                self.data[index/3, num_row] = info
-                self.groups[ident].append((index/3, num_row))
-                if info.get('kind') == 'texture':
+                self._data[index / 3, num_row] = info
+                self.groups[ident].append((index / 3, num_row))
+                if info.get('kind', 'empty') == 'texture':
                     self.textures.add(info['texture'])
         self.routes = {}
         for key, value in data.get('routes', {}).items():
@@ -146,19 +146,19 @@ class Map(object):
                 yield 'npc', error
 
     def __getitem__(self, coord):
-        return self.data.get(coord)
+        return self._data.get(coord)
 
     def __delitem__(self, coord):
-        del self.data[coord]
+        del self._data[coord]
 
     def __setitem__(self, coord, group):
-        self.data[coord] = group
+        self._data[coord] = group
 
     def __iter__(self):
-        return self.data.items().__iter__()
+        return self._data.items().__iter__()
 
     def __contains__(self, coord):
-        return coord in self.data
+        return coord in self._data
 
     def neighbors(self, coord, all=False, yield_names=False):
         keys = self._neighbors.keys()

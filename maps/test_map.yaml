@@ -35,8 +35,10 @@ definitions:
     size: 6.0
     actions: [walk]
   ow:
+    kind: empty
     actions: [walk]
   wl:
+    kind: empty
     actions: []
 
 topology:

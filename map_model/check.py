@@ -9,6 +9,7 @@ class MapDataError(Exception):
 
 
 def check_map_data(data):
+    group_definition = fdecl.get_definition()
     all_actions = set(AVAILABLE_ACTIONS)
     stop = False
     for f in ('substrate_texture', 'definitions',
@@ -34,13 +35,11 @@ def check_map_data(data):
         actions = set(info.get('actions', []))
         if actions - all_actions:
             yield ('definitions', "unknown action for '{0}'".format(id))
-        kind = info.get('kind')
-        if kind is None:
-            continue
-        elif kind not in fdecl.definition:
+        kind = info.get('kind', 'empty')
+        if kind not in group_definition:
             yield 'definitions', "unknown kind for '{0}'".format(id)
             continue
-        fields = fdecl.definition[kind]
+        fields = group_definition[kind]
         for f, i in fields.items():
             if not i.get('default', False) and f not in info:
                 yield ('definitions',

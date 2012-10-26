@@ -14,3 +14,10 @@ camera:
 pointer:
   move_camera_border: 0.1 # defines the region in which mouse cursor moves the camera
 
+edit_panel:
+  widget_scale: 0.05
+  row_height: 0.06
+  row_width: 7
+  left_margin: 0.01
+  row_poses:
+    select_group: 0.1

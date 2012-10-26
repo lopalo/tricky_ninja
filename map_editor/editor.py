@@ -18,11 +18,6 @@ class Editor(ShowBase):
         self.current_group = None
         base.accept('escape', self.esc_handler)
         self.map = Map(map_name)
-        #FIXME: delete
-        self.current_group = dict(
-            kind='substrate_texture',
-            actions=[]
-        )
         self.map_builder = MapBuilder(self.map, render)
         self.map_builder.build()
         self.edit_panel = EditPanel(self)
@@ -61,6 +56,17 @@ class Editor(ShowBase):
             camera_node.setZ(max(camera_node.getZ() - hstep, min_h))
         base.accept('arrow_down', decr_height)
         base.accept('arrow_down-repeat', decr_height)
+
+    def select_group(self, ident):
+        self.edit_panel.select_group(ident)
+
+    def set_current_group(self, group):
+        self.current_group = group
+        self._mark_group()
+
+    def _mark_group(self):
+        #TODO: mark of group
+        pass
 
 
     def esc_handler(self):

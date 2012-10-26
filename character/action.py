@@ -12,6 +12,7 @@ def set_testing(value):
 
 
 def action(name):
+    #TODO: refactor this hack using getattr in update_action
     actions = sys._getframe(1).f_locals['actions']
     assert name not in actions
     def wrapper(func):

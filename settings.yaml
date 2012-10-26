@@ -1,8 +1,8 @@
 paths:
-  textures: models/textures
-  map_textures: models/map_textures
-  models: models
-  model_sizes: models/sizes.yaml
+  textures: graphic_objects/textures
+  map_textures: graphic_objects/map_textures
+  models: graphic_objects/models
+  model_sizes: graphic_objects/sizes.yaml
   maps: maps
 
 show_view_field: false # for debugging
