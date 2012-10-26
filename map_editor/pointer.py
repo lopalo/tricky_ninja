@@ -38,9 +38,10 @@ class Pointer:
         if not self.map_pointer:
             return
         cur_g = self.editor.current_group
+        if self.map_pos in map:
+            map.groups[map[self.map_pos]['ident']].remove(self.map_pos)
         if cur_g is None:
             if self.map_pos in map:
-                map.groups[map[self.map_pos]['ident']].remove(self.map_pos)
                 del map[self.map_pos]
         else:
             map[self.map_pos] = cur_g

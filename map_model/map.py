@@ -73,6 +73,7 @@ class Map(object):
         if data is None:
             with open(S.map(name), 'r') as f:
                 data = yaml.load(f)
+        self.yaml_data = data # need for saving in editor
         data['topology'].reverse()
         self._name = name
         self._check = check
@@ -82,10 +83,9 @@ class Map(object):
         self.substrate_texture = data['substrate_texture']
 
         self.textures = set([self.substrate_texture])
-        self.groups = defaultdict(list) # need for tests
+        self.groups = defaultdict(list) # need for tests and editor
         self._data = {}
         definitions = self.definitions = data['definitions']
-        #TODO: implement backward converting when saving
         definitions['ss'] = dict(
             kind='substrate_texture',
             actions=data['substrate_actions']

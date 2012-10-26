@@ -1,78 +1,107 @@
-start_position: [11, 4]
-
-substrate_texture: grass
-substrate_actions: [walk, jump, see]
-#for substrate_texture ident always is 'ss'
-
 definitions:
+  S0:
+    actions:
+    - jump
+    - see
+    angle: 128
+    ident: S0
+    kind: model
+    model: stone
+  S1:
+    actions: []
+    angle: 23
+    ident: S1
+    kind: model
+    model: stone
+    size: 1.5
+  ff:
+    actions: []
+    ident: ff
+    kind: chain_model
+    left_bottom_model: fence-corner
+    vertical_model: fence
+  ow:
+    actions:
+    - walk
+    ident: ow
+    kind: empty
   sa:
+    actions:
+    - walk
+    - jump
+    - see
+    ident: sa
     kind: texture
     texture: sand
-    actions: [walk, jump, see]
   st:
+    actions:
+    - walk
+    - jump
+    - see
+    ident: st
     kind: texture
     texture: stone
-    actions: [walk, jump, see]
-  S0:
-    kind: model
-    model: stone
-    angle: 128
-    actions: [jump, see]
-  S1:
-    kind: model
-    model: stone
-    angle: 23
-    size: 1.5
-    actions: []
-  ff:
-    kind: chain_model
-    vertical_model: fence
-    left_bottom_model: fence-corner
-    actions: []
   tr:
-    kind: sprite
-    texture: tree
-    size: 6.0
-    actions: [walk]
-  ow:
-    kind: empty
-    actions: [walk]
+    actions:
+    - walk
+    angle: 333
+    ident: tr
+    kind: model
+    model: fence
+    size: 0.01
   wl:
-    kind: empty
     actions: []
-
-topology:
-- '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
-- '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..'
-- '.. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..'
-- '.. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..'
-- '.. ss ss ss ss ss ss ss ss ss ss ss ss ss ow ss ow ss ss ss ss ss ss S0'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ow tr ow tr ow ss ss ss ss ss ..'
-- '.. .. ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss ss sa ..'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss wl S1 wl tr ow ss ss ss ss sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ff ff sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ff sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ff ff sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss st st ss ff ff ff ff sa sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss st st st ff sa sa sa sa sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss ss st st sa sa sa sa sa sa sa sa sa sa'
-- 'ss ss ss ss ss ss ss ss ss ss ss S0 st st sa sa sa sa sa sa sa sa sa ..'
-- '.. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..'
-- '.. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. sa sa .. .. .. .. .. ..'
-
-routes:
-  r1: [[0, 13], [17, 4], [17, 0]]
-  r2: [[0, 13], [14, 16], [21, 8]]
-
+    ident: wl
+    kind: empty
 npcs:
-- count: 2
-  texture: nskinbr
-  alert_texture: nskinrd
+- alert_texture: nskinrd
+  count: 2
   route: r1
-
-# - count: 1
-#   texture: nskinbr
-#   alert_texture: nskinrd
-#   route: r2
+  texture: nskinbr
+routes:
+  r1:
+  - - 0
+    - 13
+  - - 17
+    - 4
+  - - 17
+    - 0
+  r2:
+  - - 0
+    - 13
+  - - 14
+    - 16
+  - - 21
+    - 8
+start_position:
+- 11
+- 4
+substrate_actions:
+- walk
+- jump
+- see
+substrate_texture: grass
+topology:
+- .. .. .. .. .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..
+- .. .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..
+- .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ow ss ow ss ss ss ss ss ss S0
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ow tr ow tr ow ss ss ss ss ss ..
+- .. .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss ss sa ..
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss wl S1 wl tr ow ss ss ss ss sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ff ff sa sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ff sa sa sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ff ff sa sa sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss st st ss ff ff ff ff sa sa sa sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss st st st ff sa sa sa sa sa sa sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss st st sa sa sa sa sa sa sa sa sa sa
+- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss S0 st st sa sa sa sa sa sa sa sa sa ..
+- .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..
+- .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. sa sa .. .. .. .. .. ..
+- sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- .. .. sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- .. .. .. .. sa .. .. .. sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- .. .. .. sa sa sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- .. .. .. .. sa sa sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..

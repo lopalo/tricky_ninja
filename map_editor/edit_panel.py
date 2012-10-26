@@ -5,7 +5,7 @@ from panda3d.core import *
 from map_model.fields_declaration import get_definition
 
 class EditPanel:
-    #TODO: adding new group that should be in map dedinition and map groups
+    #TODO: adding new group that should be in map dedinitions and map groups
 
     def __init__(self, editor):
         self._row_count = 0
