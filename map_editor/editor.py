@@ -105,11 +105,9 @@ class Editor(ShowBase):
         offset_x, offset_y = 0, 0
         poses = [p for p, i in map]
         min_x = min(p[0] for p in poses)
-        if min_x < 0:
-            offset_x = -min_x
+        offset_x = -min_x
         min_y = min(p[1] for p in poses)
-        if min_y < 0:
-            offset_y = -min_y
+        offset_y = -min_y
         width = max(p[0] for p in poses) - min_x + 1
         height = max(p[1] for p in poses) - min_y + 1
         topology = [['..'] * width for _ in range(height)]
@@ -118,12 +116,20 @@ class Editor(ShowBase):
                 topology[p[1] + offset_y][p[0] + offset_x] = ident
         topology = [' '.join(row) for row in topology]
         topology.reverse()
-        yaml_data = map.yaml_data
+        yaml_data = deepcopy(map.yaml_data)
         definitions = deepcopy(map.definitions)
         yaml_data['topology'] = topology
         yaml_data['substrate_actions'] = definitions.pop('ss')['actions']
         yaml_data['definitions'] = definitions
-        #TODO: apply offset to routes
+        if 'start_position' in yaml_data:
+            st_pos = yaml_data['start_position']
+            st_pos = [st_pos[0] + offset_x, st_pos[1] + offset_y]
+            yaml_data['start_position'] = st_pos
+        if 'routes' in yaml_data:
+            routes = yaml_data['routes']
+            for rname, route in routes.items():
+                for index, rpos in  enumerate(tuple(route)):
+                    route[index] = [rpos[0] + offset_x, rpos[1] + offset_y]
         with open(S.map(self.map_name), 'w') as f:
             yaml.dump(yaml_data, f, default_flow_style=False, width=1000)
 

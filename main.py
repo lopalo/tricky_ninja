@@ -10,6 +10,9 @@ class App(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
         #TODO: implement menu and setting manager from it
+
+        #TODO: loading custom panda3d config
+        #TODO: get control keys from setting
         self.set_manager('test_map.yaml')
         self.disableMouse()
         self.stop_loop = False

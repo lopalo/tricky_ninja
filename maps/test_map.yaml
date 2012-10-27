@@ -44,11 +44,10 @@ definitions:
   tr:
     actions:
     - walk
-    angle: 333
     ident: tr
-    kind: model
-    model: fence
-    size: 0.01
+    kind: sprite
+    size: 6.0
+    texture: tree
   wl:
     actions: []
     ident: wl
@@ -82,26 +81,20 @@ substrate_actions:
 - see
 substrate_texture: grass
 topology:
-- .. .. .. .. .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..
-- .. .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..
-- .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ow ss ow ss ss ss ss ss ss S0
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ow tr ow tr ow ss ss ss ss ss ..
-- .. .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss ss sa ..
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss wl S1 wl tr ow ss ss ss ss sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ff ff sa sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ff sa sa sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ff ff sa sa sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss st st ss ff ff ff ff sa sa sa sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss st st st ff sa sa sa sa sa sa sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss st st sa sa sa sa sa sa sa sa sa sa
-- .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss S0 st st sa sa sa sa sa sa sa sa sa ..
-- .. .. .. .. .. .. .. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..
-- .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. sa sa .. .. .. .. .. ..
-- sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
-- .. .. sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
-- .. .. .. .. sa .. .. .. sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
-- .. .. .. sa sa sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
-- .. .. .. .. sa sa sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
-- sa .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..
+- .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ..
+- .. ss ss ss ss ss ss ss ss ss ss ss ss ss ow ss ow ss ss ss ss ss ss S0
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ow tr ow tr ow ss ss ss ss ss ..
+- .. .. ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss ss sa ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss wl S1 wl tr ow ss ss ss ss sa sa
+- ss ss ss ss ss ss ss ss ss ss ss ss ss wl wl wl ow ss ss ss ss sa sa sa
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss sa sa sa
+- ss ss ss ss ss ss ss ss ss st ss ss ss ss ss ss ss ss ff ff sa sa sa sa
+- ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ss ss ff sa sa sa sa sa
+- ss ss ss ss ss ss ss ss ss ss st st ss ss ss ss ss ff ff sa sa sa sa sa
+- ss ss ss ss ss ss ss ss ss ss ss st st ss ff ff ff ff sa sa sa sa sa sa
+- ss ss ss ss ss ss ss ss ss ss ss st st st ff sa sa sa sa sa sa sa sa sa
+- ss ss ss ss ss ss ss ss ss ss ss ss st st sa sa sa sa sa sa sa sa sa sa
+- ss ss ss ss ss ss ss ss ss ss ss S0 st st sa sa sa sa sa sa sa sa sa ..
+- .. ss ss ss ss ss ss ss ss ss .. .. .. .. .. sa sa sa .. .. .. .. .. ..
+- .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. sa sa .. .. .. .. .. ..

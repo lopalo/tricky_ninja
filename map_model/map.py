@@ -266,6 +266,7 @@ class Map(object):
             diff = sq[0] - pos[0], sq[1] - pos[1]
             if hypot(diff[0], diff[1]) > radius:
                 return False
+            #TODO: refactor this using dot product
             sq_angle = degrees(atan2(diff[1], diff[0]))
             if 90 < angle < 270:
                 sq_angle %= 360
