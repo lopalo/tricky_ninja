@@ -64,7 +64,7 @@ class Character(object):
         return pos
 
     def _rotate_to(self, to_pos=None, angle=None, speed=None):
-        assert to_pos or angle
+        assert to_pos is not None or angle is not None
         if angle is None:
             shift = to_pos[1] - self.pos[1], to_pos[0] - self.pos[0]
             angle = (self.angle_table[shift] + 180) % 360

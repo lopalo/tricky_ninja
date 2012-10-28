@@ -21,3 +21,15 @@ edit_panel:
   left_margin: 0.01
   row_poses:
     select_group: 0.1
+
+show_control_keys: true
+
+control_keys:
+- close_window: escape
+- save: s
+- rotate_camera_clockwise: arrow_right
+- rotate_camera_counterclockwise: arrow_left
+- increase_camera_height: arrow_up
+- decrease_camera_height: arrow_down
+- set_group_for_square: mouse1
+- select_group_by_square: lcontrol

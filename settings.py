@@ -8,6 +8,8 @@ class BaseSettings(object):
             data = yaml.load(f)
         self.__dict__.update(data)
         self._path = os.path.abspath(os.path.dirname(__file__))
+        self.ordered_control_keys = self.control_keys
+        self.control_keys = dict(i.items()[0] for i in self.control_keys)
 
 class Settings(BaseSettings):
 

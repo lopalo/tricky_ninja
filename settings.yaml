@@ -70,3 +70,20 @@ npc:
   idle_frame: 28
   body_frame: 170
   body_shift: -2
+
+show_control_keys: true
+
+control_keys:
+- close_window: escape
+- rotate_camera_clockwise: x
+- rotate_camera_counterclockwise: z
+- increase_camera_distance: a
+- decrease_camera_distance: s
+- move_forward: arrow_up
+- move_backward: arrow_down
+- move_left: arrow_left
+- move_right: arrow_right
+- jump: space
+- kill_self: k
+- hit: h
+- move_body: b

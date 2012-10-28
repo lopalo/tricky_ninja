@@ -20,9 +20,9 @@ class Pointer:
 
         self.plane = plane = Plane((0, 0, 0), (1, 1, 0), (1, 0, 0))
 
-        base.accept('mouse1', self.on_left_click)
-        base.accept('mouse2', self.on_right_click)
-        base.accept('lcontrol', self.on_right_click)
+        base.accept(ES.control_keys['set_group_for_square'], self.on_left_click)
+        base.accept(ES.control_keys['select_group_by_square'],
+                                            self.on_right_click)
 
     @property
     def pos(self):

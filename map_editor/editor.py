@@ -10,6 +10,7 @@ from map_model.map import Map
 from map_builder import MapBuilder
 from map_editor.edit_panel import EditPanel
 from map_editor.pointer import Pointer
+from misc.display_text import display_control_keys
 
 class Editor(ShowBase):
 
@@ -28,8 +29,10 @@ class Editor(ShowBase):
         taskMgr.add(self.pointer.update, 'update_pointer')
         self.camera_node = render.attachNewNode('camera_node')
         self.set_camera_control()
-        base.accept('escape', self.esc_handler)
-        base.accept('s', self.save)
+        base.accept(ES.control_keys['close_window'], self.esc_handler)
+        base.accept(ES.control_keys['save'], self.save)
+        if ES.show_control_keys:
+            display_control_keys(ES)
 
     def set_camera_control(self, only_arrows=False):
         pitch = -ES.camera['horizontal_angle']
@@ -49,30 +52,38 @@ class Editor(ShowBase):
             base.accept('home', init)
         def incr_angle():
             camera_node.setH(camera_node, ES.camera['vertical_angle_step'])
-        base.accept('arrow_left', incr_angle)
-        base.accept('arrow_left-repeat', incr_angle)
-        def incr_angle():
+        key = ES.control_keys['rotate_camera_counterclockwise']
+        base.accept(key, incr_angle)
+        base.accept(key + '-repeat', incr_angle)
+        def decr_angle():
             camera_node.setH(camera_node, -ES.camera['vertical_angle_step'])
-        base.accept('arrow_right', incr_angle)
-        base.accept('arrow_right-repeat', incr_angle)
+        key = ES.control_keys['rotate_camera_clockwise']
+        base.accept(key, decr_angle)
+        base.accept(key + '-repeat', decr_angle)
         def incr_height():
             camera_node.setZ(min(camera_node.getZ() + hstep, max_h))
-        base.accept('arrow_up', incr_height)
-        base.accept('arrow_up-repeat', incr_height)
+        key = ES.control_keys['increase_camera_height']
+        base.accept(key, incr_height)
+        base.accept(key + '-repeat', incr_height)
         def decr_height():
             camera_node.setZ(max(camera_node.getZ() - hstep, min_h))
-        base.accept('arrow_down', decr_height)
-        base.accept('arrow_down-repeat', decr_height)
+        key = ES.control_keys['decrease_camera_height']
+        base.accept(key, decr_height)
+        base.accept(key + '-repeat', decr_height)
 
     def remove_arrow_handlers(self):
-        base.ignore('arrow_left')
-        base.ignore('arrow_left-repeat')
-        base.ignore('arrow_right')
-        base.ignore('arrow_right-repeat')
-        base.ignore('arrow_up')
-        base.ignore('arrow_up-repeat')
-        base.ignore('arrow_down')
-        base.ignore('arrow_down-repeat')
+        key = ES.control_keys['rotate_camera_counterclockwise']
+        base.ignore(key)
+        base.ignore(key + '-repeat')
+        key = ES.control_keys['rotate_camera_clockwise']
+        base.ignore(key)
+        base.ignore(key + '-repeat')
+        key = ES.control_keys['increase_camera_height']
+        base.ignore(key)
+        base.ignore(key + '-repeat')
+        key = ES.control_keys['decrease_camera_height']
+        base.ignore(key)
+        base.ignore(key + '-repeat')
 
     def select_group(self, ident):
         self.edit_panel.select_group(ident)

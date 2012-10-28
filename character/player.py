@@ -43,7 +43,7 @@ class Player(Character):
         actor.pose('anim', self.idle_frame)
         actor.setBlend(frameBlend=True)
         self.set_camera()
-        self.set_arrow_handlers()
+        self.set_move_handlers()
         self.set_control()
 
     def set_camera(self):
@@ -65,86 +65,98 @@ class Player(Character):
         def incr_angle():
             self.cam_angle += S.camera['vertical_angle_step']
             recalc()
-        base.accept('z', incr_angle)
-        base.accept('z-repeat', incr_angle)
+        key = S.control_keys['rotate_camera_counterclockwise']
+        base.accept(key, incr_angle)
+        base.accept(key + '-repeat', incr_angle)
         def decr_angle():
             self.cam_angle -= S.camera['vertical_angle_step']
             recalc()
-        base.accept('x', decr_angle)
-        base.accept('x-repeat', decr_angle)
+        key = S.control_keys['rotate_camera_clockwise']
+        base.accept(key, decr_angle)
+        base.accept(key + '-repeat', decr_angle)
         def incr_dist():
             self.cam_distance += S.camera['distance_step']
             recalc()
-        base.accept('a', incr_dist)
-        base.accept('a-repeat', incr_dist)
+        key = S.control_keys['increase_camera_distance']
+        base.accept(key, incr_dist)
+        base.accept(key + '-repeat', incr_dist)
         def decr_dist():
             self.cam_distance -= S.camera['distance_step']
             recalc()
-        base.accept('s', decr_dist)
-        base.accept('s-repeat', decr_dist)
+        key = S.control_keys['decrease_camera_distance']
+        base.accept(key, decr_dist)
+        base.accept(key + '-repeat', decr_dist)
         recalc()
 
-    def set_arrow_handlers(self):
+    def set_move_handlers(self):
         def common_handler():
             if self.captured_body:
                 messenger.send(self.continue_move_body_event)
             else:
                 self.update_action('walk')
-        def up():
+        def forward():
             self.move_direction[0] = 1
             common_handler()
-        def up_up():
+        def forward_up():
             self.move_direction[0] = 0
-        base.accept('arrow_up', up)
-        base.accept('arrow_up-up', up_up)
-        def down():
+        key = S.control_keys['move_forward']
+        base.accept(key, forward)
+        base.accept(key + '-up', forward_up)
+        def backward():
             self.move_direction[0] = -1
             common_handler()
-        def down_up():
+        def backward_up():
             self.move_direction[0] = 0
-        base.accept('arrow_down', down)
-        base.accept('arrow_down-up', down_up)
+        key = S.control_keys['move_backward']
+        base.accept(key, backward)
+        base.accept(key + '-up', backward_up)
         def right():
             self.move_direction[1] = 1
             common_handler()
         def right_up():
             self.move_direction[1] = 0
-        base.accept('arrow_right', right)
-        base.accept('arrow_right-up', right_up)
+        key = S.control_keys['move_right']
+        base.accept(key, right)
+        base.accept(key + '-up', right_up)
         def left():
             self.move_direction[1] = -1
             common_handler()
         def left_up():
             self.move_direction[1] = 0
-        base.accept('arrow_left', left)
-        base.accept('arrow_left-up', left_up)
+        key = S.control_keys['move_left']
+        base.accept(key, left)
+        base.accept(key + '-up', left_up)
 
-    def remove_arrow_handlers(self):
-        base.ignore('arrow_up')
-        base.ignore('arrow_up-up')
-        base.ignore('arrow_down')
-        base.ignore('arrow_down-up')
-        base.ignore('arrow_right')
-        base.ignore('arrow_right-up')
-        base.ignore('arrow_left')
-        base.ignore('arrow_left-up')
+    def remove_move_handlers(self):
+        key = S.control_keys['move_forward']
+        base.ignore(key)
+        base.ignore(key + '-up')
+        key = S.control_keys['move_backward']
+        base.ignore(key)
+        base.ignore(key + '-up')
+        key = S.control_keys['move_left']
+        base.ignore(key)
+        base.ignore(key + '-up')
+        key = S.control_keys['move_right']
+        base.ignore(key)
+        base.ignore(key + '-up')
 
     def set_control(self):
-        def space_down():
+        def start_jump():
             self.update_action('jump')
-        base.accept('space', space_down)
-        base.accept('k', self.kill)
-        def h_down():
+        base.accept(S.control_keys['jump'], start_jump)
+        base.accept(S.control_keys['kill_self'], self.kill)
+        def hit_down():
             self.update_action('hit')
-        base.accept('h', h_down)
-        def b_down():
+        base.accept(S.control_keys['hit'], hit_down)
+        def start_move_body():
             self.captured_body = True
             self.update_action('move_body')
-        base.accept('b', b_down)
-        def b_up():
+        base.accept(S.control_keys['move_body'], start_move_body)
+        def finish_move_body():
             self.captured_body = False
             messenger.send(self.release_body_event)
-        base.accept('b-up', b_up)
+        base.accept(S.control_keys['move_body'] + '-up', finish_move_body)
 
     def kill(self, hit_angle=0):
         if not self:
@@ -154,7 +166,7 @@ class Player(Character):
 
     def update_action(self, action=None):
         #calls in every frame and by some
-        #events('arrows'...)
+        #events
 
         if not self:
             return
@@ -220,18 +232,21 @@ class Player(Character):
         while True:
             pos = field[0]
             pointer.setPos(pos[0], pos[1], 0.1)
-            val = yield events('arrow_left', 'arrow_left-repeat',
-                               'arrow_right', 'arrow_right-repeat',
-                               'space-up', self.must_die_event)
-            if val in (self.must_die_event, 'space-up'):
+            finish_event = S.control_keys['jump'] + '-up'
+            left_key = S.control_keys['move_left']
+            right_key = S.control_keys['move_right']
+            val = yield events(left_key, left_key + '-repeat',
+                               right_key, right_key + '-repeat',
+                               finish_event, self.must_die_event)
+            if val in (self.must_die_event, finish_event):
                 break
-            elif val in ('arrow_left', 'arrow_left-repeat'):
+            elif val in (left_key, left_key + '-repeat'):
                 field.rotate(1)
-            elif val in ('arrow_right', 'arrow_right-repeat'):
+            elif val in (right_key, right_key + '-repeat'):
                 field.rotate(-1)
             else:
                 raise Exception('Unknown event')
-        self.set_arrow_handlers()
+        self.set_move_handlers()
         pointer.removeNode()
         if self.must_die:
             return
