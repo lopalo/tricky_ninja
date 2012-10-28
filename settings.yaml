@@ -14,8 +14,8 @@ graphics:
   light_color: [1, 1, 1, 1]
   ambient_light_color: [0.4, 0.4, 0.4, 1]
   #TODO: move this to user's settings
-  enable_shadows: true
-  enable_cartoon: true
+  enable_shadows: false
+  enable_cartoon: false
 
 camera:
   min_distance: 3

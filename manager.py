@@ -74,7 +74,7 @@ class Manager(object):
                 npc.view_angle = S.npc['excited_view_angle']
 
     def setup_graphics(self):
-        self.main_node.setShaderAuto()
+        #self.main_node.setShaderAuto() # doesn't work in multithreading mode
         mnode = self.main_node
         alight = AmbientLight('alight')
         alight.setColor(VBase4(*S.graphics['ambient_light_color']))

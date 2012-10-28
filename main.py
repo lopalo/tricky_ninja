@@ -1,6 +1,9 @@
+import os
+os.environ["PANDA_PRC_DIR"] = os.getcwd()
+os.environ["PANDA_PRC_PATH"] = os.getcwd()
+
 import __builtin__
 from direct.showbase.ShowBase import ShowBase
-from panda3d.core import ConfigVariableString
 from manager import Manager
 from settings import Settings
 import cProfile
@@ -11,7 +14,6 @@ class App(ShowBase):
         ShowBase.__init__(self)
         #TODO: implement menu and setting manager from it
 
-        #TODO: loading custom panda3d config
         #TODO: get control keys from setting
         self.set_manager('test_map.yaml')
         self.disableMouse()
@@ -39,6 +41,5 @@ class App(ShowBase):
 
 if __name__ == '__main__':
     __builtin__.S = Settings('settings.yaml')
-    ConfigVariableString("show-frame-rate-meter").setValue('#t')
     app = App()
     cProfile.run('app.loop()')
