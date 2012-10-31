@@ -6,14 +6,13 @@ paths:
   maps: maps
 
 show_view_field: false # for debugging
-show_pathes: true # for debugging
+show_pathes: false # for debugging
 
 graphics:
   map_texture_size: 256
   light_hpr: [-90, -40, 0]
   light_color: [1, 1, 1, 1]
   ambient_light_color: [0.4, 0.4, 0.4, 1]
-  #TODO: move this to user's settings
   enable_shadows: false
   enable_cartoon: false
 

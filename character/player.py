@@ -13,7 +13,6 @@ from character.action import action, wait, events, ret
 
 
 class Player(Character):
-    actions = Character.actions.copy()
 
     release_body_event = 'release_body_event'
     continue_move_body_event = 'continue_move_body_event'
@@ -170,16 +169,15 @@ class Player(Character):
 
         if not self:
             return
-        assert action in self.actions or action == None
         if self.action is not None:
             return
         if self.must_die:
-            self.actions['die'](self)
+            self._start_action('die')
             return
         if action is not None:
-            self.actions[action](self)
+            self._start_action(action)
         elif tuple(self.move_direction) != (0, 0):
-            self.actions['walk'](self)
+            self._start_action('walk')
 
     def get_next_pos(self):
         move_dir = tuple(self.move_direction)
@@ -215,7 +213,7 @@ class Player(Character):
         new_pos = pos[0] + shift[0], pos[1] + shift[1]
         return new_pos
 
-    @action('jump')
+    @action
     def do_jump(self):
         map = self.manager.map
         pred = lambda pos: 'jump' in map[pos]['actions']
@@ -245,7 +243,7 @@ class Player(Character):
             elif val in (right_key, right_key + '-repeat'):
                 field.rotate(-1)
             else:
-                raise Exception('Unknown event')
+                raise Exception('Unknown event "{}"'.format(val))
         self.set_move_handlers()
         pointer.removeNode()
         if self.must_die:
@@ -292,7 +290,7 @@ class Player(Character):
         yield wait(0.1)
         actor.pose('anim', self.idle_frame)
 
-    @action('die')
+    @action
     def do_die(self):
         self.dead = True
         self.must_die = False
@@ -353,7 +351,7 @@ class Player(Character):
         self.walking = False
         body.update_poses()
 
-    @action('move_body')
+    @action
     def do_move_body(self):
         map = self.manager.map
         bpos = self.angle_to_pos(0)

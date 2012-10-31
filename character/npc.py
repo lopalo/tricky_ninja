@@ -10,7 +10,6 @@ from character.action import action, wait
 
 
 class NPC(Character):
-    actions = Character.actions.copy()
 
     def __init__(self, manager, texture, route, **spam):
         super(NPC, self).__init__(manager)
@@ -112,11 +111,10 @@ class NPC(Character):
         if self.action is not None:
             return
         action = self.get_action()
-        assert action in self.actions
         if self.must_die:
-            self.actions['die'](self)
+            self._start_action('die')
             return
-        self.actions[action](self)
+        self._start_action(action)
 
     def in_view_field(self, char):
         assert isinstance(char, Character)
@@ -135,7 +133,7 @@ class NPC(Character):
             return True
         return False
 
-    @action('die')
+    @action
     def do_die(self):
         anim_interval = yield self._falling()
         anim_interval.finish()

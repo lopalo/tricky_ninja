@@ -43,6 +43,13 @@ class TestPlayer(unittest.TestCase):
         S.player = defaultdict(int)
         S.player['body_moving_speed'] = .2
         S.ch_anim = {'walk_range': (343, 400)}
+        S.control_keys = {
+            'move_right': 'arrow_right',
+            'move_left': 'arrow_left',
+            'move_forward': 'arrow_up',
+            'move_backward': 'arrow_down',
+            'jump': 'space'
+        }
 
     @mock.patch('character.char.LerpHprInterval', interval_mock)
     @mock.patch('character.player.LerpPosInterval', interval_mock)

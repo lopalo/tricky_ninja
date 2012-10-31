@@ -44,7 +44,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                NPC(self, **_data).dead = True
+                NPC(self, **_data)#.dead = True
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -74,22 +74,24 @@ class Manager(object):
                 npc.view_angle = S.npc['excited_view_angle']
 
     def setup_graphics(self):
-        #self.main_node.setShaderAuto() # doesn't work in multithreading mode
         mnode = self.main_node
         alight = AmbientLight('alight')
         alight.setColor(VBase4(*S.graphics['ambient_light_color']))
         alnp = mnode.attachNewNode(alight)
         mnode.setLight(alnp)
 
+        #TODO: set light color and direction using hour that specified in the map
         dlight = DirectionalLight('dlight')
         dlight.setColor(VBase4(*S.graphics['light_color']))
         dlnp = mnode.attachNewNode(dlight)
         dlnp.setHpr(*S.graphics['light_hpr'])
         mnode.setLight(dlnp)
         if S.graphics['enable_shadows']:
+            self.main_node.setShaderAuto() # doesn't work in multithreading mode
             dlight.setShadowCaster(True, 512, 512)
         self.filters = CommonFilters(base.win, base.cam)
         if S.graphics['enable_cartoon']:
+            self.main_node.setShaderAuto() # doesn't work in multithreading mode
             mnode.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
             self.filters.setCartoonInk(1)
 

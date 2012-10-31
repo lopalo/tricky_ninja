@@ -9,7 +9,6 @@ from character.action import action, wait, ret
 
 class Character(object):
     model = 'ninja'
-    actions = {}
 
     #(forward, right)
     angle_table = {
@@ -36,6 +35,9 @@ class Character(object):
 
     def __nonzero__(self):
         return not self.dead
+
+    def _start_action(self, name):
+        getattr(self, 'do_' + name)()
 
     @property
     def pos(self):
@@ -79,7 +81,7 @@ class Character(object):
                                                     (c_angle, 0, 0))
             yield interval
 
-    @action('walk')
+    @action
     def do_walk(self):
         # 'yield wait()' need for reading right direction
         # if player pressed 2 arrow keys
@@ -114,7 +116,7 @@ class Character(object):
             self.walking = False
         anim.pose(self.idle_frame)
 
-    @action('hit')
+    @action
     def do_hit(self):
         actor = self.actor
         interval = actor.actorInterval(

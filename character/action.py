@@ -1,4 +1,3 @@
-import sys
 from functools import wraps
 from types import GeneratorType
 from direct.interval.ActorInterval import ActorInterval
@@ -11,24 +10,21 @@ def set_testing(value):
     _testing = value
 
 
-def action(name):
-    #TODO: refactor this hack using getattr in update_action
-    actions = sys._getframe(1).f_locals['actions']
-    assert name not in actions
-    def wrapper(func):
-        @wraps(func)
-        def wrap(char, *args, **kwargs):
-            assert char.action == None
-            char.action = name
-            gen = func(char, *args, **kwargs)
-            assert isinstance(gen, GeneratorType)
-            gen = _stack(gen)
-            if _testing:
-                return gen
-            _runner(char, gen, None)
-        actions[name] = wrap
-        return wrap
-    return wrapper
+def action(func):
+    fname = func.__name__
+    assert fname.startswith('do_')
+    name = fname[3:]
+    @wraps(func)
+    def wrap(char, *args, **kwargs):
+        assert char.action == None
+        char.action = name
+        gen = func(char, *args, **kwargs)
+        assert isinstance(gen, GeneratorType)
+        gen = _stack(gen)
+        if _testing:
+            return gen
+        _runner(char, gen, None)
+    return wrap
 
 
 def _runner(char, gen, send_value=None):

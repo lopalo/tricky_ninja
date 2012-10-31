@@ -13,7 +13,7 @@ class App(ShowBase):
 
     def __init__(self):
         ShowBase.__init__(self)
-        #TODO: implement menu and setting manager from it
+        #TODO: implement main menu and selecting level (screenshot, title) from it
         self.set_manager('test_map.yaml')
         self.disableMouse()
         self.stop_loop = False

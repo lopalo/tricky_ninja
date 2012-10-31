@@ -1,4 +1,4 @@
-from math import atan2, hypot, degrees, sqrt
+from math import atan2, hypot, degrees, radians, sqrt, cos, sin, acos
 from heapq import heappush, heappop
 from collections import OrderedDict, defaultdict, deque
 import yaml
@@ -53,6 +53,14 @@ def square_sides(pos):
         v1, v2 = tuple(vertices)[:2]
         yield (x + v1[0], y + v1[1]), (x + v2[0], y + v2[1])
         vertices.rotate(-1)
+
+
+def angle_between(v1, v2):
+    l1 = hypot(v1[0], v1[1])
+    v1 = v1[0] / l1, v1[1] / l1
+    l2 = hypot(v2[0], v2[1])
+    v2 = v2[0] / l2, v2[1] / l2
+    return degrees(acos(v1[0] * v2[0] + v1[1] * v2[1]))
 
 
 class Map(object):
@@ -261,18 +269,14 @@ class Map(object):
         assert 0 <= angle < 360, angle
         assert 0 < cone_angle < 180, cone_angle
 
-        st_a, end_a = angle - cone_angle / 2 , angle + cone_angle / 2
+        direction = cos(radians(angle)), sin(radians(angle))
+        half_cone = float(cone_angle) / 2
         def field_pred(sq):
             diff = sq[0] - pos[0], sq[1] - pos[1]
             if hypot(diff[0], diff[1]) > radius:
                 return False
-            #TODO: refactor this using dot product
-            sq_angle = degrees(atan2(diff[1], diff[0]))
-            if 90 < angle < 270:
-                sq_angle %= 360
-            elif 270 <= angle < 360:
-                sq_angle += 360
-            if not st_a < sq_angle < end_a:
+            angle = angle_between(diff, direction)
+            if angle > half_cone:
                 return False
             if not pred(sq):
                 obstacles.add(sq)
