@@ -1,5 +1,5 @@
 <Texture> wood_diffuse {
-  ../textures/wood.png
+  textures/wood.png
   <Scalar> format { rgb }
   <Scalar> wrapu { repeat }
   <Scalar> wrapv { repeat }
@@ -7,7 +7,7 @@
   <Scalar> magfilter { linear_mipmap_linear }
 }
 <Texture> treebark_diffuse {
-  ../textures/treebark.png
+  textures/treebark.png
   <Scalar> format { rgb }
   <Scalar> wrapu { repeat }
   <Scalar> wrapv { repeat }

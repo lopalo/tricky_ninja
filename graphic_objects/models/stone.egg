@@ -1,5 +1,5 @@
 <Texture> 1 {
-  ../textures/stone.png
+  textures/stone.png
 }
 <Group> 2 {
 }

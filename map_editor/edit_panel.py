@@ -141,6 +141,7 @@ class ComboboxWidget:
         self.type = type
         items = [basename(i).split('.')[0] for i
                     in glob(variants_dir + '/*[!~]')]
+        items.remove('textures') # ignore textures of models
         if self.group[fname] in items:
             init_item = items.index(self.group[fname])
         else:
