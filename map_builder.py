@@ -20,7 +20,7 @@ class MapBuilder(object):
         self.main_node = main_node
 
     def build(self):
-        self._load_textures()
+        self._load_map_textures()
         self._substrate = {}
         self._models = {}
         for coord, info in self.map:
@@ -102,7 +102,9 @@ class MapBuilder(object):
 
         return model, self._set_texture(None, None, coord, True)
 
-    def _load_textures(self):
+    def _load_map_textures(self, additional=None):
+        if additional is not None:
+            self.map.textures.add(additional)
         self.map_textures = {}
         for txt_name in self.map.textures:
             txt_paths = glob(path.join(S.map_texture(txt_name), '*.png'))
@@ -182,6 +184,8 @@ class MapBuilder(object):
             result_image.copySubImage(ss_img, x, y, 0, 0, w, h)
 
         if not only_ss:
+            if not txt_name in self.map_textures:
+                self._load_map_textures(txt_name)
             textures = self.map_textures[txt_name]
             mpart = type(textures) is list
             if mpart:
