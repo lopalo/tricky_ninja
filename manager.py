@@ -44,7 +44,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                NPC(self, **_data)#.dead = True
+                NPC(self, **_data).dead = True
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -88,7 +88,13 @@ class Manager(object):
         mnode.setLight(dlnp)
         if S.graphics['enable_shadows']:
             self.main_node.setShaderAuto() # doesn't work in multithreading mode
-            dlight.setShadowCaster(True, 512, 512)
+            lens = OrthographicLens()
+            lens.setFilmSize(30, 30)
+            lens.setNearFar(-1000, 1000)
+            dlight.setLens(lens)
+            ss = S.graphics['shadow_size']
+            dlight.setShadowCaster(True, ss, ss)
+            dlnp.reparentTo(self.player.node)
         self.filters = CommonFilters(base.win, base.cam)
         if S.graphics['enable_cartoon']:
             self.main_node.setShaderAuto() # doesn't work in multithreading mode
