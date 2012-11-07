@@ -64,7 +64,7 @@ class MapBuilder(object):
 
     def _draw_square(self, coord, info):
         kind = info['kind']
-        if kind in ('substrate_texture', 'empty'):
+        if kind in ('substrate_texture', 'empty', 'model_field'):
             model = None
         elif kind == 'texture':
             return self._set_texture(info['texture'], info['ident'], coord), None

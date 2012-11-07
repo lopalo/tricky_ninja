@@ -129,6 +129,8 @@ class Editor(ShowBase):
         topology.reverse()
         yaml_data = deepcopy(map.yaml_data)
         definitions = deepcopy(map.definitions)
+        for info in definitions.values():
+            info.pop('ident')
         yaml_data['topology'] = topology
         yaml_data['substrate_actions'] = definitions.pop('ss')['actions']
         yaml_data['definitions'] = definitions

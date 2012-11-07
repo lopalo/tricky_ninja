@@ -6,6 +6,7 @@ from map_model.fields_declaration import get_definition
 
 class EditPanel:
     #TODO: adding new group that should be in map dedinitions and map groups
+    # append group id in select_group and group_widget
 
     def __init__(self, editor):
         self._row_count = 0
@@ -56,8 +57,12 @@ class EditPanel:
         if kind is not None:
             fields = get_definition()[kind]
             for fname, info in fields.items():
+                if fname.startswith('_'):
+                    continue
                 self._add_row(fname + '_title', Label(fname + ':'))
-                if 'variants_dir' in info:
+                if fname == 'group':
+                    self._add_row(fname, GroupWidget(self, fname, **info))
+                elif 'variants_dir' in info:
                     self._add_row(fname, ComboboxWidget(self, fname, **info))
                 else:
                     self._add_row(fname, RowWidget(self, fname, **info))
@@ -122,9 +127,13 @@ class SelectKindWidget:
         if old_kind is not None:
             fields = definition[old_kind]
             for fname in fields:
+                if fname.startswith('_'):
+                    continue
                 self.group.pop(fname, None)
         self.group['kind'] = kind
         for fname, info in definition[kind].items():
+            if fname.startswith('_'):
+                    continue
             if info.get('default', False):
                 continue
             self.group[fname] = info['type']()
@@ -193,3 +202,30 @@ class RowWidget:
     def focus_out(self):
         self.edit_panel.editor.set_camera_control(only_arrows=True)
 
+class GroupWidget:
+    """Cannot contain empty value"""
+
+    def __init__(self, edit_panel, fname, type, **kwargs):
+        self.edit_panel = edit_panel
+        self.group = edit_panel.editor.current_group
+        self.fname = fname
+        self.type = type
+        self.items = items = sorted(edit_panel.all_groups)
+        if self.group[fname] in items:
+            init_item = items.index(self.group[fname])
+        else:
+            init_item = None
+        self.widget = DirectOptionMenu(highlightColor=(0.6, 0.6, 0.6, 1),
+                                       command=self.set_value,
+                                       items=items,
+                                       initialitem=init_item or 0,
+                                       borderWidth=(0.05, 0.05),
+                                       scale=ES.edit_panel['widget_scale'],
+                                       sortOrder=1)
+        if init_item is None:
+            self.group[self.fname] = self.type(items[0])
+
+    def set_value(self, value):
+        self.group[self.fname] = self.type(value)
+
+    #TODO: append to list new group

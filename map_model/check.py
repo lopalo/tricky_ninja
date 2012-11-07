@@ -41,6 +41,8 @@ def check_map_data(data):
             continue
         fields = group_definition[kind]
         for f, i in fields.items():
+            if f.startswith('_'):
+                continue
             if not i.get('default', False) and f not in info:
                 yield ('definitions',
                 "value of '{0}' doesn't contain '{1}' field".format(id, f))
@@ -53,6 +55,9 @@ def check_map_data(data):
             if i.get('positive') and info[f] <= 0:
                 yield ('definitions',
                 "field '{0}' of '{1}' must be positive".format(f, id))
+            if f == 'group' and info['group'] not in data['definitions']:
+                yield ('definitions',
+                "field 'group' of '{0}' has unknown group ident".format(id))
 
     length = len(data['topology'][0])
     for row in data['topology']:

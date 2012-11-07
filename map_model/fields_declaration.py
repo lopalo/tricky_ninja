@@ -4,7 +4,12 @@ from os import path
 def get_definition():
     definition = {
         'empty': {},
-
+        'model_field': {
+            '_no_actions': True,
+            'group': {
+                'type': str
+            },
+        },
         'texture': {
             'texture': {
                 'type': str,
