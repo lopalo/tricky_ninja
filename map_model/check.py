@@ -13,7 +13,7 @@ def check_map_data(data):
     all_actions = set(AVAILABLE_ACTIONS)
     stop = False
     for f in ('substrate_texture', 'definitions',
-              'topology', 'start_position'):
+              'topology', 'start_position', 'hour'):
         if f not in data:
             stop = True
             yield f, 'is not specified'

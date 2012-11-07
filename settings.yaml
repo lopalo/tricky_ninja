@@ -11,9 +11,8 @@ show_pathes: false # for debugging
 graphics:
   map_texture_size: 256
   shadow_size: 512
-  light_hpr: [-90, -40, 0]
-  light_color: [1, 1, 1, 1]
-  ambient_light_color: [0.4, 0.4, 0.4, 1]
+  light_color: [1, 1, 1]
+  ambient_light_color: [0.4, 0.4, 0.4]
   enable_shadows: false
   enable_cartoon: false
 

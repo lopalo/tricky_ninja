@@ -79,6 +79,7 @@ substrate_actions:
 - walk
 - jump
 - see
+hour: 7
 substrate_texture: grass
 topology:
 - .. .. .. .. .. ss ss ss ss ss ss ss ss ss ss ss ss ss .. .. .. .. .. ..

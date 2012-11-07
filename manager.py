@@ -1,4 +1,4 @@
-from math import hypot
+from math import hypot, sin, radians
 from random import choice
 from collections import defaultdict, deque
 
@@ -74,18 +74,22 @@ class Manager(object):
                 npc.view_angle = S.npc['excited_view_angle']
 
     def setup_graphics(self):
+        angle = self.map.hour * 15 - 90
+        light_factor = max(sin(radians(angle)), 0)
         mnode = self.main_node
         alight = AmbientLight('alight')
-        alight.setColor(VBase4(*S.graphics['ambient_light_color']))
+        color = S.graphics['ambient_light_color'] + [light_factor]
+        alight.setColor(VBase4(*color))
         alnp = mnode.attachNewNode(alight)
         mnode.setLight(alnp)
 
-        #TODO: set light color and direction using hour that specified in the map
         dlight = DirectionalLight('dlight')
-        dlight.setColor(VBase4(*S.graphics['light_color']))
+        color = S.graphics['light_color'] + [light_factor]
+        dlight.setColor(VBase4(*color))
         dlnp = mnode.attachNewNode(dlight)
-        dlnp.setHpr(*S.graphics['light_hpr'])
+        dlnp.setHpr(0, -angle, 0)
         mnode.setLight(dlnp)
+
         if S.graphics['enable_shadows']:
             self.main_node.setShaderAuto() # doesn't work in multithreading mode
             lens = OrthographicLens()
@@ -95,10 +99,10 @@ class Manager(object):
             ss = S.graphics['shadow_size']
             dlight.setShadowCaster(True, ss, ss)
             dlnp.reparentTo(self.player.node)
-        self.filters = CommonFilters(base.win, base.cam)
         if S.graphics['enable_cartoon']:
             self.main_node.setShaderAuto() # doesn't work in multithreading mode
             mnode.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
+            self.filters = CommonFilters(base.win, base.cam)
             self.filters.setCartoonInk(1)
 
 
