@@ -14,30 +14,8 @@
   <Scalar> minfilter { linear_mipmap_linear }
   <Scalar> magfilter { linear_mipmap_linear }
 }
-<Material> wood_mat {
-  <Scalar> diffr { 0.8 }
-  <Scalar> diffg { 0.8 }
-  <Scalar> diffb { 0.8 }
-  <Scalar> ambr { 0.2 }
-  <Scalar> ambg { 0.2 }
-  <Scalar> ambb { 0.2 }
-  <Scalar> specr { 0 }
-  <Scalar> specg { 0 }
-  <Scalar> specb { 0 }
-  <Scalar> shininess { 0 }
-}
-<Material> treebark_mat {
-  <Scalar> diffr { 0.8 }
-  <Scalar> diffg { 0.8 }
-  <Scalar> diffb { 0.8 }
-  <Scalar> ambr { 0.2 }
-  <Scalar> ambg { 0.2 }
-  <Scalar> ambb { 0.2 }
-  <Scalar> specr { 0 }
-  <Scalar> specg { 0 }
-  <Scalar> specb { 0 }
-  <Scalar> shininess { 0 }
-}
+<Material> wood_mat {}
+<Material> treebark_mat {}
 <Group> treebark {
   <Group> treebark {
     <VertexPool> treebark {

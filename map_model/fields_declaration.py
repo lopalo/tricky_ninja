@@ -2,6 +2,7 @@ from os import path
 
 # maps kinds to dicts with fields
 def get_definition():
+    #TODO: fields with material properties
     definition = {
         'empty': {},
         'model_field': {

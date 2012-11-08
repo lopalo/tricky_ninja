@@ -13,6 +13,7 @@ from map_editor.pointer import Pointer
 from misc.display_text import display_control_keys
 
 class Editor(ShowBase):
+    #TODO: simple ambient and directional lighting
 
     def __init__(self, map_name):
         ShowBase.__init__(self)

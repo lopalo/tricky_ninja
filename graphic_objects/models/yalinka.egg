@@ -1,6 +1,6 @@
 <Texture> Material_1850.png_diffuse {
   textures/yal.png
-  <Scalar> format { rgb }
+  <Scalar> format { rgba }
   <Scalar> wrapu { repeat }
   <Scalar> wrapv { repeat }
   <Scalar> minfilter { linear_mipmap_linear }
@@ -8,36 +8,14 @@
 }
 <Texture> Material.001_1850.png_diffuse {
   textures/yal.png
-  <Scalar> format { rgb }
+  <Scalar> format { rgba }
   <Scalar> wrapu { repeat }
   <Scalar> wrapv { repeat }
   <Scalar> minfilter { linear_mipmap_linear }
   <Scalar> magfilter { linear_mipmap_linear }
 }
-<Material> Material_1850.png_mat {
-  <Scalar> diffr { 0.8 }
-  <Scalar> diffg { 0.8 }
-  <Scalar> diffb { 0.8 }
-  <Scalar> ambr { 0.2 }
-  <Scalar> ambg { 0.2 }
-  <Scalar> ambb { 0.2 }
-  <Scalar> specr { 0 }
-  <Scalar> specg { 0 }
-  <Scalar> specb { 0 }
-  <Scalar> shininess { 0 }
-}
-<Material> Material.001_1850.png_mat {
-  <Scalar> diffr { 0.8 }
-  <Scalar> diffg { 0.8 }
-  <Scalar> diffb { 0.8 }
-  <Scalar> ambr { 0.2 }
-  <Scalar> ambg { 0.2 }
-  <Scalar> ambb { 0.2 }
-  <Scalar> specr { 0 }
-  <Scalar> specg { 0 }
-  <Scalar> specb { 0 }
-  <Scalar> shininess { 0 }
-}
+<Material> Material_1850.png_mat {}
+<Material> Material.001_1850.png_mat {}
 <Group> Circle.001 {
   <Group> defaultgroup {
     <VertexPool> defaultgroup {
