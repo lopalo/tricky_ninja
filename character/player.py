@@ -45,6 +45,17 @@ class Player(Character):
         self.set_move_handlers()
         self.set_control()
 
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, value):
+        assert value in self.manager.map
+        prev_pos = getattr(self, '_pos', None)
+        self._pos = value
+        self.manager.on_player_moved(prev_pos, value)
+
     def set_camera(self):
         camera.reparentTo(self.node)
         self.cam_distance = S.camera['init_distance']

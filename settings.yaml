@@ -10,6 +10,7 @@ show_pathes: false # for debugging
 
 graphics:
   map_texture_size: 256
+  transparency: 0.3 # for showing player inside models
   shadow_size: 512
   light_color: [1, 1, 1]
   ambient_light_color: [0.4, 0.4, 0.4]

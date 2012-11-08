@@ -28,6 +28,9 @@ class MapBuilder(object):
             self._models[coord] = model
             self._substrate[coord] = substr
 
+    def get_model(self, coord):
+        return self._models.get(coord)
+
     def redraw_9_squares(self, coord, info):
         lst = tuple(self.map.neighbors(coord, all=True)) + ((coord, info),)
         for c, info in lst:
@@ -92,7 +95,6 @@ class MapBuilder(object):
             texture.setWrapV(Texture.WMClamp)
             model.setTexture(texture)
             model.reparentTo(self.main_node)
-            model.setTransparency(True)
             model.reparentTo(self.main_node)
             size = info.get('size', 1.0)
             model.setScale(size)
@@ -100,6 +102,8 @@ class MapBuilder(object):
             model.setBillboardAxis()
             model.setAttrib(LightRampAttrib.makeDefault())
 
+        if model is not None:
+            model.setTransparency(True)
         return model, self._set_texture(None, None, coord, True)
 
     def _load_map_textures(self, additional=None):

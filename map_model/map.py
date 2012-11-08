@@ -92,7 +92,7 @@ class Map(object):
         self.substrate_texture = data['substrate_texture']
 
         self.textures = set([self.substrate_texture])
-        self.groups = defaultdict(list) # need for tests and editor
+        self.groups = defaultdict(list)
         self._data = {}
         definitions = self.definitions = data['definitions']
         definitions['ss'] = dict(

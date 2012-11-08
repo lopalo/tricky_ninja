@@ -39,15 +39,6 @@ class Character(object):
     def _start_action(self, name):
         getattr(self, 'do_' + name)()
 
-    @property
-    def pos(self):
-        return self._pos
-
-    @pos.setter
-    def pos(self, value):
-        assert value in self.manager.map
-        self._pos = value
-
     def walk_pred(self, pos):
         map = self.manager.map
         return (map.is_available(pos) and

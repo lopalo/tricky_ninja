@@ -25,7 +25,7 @@ edit_panel:
 show_control_keys: true
 
 control_keys:
-- close_window: escape
+- close_window: control-escape
 - save: s
 - rotate_camera_clockwise: arrow_right
 - rotate_camera_counterclockwise: arrow_left
@@ -33,3 +33,4 @@ control_keys:
 - decrease_camera_height: arrow_down
 - set_group_for_square: mouse1
 - select_group_by_square: lcontrol
+- cancel_selection: escape

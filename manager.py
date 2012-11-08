@@ -62,6 +62,32 @@ class Manager(object):
             npc.update_action()
         return task.cont
 
+    def on_player_moved(self, prev_pos, pos):
+        map = self.map
+        if prev_pos is None:
+            prev_group = None
+        elif map[prev_pos]['kind'] != 'model_field':
+            prev_group = map[prev_pos]['ident']
+        else:
+            prev_group = map[prev_pos]['group']
+        if map[pos]['kind'] != 'model_field':
+            group = map[pos]['ident']
+        else:
+            group = map[pos]['group']
+        if prev_group == group:
+            return
+        if prev_group is not None:
+            for pos in map.groups[prev_group]:
+                model = self.map_builder.get_model(pos)
+                if model is None:
+                    continue
+                model.setAlphaScale(1)
+        for pos in map.groups[group]:
+            model = self.map_builder.get_model(pos)
+            if model is None:
+                continue
+            model.setAlphaScale(S.graphics['transparency'])
+
     def alert(self, pos, target_pos=None):
         for npc in self.npcs.values():
             if not npc:

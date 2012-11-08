@@ -29,7 +29,8 @@ class Editor(ShowBase):
         taskMgr.add(self.pointer.update, 'update_pointer')
         self.camera_node = render.attachNewNode('camera_node')
         self.set_camera_control()
-        base.accept(ES.control_keys['close_window'], self.esc_handler)
+        base.accept(ES.control_keys['cancel_selection'], self.cancel_selection)
+        base.accept(ES.control_keys['close_window'], self.close_window)
         base.accept(ES.control_keys['save'], self.save)
         if ES.show_control_keys:
             display_control_keys(ES)
@@ -84,6 +85,9 @@ class Editor(ShowBase):
         key = ES.control_keys['decrease_camera_height']
         base.ignore(key)
         base.ignore(key + '-repeat')
+
+    def cancel_selection(self):
+        self.select_group(None)
 
     def select_group(self, ident):
         self.edit_panel.select_group(ident)
@@ -146,7 +150,7 @@ class Editor(ShowBase):
         with open(S.map(self.map_name), 'w') as f:
             yaml.dump(yaml_data, f, default_flow_style=False, width=1000)
 
-    def esc_handler(self):
+    def close_window(self):
         self.stop_loop = True
 
     def loop(self):
