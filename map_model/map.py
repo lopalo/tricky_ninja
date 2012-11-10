@@ -107,6 +107,8 @@ class Map(object):
                 else:
                     info = definitions[ident]
                     info['ident'] = ident
+                    if info['kind'] == 'model_field':
+                        info['actions'] = definitions[info['group']]['actions']
                 self._data[index / 3, num_row] = info
                 self.groups[ident].append((index / 3, num_row))
                 if info.get('kind', 'empty') == 'texture':

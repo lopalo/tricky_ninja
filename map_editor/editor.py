@@ -135,7 +135,9 @@ class Editor(ShowBase):
         yaml_data = deepcopy(map.yaml_data)
         definitions = deepcopy(map.definitions)
         for info in definitions.values():
-            info.pop('ident')
+            del info['ident']
+            if info['kind'] == 'model_field':
+                del info['actions']
         yaml_data['topology'] = topology
         yaml_data['substrate_actions'] = definitions.pop('ss')['actions']
         yaml_data['definitions'] = definitions
