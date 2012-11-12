@@ -2,7 +2,7 @@ from os.path import basename
 from glob import glob
 from direct.gui.DirectGui import *
 from panda3d.core import *
-from map_model.fields_declaration import get_definition
+from map_model.fields_declaration import get_definition, AVAILABLE_ACTIONS
 
 class EditPanel:
 
@@ -23,7 +23,7 @@ class EditPanel:
     def _add_row(self, name, widget, set_titile=True):
         self._widgets.append((name, widget))
         widget.reparentTo(self.frame)
-        if isinstance(widget, DirectLabel):
+        if isinstance(widget, (DirectLabel, DirectCheckButton)):
             x = -(1 - ES.border) / 2
         else:
             x = -(1 - ES.border - ES.edit_panel['left_margin'])
@@ -52,19 +52,22 @@ class EditPanel:
         self._delete_until('kind_selection')
         group = self.editor.current_group
         kind = group.get('kind')
-        if kind is not None:
-            fields = get_definition()[kind]
-            for fname, info in fields.items():
-                if fname.startswith('_'):
-                    continue
-                self._add_row(fname + '_title', label(fname + ':'))
-                if fname == 'group':
-                    self._add_row(fname, group_widget(self, fname, **info))
-                elif 'variants_dir' in info:
-                    self._add_row(fname, combobox_widget(self, fname, **info))
-                else:
-                    self._add_row(fname, row_widget(self, fname, **info))
-        #TODO: set actions widget
+        fields = get_definition()[kind]
+        for fname, info in fields.items():
+            if fname.startswith('_'):
+                continue
+            self._add_row(fname + '_title', label(fname + ':'))
+            if fname == 'group':
+                self._add_row(fname, group_widget(self, fname, **info))
+            elif 'variants_dir' in info:
+                self._add_row(fname, combobox_widget(self, fname, **info))
+            else:
+                self._add_row(fname, row_widget(self, fname, **info))
+        if not fields.get('_no_actions', False):
+            self._add_row('actions_title', label('actions:'))
+            for action in AVAILABLE_ACTIONS:
+                widget = action_widget(self, 'actions', action)
+                self._add_row('action_' + action, widget)
         self.editor.map_builder.redraw_group(group['ident'])
 
 
@@ -223,3 +226,18 @@ def group_widget(edit_panel, fname, type, **kwargs):
                             borderWidth=(0.05, 0.05),
                             scale=ES.edit_panel['widget_scale'],
                             sortOrder=1)
+
+
+def action_widget(edit_panel, fname, action):
+    actions = edit_panel.editor.current_group[fname]
+
+    def set_value(status):
+        if status:
+            actions.append(action)
+        else:
+            actions.remove(action)
+
+    return DirectCheckButton(command=set_value,
+                             text=action,
+                             indicatorValue=action in actions,
+                             scale=ES.edit_panel['widget_scale'])

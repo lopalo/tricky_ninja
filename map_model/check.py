@@ -1,16 +1,13 @@
 from map_model import fields_declaration as fdecl
 
 
-AVAILABLE_ACTIONS = ('walk', 'jump', 'see')
-
-
 class MapDataError(Exception):
     pass
 
 
 def check_map_data(data):
     group_definition = fdecl.get_definition()
-    all_actions = set(AVAILABLE_ACTIONS)
+    all_actions = set(fdecl.AVAILABLE_ACTIONS)
     stop = False
     for f in ('substrate_texture', 'definitions',
               'topology', 'start_position', 'hour'):
