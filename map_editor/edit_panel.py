@@ -16,36 +16,36 @@ class EditPanel:
         self.node = render2d.attachNewNode(PGTop('panel_node'))
         self.node.node().setMouseWatcher(base.mouseWatcherNode)
         self.frame.reparentTo(self.node)
-        self._add_row('group_selection_title', Label('group:'))
-        self._add_row('group_selection', SelectGroupWidget(self))
+        self._add_row('group_selection_title', label('group:'))
+        self._group_selection = GroupSelection(self)
+        self._add_row('group_selection', self._group_selection.widget)
 
-    def _add_row(self, name, obj, set_titile=True):
-        setattr(self, '_' + name, obj)
-        self._widgets.append((name, obj))
-        obj.widget.reparentTo(self.frame)
-        if isinstance(obj, Label):
+    def _add_row(self, name, widget, set_titile=True):
+        self._widgets.append((name, widget))
+        widget.reparentTo(self.frame)
+        if isinstance(widget, DirectLabel):
             x = -(1 - ES.border) / 2
         else:
             x = -(1 - ES.border - ES.edit_panel['left_margin'])
         pos = (x, 0, -0.1 - self._row_count * ES.edit_panel['row_height'])
-        obj.widget.setPos(pos)
+        widget.setPos(pos)
         self._row_count += 1
 
     def _delete_until(self, name):
-        for n, obj in tuple(reversed(self._widgets)):
+        for n, widget in tuple(reversed(self._widgets)):
             if n == name:
                 return
             self._widgets.pop()
-            obj.widget.destroy()
+            widget.destroy()
             self._row_count -= 1
 
     def set_current_group(self, group_id):
         self._delete_until('group_selection')
         group = self.all_groups[group_id] if group_id else None
         self.editor.set_current_group(group)
-        if group_id not in(None, 'ss'):
-            self._add_row('kind_selection_title', Label('kind:'))
-            self._add_row('kind_selection', SelectKindWidget(self))
+        if group_id not in (None, 'ss'):
+            self._add_row('kind_selection_title', label('kind:'))
+            self._add_row('kind_selection', kind_widget(self))
             self.set_group_by_kind()
 
     def set_group_by_kind(self):
@@ -57,13 +57,13 @@ class EditPanel:
             for fname, info in fields.items():
                 if fname.startswith('_'):
                     continue
-                self._add_row(fname + '_title', Label(fname + ':'))
+                self._add_row(fname + '_title', label(fname + ':'))
                 if fname == 'group':
-                    self._add_row(fname, GroupWidget(self, fname, **info))
+                    self._add_row(fname, group_widget(self, fname, **info))
                 elif 'variants_dir' in info:
-                    self._add_row(fname, ComboboxWidget(self, fname, **info))
+                    self._add_row(fname, combobox_widget(self, fname, **info))
                 else:
-                    self._add_row(fname, RowWidget(self, fname, **info))
+                    self._add_row(fname, row_widget(self, fname, **info))
         #TODO: set actions widget
         self.editor.map_builder.redraw_group(group['ident'])
 
@@ -74,14 +74,8 @@ class EditPanel:
     def add_group(self, ident):
         self._group_selection.append(ident)
 
-class Label:
 
-    def __init__(self, text):
-        self.widget = DirectLabel(text=text,
-                                  scale=ES.edit_panel['widget_scale'])
-
-
-class SelectGroupWidget:
+class GroupSelection:
     """ Should be created once when editor is loaded and current group is None"""
 
     def __init__(self, edit_panel):
@@ -110,124 +104,122 @@ class SelectGroupWidget:
         self.set_value(items[0])
 
 
-class SelectKindWidget:
+### widgets makers ###
 
-    def __init__(self, edit_panel):
-        self.edit_panel = edit_panel
-        self.group = edit_panel.editor.current_group
-        self.items = sorted(get_definition())
-        init_item = self.items.index(self.group['kind'])
-        self.widget = DirectOptionMenu(highlightColor=(0.6, 0.6, 0.6, 1),
-                                       command=self.set_value,
-                                       items=self.items,
-                                       initialitem=init_item,
-                                       borderWidth=(0.05, 0.05),
-                                       scale=ES.edit_panel['widget_scale'],
-                                       sortOrder=1)
+def label(text):
+    return DirectLabel(text=text, scale=ES.edit_panel['widget_scale'])
 
-    def set_value(self, kind):
+
+def kind_widget(edit_panel):
+    group = edit_panel.editor.current_group
+    items = sorted(get_definition())
+    init_item = items.index(group['kind'])
+
+    def set_value(kind):
         definition = get_definition()
-        old_kind = self.group.get('kind')
+        old_kind = group.get('kind')
         if old_kind is not None:
             fields = definition[old_kind]
             for fname in fields:
                 if fname.startswith('_'):
                     continue
-                self.group.pop(fname, None)
-        self.group['kind'] = kind
+                group.pop(fname, None)
+        group['kind'] = kind
         for fname, info in definition[kind].items():
             if fname.startswith('_'):
                     continue
             if info.get('default', False):
                 continue
-            self.group[fname] = info['type']()
-        self.edit_panel.set_group_by_kind()
+            group[fname] = info['type']()
+        edit_panel.set_group_by_kind()
+
+    return DirectOptionMenu(highlightColor=(0.6, 0.6, 0.6, 1),
+                            command=set_value,
+                            items=items,
+                            initialitem=init_item,
+                            borderWidth=(0.05, 0.05),
+                            scale=ES.edit_panel['widget_scale'],
+                            sortOrder=1)
 
 
-class ComboboxWidget:
+def combobox_widget(edit_panel, fname, type, variants_dir, **kwargs):
     """Cannot contain empty value"""
 
-    def __init__(self, edit_panel, fname, type, variants_dir, **kwargs):
-        self.edit_panel = edit_panel
-        self.group = edit_panel.editor.current_group
-        self.fname = fname
-        self.type = type
-        items = [basename(i).split('.')[0] for i
-                    in glob(variants_dir + '/*[!~]')]
-        if 'textures' in items:
-            items.remove('textures') # ignore textures of models
-        if self.group[fname] in items:
-            init_item = items.index(self.group[fname])
+    group = edit_panel.editor.current_group
+    items = [basename(i).split('.')[0] for i
+                in glob(variants_dir + '/*[!~]')]
+    if 'textures' in items:
+        items.remove('textures') # ignore textures of models
+    if group[fname] in items:
+        init_item = items.index(group[fname])
+    else:
+        init_item = None
+    if init_item is None:
+        group[fname] = type(items[0])
+
+    def set_value(value):
+        group[fname] = type(value)
+        edit_panel.editor.map_builder.redraw_group(group['ident'])
+
+    return DirectOptionMenu(highlightColor=(0.6, 0.6, 0.6, 1),
+                            command=set_value,
+                            items=items,
+                            initialitem=init_item or 0,
+                            borderWidth=(0.05, 0.05),
+                            scale=ES.edit_panel['widget_scale'],
+                            sortOrder=1)
+
+
+def row_widget(edit_panel, fname, type, default=False, **kwargs):
+    group = edit_panel.editor.current_group
+
+    def change_text(text):
+        if not text and default:
+            group.pop(fname, None)
         else:
-            init_item = None
-        self.widget = DirectOptionMenu(highlightColor=(0.6, 0.6, 0.6, 1),
-                                       command=self.set_value,
-                                       items=items,
-                                       initialitem=init_item or 0,
-                                       borderWidth=(0.05, 0.05),
-                                       scale=ES.edit_panel['widget_scale'],
-                                       sortOrder=1)
-        if init_item is None:
-            self.group[self.fname] = self.type(items[0])
+            try:
+                group[fname] = type(text)
+            except ValueError:
+                pass
+        edit_panel.editor.map_builder.redraw_group(group['ident'])
 
-    def set_value(self, value):
-        self.group[self.fname] = self.type(value)
-        self.edit_panel.editor.map_builder.redraw_group(self.group['ident'])
+    def focus_in():
+        edit_panel.editor.remove_arrow_handlers()
+
+    def focus_out():
+        edit_panel.editor.set_camera_control(only_arrows=True)
+
+    return DirectEntry(command=change_text,
+                       focusInCommand=focus_in,
+                       focusOutCommand=focus_out,
+                       initialText=str(group.get(fname, '')),
+                       numLines=1,
+                       width=ES.edit_panel['row_width'],
+                       frameColor=(1, 1, 1, 1),
+                       scale=ES.edit_panel['widget_scale'] / 2,
+                       focus=0)
 
 
-class RowWidget:
-
-    def __init__(self, edit_panel, fname, type, default=False, **kwargs):
-        self.edit_panel = edit_panel
-        self.group = edit_panel.editor.current_group
-        self.fname = fname
-        self.type = type
-        self.default = default
-        self.widget = DirectEntry(command=self.change_text,
-                                  focusInCommand=self.focus_in,
-                                  focusOutCommand=self.focus_out,
-                                  initialText=str(self.group.get(fname, '')),
-                                  numLines=1,
-                                  width=ES.edit_panel['row_width'],
-                                  frameColor=(1, 1, 1, 1),
-                                  scale=ES.edit_panel['widget_scale'] / 2,
-                                  focus=0)
-
-    def change_text(self, text):
-        if not text and self.default:
-            self.group.pop(self.fname, None)
-        else:
-            self.group[self.fname] = self.type(text)
-        self.edit_panel.editor.map_builder.redraw_group(self.group['ident'])
-
-    def focus_in(self):
-        self.edit_panel.editor.remove_arrow_handlers()
-
-    def focus_out(self):
-        self.edit_panel.editor.set_camera_control(only_arrows=True)
-
-class GroupWidget:
+def group_widget(edit_panel, fname, type, **kwargs):
     """Cannot contain empty value"""
 
-    def __init__(self, edit_panel, fname, type, **kwargs):
-        self.edit_panel = edit_panel
-        self.group = edit_panel.editor.current_group
-        self.fname = fname
-        self.type = type
-        self.items = items = sorted(edit_panel.all_groups)
-        if self.group[fname] in items:
-            init_item = items.index(self.group[fname])
-        else:
-            init_item = None
-        self.widget = DirectOptionMenu(highlightColor=(0.6, 0.6, 0.6, 1),
-                                       command=self.set_value,
-                                       items=items,
-                                       initialitem=init_item or 0,
-                                       borderWidth=(0.05, 0.05),
-                                       scale=ES.edit_panel['widget_scale'],
-                                       sortOrder=1)
-        if init_item is None:
-            self.group[self.fname] = self.type(items[0])
+    group = edit_panel.editor.current_group
+    items = sorted(edit_panel.all_groups)
+    if group[fname] in items:
+        init_item = items.index(group[fname])
+    else:
+        init_item = None
 
-    def set_value(self, value):
-        self.group[self.fname] = self.type(value)
+    if init_item is None:
+        group[fname] = type(items[0])
+
+    def set_value(value):
+        group[fname] = type(value)
+
+    return DirectOptionMenu(highlightColor=(0.6, 0.6, 0.6, 1),
+                            command=set_value,
+                            items=items,
+                            initialitem=init_item or 0,
+                            borderWidth=(0.05, 0.05),
+                            scale=ES.edit_panel['widget_scale'],
+                            sortOrder=1)
