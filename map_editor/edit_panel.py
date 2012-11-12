@@ -5,8 +5,6 @@ from panda3d.core import *
 from map_model.fields_declaration import get_definition
 
 class EditPanel:
-    #TODO: adding new group that should be in map dedinitions and map groups
-    # append group id in select_group and group_widget
 
     def __init__(self, editor):
         self._row_count = 0
@@ -73,6 +71,8 @@ class EditPanel:
     def select_group(self, ident):
         self._group_selection.set(ident)
 
+    def add_group(self, ident):
+        self._group_selection.append(ident)
 
 class Label:
 
@@ -103,7 +103,11 @@ class SelectGroupWidget:
     def set_value(self, group_id):
         self.edit_panel.set_current_group(group_id or None)
 
-    #TODO: append to list new group
+    def append(self, group_id):
+        items = self.items
+        items.append(group_id)
+        self.widget['items'] = items
+        self.set_value(items[0])
 
 
 class SelectKindWidget:
@@ -227,5 +231,3 @@ class GroupWidget:
 
     def set_value(self, value):
         self.group[self.fname] = self.type(value)
-
-    #TODO: append to list new group

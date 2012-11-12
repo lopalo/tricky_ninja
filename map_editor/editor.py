@@ -3,6 +3,8 @@ sys.path.insert(0, '')
 from os import path
 import __builtin__
 from copy import deepcopy
+import string
+import random
 import yaml
 from direct.showbase.ShowBase import ShowBase
 from settings import Settings, BaseSettings
@@ -33,6 +35,7 @@ class Editor(ShowBase):
         base.accept(ES.control_keys['cancel_selection'], self.cancel_selection)
         base.accept(ES.control_keys['close_window'], self.close_window)
         base.accept(ES.control_keys['save'], self.save)
+        base.accept(ES.control_keys['add_group'], self.add_group)
         if ES.show_control_keys:
             display_control_keys(ES)
 
@@ -116,6 +119,16 @@ class Editor(ShowBase):
             marker.setDepthWrite(False)
             self._group_markers.add(marker)
 
+    def add_group(self):
+        letters = string.uppercase + string.lowercase
+        while True:
+            group_id = random.choice(letters) + random.choice(letters)
+            if group_id not in self.map.definitions:
+                break
+        group = dict(ident=group_id, kind='empty', actions=[])
+        self.map.definitions[group_id] = group
+        self.edit_panel.add_group(group_id)
+
     def save(self):
         map = self.map
         offset_x, offset_y = 0, 0
@@ -134,7 +147,9 @@ class Editor(ShowBase):
         topology.reverse()
         yaml_data = deepcopy(map.yaml_data)
         definitions = deepcopy(map.definitions)
-        for info in definitions.values():
+        for info in tuple(definitions.values()):
+            if not map.groups[info['ident']]:
+                del definitions[info['ident']]
             del info['ident']
             if info['kind'] == 'model_field':
                 del info['actions']

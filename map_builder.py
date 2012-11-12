@@ -71,7 +71,7 @@ class MapBuilder(object):
         if kind in ('substrate_texture', 'empty', 'model_field'):
             model = None
         elif kind == 'texture':
-            return self._set_texture(info['texture'], info['ident'], coord), None
+            return None, self._set_texture(info['texture'], info['ident'], coord)
         elif kind == 'model':
             model = loader.loadModel(S.model(info['model']))
             model.reparentTo(self.main_node)

@@ -26,6 +26,7 @@ show_control_keys: true
 
 control_keys:
 - close_window: control-escape
+- add_group: a
 - save: s
 - rotate_camera_clockwise: arrow_right
 - rotate_camera_counterclockwise: arrow_left
