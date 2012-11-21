@@ -13,7 +13,6 @@ class MapTextureError(BuildWorldError):
 
 
 class MapBuilder(object):
-    #TODO: setting material of models
     texture_names = ['main', 'center', 'horizontal', 'vertical', 'corners']
 
     def __init__(self, map, main_node):
