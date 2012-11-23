@@ -23,11 +23,13 @@ edit_panel:
     select_group: 0.1
 
 show_control_keys: true
+model_transparency: 0.3
 
 control_keys:
 - close_window: control-escape
 - add_group: a
 - save: s
+- switch_transparency: t
 - rotate_camera_clockwise: arrow_right
 - rotate_camera_counterclockwise: arrow_left
 - increase_camera_height: arrow_up

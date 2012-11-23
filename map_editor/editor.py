@@ -35,6 +35,8 @@ class Editor(ShowBase):
         base.accept(ES.control_keys['close_window'], self.close_window)
         base.accept(ES.control_keys['save'], self.save)
         base.accept(ES.control_keys['add_group'], self.add_group)
+        base.accept(ES.control_keys['switch_transparency'],
+                                self.switch_transparency)
         if ES.show_control_keys:
             display_control_keys(ES)
 
@@ -166,6 +168,12 @@ class Editor(ShowBase):
                     route[index] = [rpos[0] + offset_x, rpos[1] + offset_y]
         with open(S.map(self.map_name), 'w') as f:
             yaml.dump(yaml_data, f, default_flow_style=False, width=1000)
+
+    def switch_transparency(self):
+        if self.map_builder.models_transparency == 1:
+            self.map_builder.set_models_transparency(ES.model_transparency)
+        else:
+            self.map_builder.set_models_transparency(1)
 
     def close_window(self):
         self.stop_loop = True

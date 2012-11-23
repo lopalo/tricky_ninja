@@ -18,6 +18,7 @@ class MapBuilder(object):
     def __init__(self, map, main_node):
         self.map = map
         self.main_node = main_node
+        self.models_transparency = 1 # need for editor
 
     def build(self):
         self._load_map_textures()
@@ -30,6 +31,13 @@ class MapBuilder(object):
 
     def get_model(self, coord):
         return self._models.get(coord)
+
+    def set_models_transparency(self, transparency):
+        for m in self._models.values():
+            if m is None:
+                continue
+            m.setAlphaScale(transparency)
+        self.models_transparency = transparency
 
     def redraw_9_squares(self, coord, info):
         lst = tuple(self.map.neighbors(coord, all=True)) + ((coord, info),)
