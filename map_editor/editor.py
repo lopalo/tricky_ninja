@@ -7,6 +7,8 @@ import string
 import random
 import yaml
 from direct.showbase.ShowBase import ShowBase
+from direct.gui.OnscreenText import OnscreenText
+from panda3d.core import TextNode
 from settings import Settings, BaseSettings
 from map_model.map import Map
 from map_builder import MapBuilder
@@ -39,6 +41,13 @@ class Editor(ShowBase):
                                 self.switch_transparency)
         if ES.show_control_keys:
             display_control_keys(ES)
+        self.coordinate_text = OnscreenText(style=1,
+                                            text='22',
+                                            fg=(1, 1, 1, 1),
+                                            pos=(-1, ES.text_scale - 1),
+                                            align=TextNode.ALeft,
+                                            scale=ES.text_scale)
+        self.coordinate_text.reparentTo(render2d)
 
     def set_camera_control(self, only_arrows=False):
         pitch = -ES.camera['horizontal_angle']
@@ -132,7 +141,6 @@ class Editor(ShowBase):
 
     def save(self):
         map = self.map
-        offset_x, offset_y = 0, 0
         poses = [p for p, i in map]
         min_x = min(p[0] for p in poses)
         offset_x = -min_x

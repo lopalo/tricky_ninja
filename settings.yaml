@@ -7,6 +7,7 @@ paths:
 
 show_view_field: false # for debugging
 show_pathes: false # for debugging
+text_scale: 0.03
 
 graphics:
   map_texture_size: 256
@@ -22,7 +23,7 @@ camera:
   max_distance: 30
   distance_step: 1
   init_distance: 30
-  init_vertical_angle: -90
+  init_vertical_angle: -45
   vertical_angle_step: 3
   horizontal_angle: 60
 

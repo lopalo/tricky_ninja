@@ -30,9 +30,29 @@
   <Scalar> minfilter { linear_mipmap_linear }
   <Scalar> magfilter { linear_mipmap_linear }
 }
-<Material> Material_untitled.002_mat {}
+<Material> Material_untitled.002_mat {
+  <Scalar> diffr { 1 }
+  <Scalar> diffg { 1 }
+  <Scalar> diffb { 1 }
+  <Scalar> diffa { 1 }
+
+  <Scalar> ambr { 1 }
+  <Scalar> ambg { 1 }
+  <Scalar> ambb { 1 }
+  <Scalar> amba { 1 } 
+}
 <Material> Material.003_untitled.002_mat {}
-<Material> Material.002_untitled.007_mat {}
+<Material> Material.002_untitled.007_mat {
+  <Scalar> diffr { 1 }
+  <Scalar> diffg { 1 }
+  <Scalar> diffb { 1 }
+  <Scalar> diffa { 1 }
+
+  <Scalar> ambr { 1 }
+  <Scalar> ambg { 1 }
+  <Scalar> ambb { 1 }
+  <Scalar> amba { 1 } 
+}
 <Material> Material.002_mat {}
 <Group> Plane.003 {
   <Group> defaultgroup {

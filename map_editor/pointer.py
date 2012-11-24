@@ -1,7 +1,6 @@
 from panda3d.core import *
 
 class Pointer:
-    #TODO: show current position on screen for creating routes
 
     def __init__(self, editor):
         self.editor = editor
@@ -99,4 +98,14 @@ class Pointer:
         if self.plane.intersectsLine(pos,
             render.getRelativePoint(camera, near_pos),
             render.getRelativePoint(camera, far_pos)):
-            self.pointer.setPos(round(pos[0]), round(pos[1]), 0.1)
+            pos = int(round(pos[0])), int(round(pos[1]))
+            self.pointer.setPos(pos[0], pos[1], 0.1)
+            self._update_text(pos)
+
+    def _update_text(self, pos):
+        poses = [p for p, i in self.editor.map]
+        offset_x = -min(p[0] for p in poses)
+        offset_y = -min(p[1] for p in poses)
+        pos = max(pos[0] + offset_x, 0), max(pos[1] + offset_y, 0)
+        txt = '{0}, {1}'.format(*pos)
+        self.editor.coordinate_text.setText(txt)

@@ -1,0 +1,66 @@
+definitions:
+  Hj:
+    group: hz
+    kind: model_field
+  hz:
+    actions:
+    - walk
+    - see
+    kind: model
+    model: japan_house
+  iK:
+    actions:
+    - walk
+    - jump
+    - see
+    kind: texture
+    texture: sand
+  mQ:
+    actions: []
+    kind: empty
+hour: 12
+npcs: {}
+routes: {}
+start_position:
+- 11
+- 5
+substrate_actions:
+- walk
+- jump
+- see
+substrate_texture: grass
+topology:
+- .. .. .. .. Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- ss ss ss ss Hj mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj hz Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
+- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
+- ss ss ss ss Hj mQ mQ mQ mQ mQ Hj Hj Hj mQ mQ mQ mQ mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK
+- ss ss ss ss Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK .. .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK .. .. .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK .. .. .. .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK .. .. .. .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK .. .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK .. .. ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK ..
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
+- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK ..
+- .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. iK iK .. .. .. .. iK iK .. iK .. ..

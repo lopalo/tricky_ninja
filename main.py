@@ -14,7 +14,7 @@ class App(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
         #TODO: implement main menu and selecting level (screenshot, title) from it
-        self.set_manager('test_map.yaml')
+        self.set_manager('bigmap.yaml')
         self.disableMouse()
         self.stop_loop = False
         base.accept(S.control_keys['close_window'], self.esc_handler)

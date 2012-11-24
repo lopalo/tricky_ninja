@@ -53,6 +53,8 @@ class MapBuilder(object):
             model, substr = self._draw_square(c, info)
             self._models[c] = model
             self._substrate[c] = substr
+            if model is not None:
+                model.setAlphaScale(self.models_transparency)
 
     def redraw_group(self, group_id):
         map = self.map
@@ -71,6 +73,8 @@ class MapBuilder(object):
             model, substr = self._draw_square(c, map[c])
             self._models[c] = model
             self._substrate[c] = substr
+            if model is not None:
+                model.setAlphaScale(self.models_transparency)
 
 
     def _draw_square(self, coord, info):
