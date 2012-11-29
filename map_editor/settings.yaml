@@ -36,5 +36,5 @@ control_keys:
 - increase_camera_height: arrow_up
 - decrease_camera_height: arrow_down
 - set_group_for_square: mouse1
-- select_group_by_square: mouse3
+- select_group_by_square: lcontrol #mouse3
 - cancel_selection: escape

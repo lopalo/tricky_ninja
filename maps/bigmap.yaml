@@ -6,6 +6,7 @@ definitions:
     actions:
     - walk
     - see
+    height: -0.14
     kind: model
     model: japan_house
   iK:

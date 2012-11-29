@@ -94,13 +94,14 @@ class MapBuilder(object):
                 model.setScale(info['size'])
             else:
                 model.setScale(S.model_size(info['model']))
-            model.setPos(coord[0], coord[1], 0)
+            model.setPos(coord[0], coord[1], info.get('height', 0))
         elif kind == 'chain_model':
             model = self._set_chain_model(
                 info['vertical_model'],
                 info['left_bottom_model'],
                 info['ident'],
-                coord
+                coord,
+                info.get('height', 0)
             )
         elif kind == 'sprite':
             model = self._create_plane()
@@ -248,7 +249,7 @@ class MapBuilder(object):
         plane.setPos(pos[0], pos[1], 0)
         return plane
 
-    def _set_chain_model(self, vm, lbm, ident, pos):
+    def _set_chain_model(self, vm, lbm, ident, pos, height):
         nbs = dict(self.map.neighbors(pos, yield_names=True))
         t, r = nbs.get('top'), nbs.get('right')
         b, l = nbs.get('bottom'), nbs.get('left')
@@ -280,5 +281,5 @@ class MapBuilder(object):
         model = loader.loadModel(S.model(model_name))
         model.reparentTo(self.main_node)
         model.setScale(S.model_size(model_name))
-        model.setPosHpr(pos[0], pos[1], 0, angle, 0, 0)
+        model.setPosHpr(pos[0], pos[1], height, angle, 0, 0)
         return model

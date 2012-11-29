@@ -31,6 +31,10 @@ def get_definition():
                 'type': float,
                 'default': True,
                 'positive': True
+            },
+            'height': {
+                'type': float,
+                'default': True,
             }
         },
         'chain_model': {
@@ -42,6 +46,10 @@ def get_definition():
                 'type': str,
                 'variants_dir': path.join(S._path, S.paths['models'])
             },
+            'height': {
+                'type': float,
+                'default': True,
+            }
         },
         'sprite': {
             'texture': {
