@@ -117,17 +117,20 @@ class Editor(ShowBase):
         if self.current_group is None:
             return
         for pos in self.map.groups[self.current_group['ident']]:
-            marker = loader.loadModel(S.model('plane'))
-            texture = loader.loadTexture(S.texture('black_pointer'))
-            marker.setTexture(texture)
-            marker.setTransparency(True)
-            marker.setHpr(0, -90, 0)
-            marker.reparentTo(render)
-            marker.setPos(pos[0], pos[1], 0.1)
-            marker.setBin("fixed", 40)
-            marker.setDepthTest(False)
-            marker.setDepthWrite(False)
-            self._group_markers.add(marker)
+            self.set_marker(pos)
+
+    def set_marker(self, pos):
+        marker = loader.loadModel(S.model('plane'))
+        texture = loader.loadTexture(S.texture('black_pointer'))
+        marker.setTexture(texture)
+        marker.setTransparency(True)
+        marker.setHpr(0, -90, 0)
+        marker.reparentTo(render)
+        marker.setPos(pos[0], pos[1], 0.1)
+        marker.setBin("fixed", 40)
+        marker.setDepthTest(False)
+        marker.setDepthWrite(False)
+        self._group_markers.add(marker)
 
     def add_group(self):
         letters = string.uppercase + string.lowercase
