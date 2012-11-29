@@ -25,6 +25,7 @@ class Character(object):
 
     def __init__(self, manager):
         self.action = None
+        self.action_timeouts = []
         self.must_die = False
         self.dead = False
         self.fall_forward = True

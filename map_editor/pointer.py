@@ -45,6 +45,7 @@ class Pointer:
         else:
             map[self.map_pos] = cur_g
             map.groups[cur_g['ident']].append(self.map_pos)
+        #TODO: set marker for new square in group
         self.editor.map_builder.redraw_9_squares(self.map_pos, cur_g)
 
     def on_right_click(self):

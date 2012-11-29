@@ -28,6 +28,7 @@ camera:
   horizontal_angle: 60
 
 character:
+  resume_action_timeout: 0.1
   animation:
     walk_range: [0, 12]
     death_speed: 0.3

@@ -33,16 +33,29 @@ def _runner(char, gen, send_value=None):
     except StopIteration:
         char.action = None
         return
+    key = str(id(yielded))
+
+    def timeout_handler(task):
+        if key not in char.action_timeouts:
+            return
+        char.action_timeouts.remove(key)
+        _runner(char, gen)
+
     if isinstance(yielded, wait):
         def callback(task):
             _runner(char, gen)
-        taskMgr.doMethodLater(yielded.seconds, callback, str(id(wait)))
+        taskMgr.doMethodLater(yielded.seconds, callback, key)
     elif isinstance(yielded, (LerpNodePathInterval, ActorInterval)):
         def callback():
+            if key not in char.action_timeouts:
+                return
+            char.action_timeouts.remove(key)
             _runner(char, gen)
-        key = str(id(gen))
+        char.action_timeouts.append(key)
         base.acceptOnce(key, callback)
-        yielded.setDoneEvent(key)
+        yielded.setDoneEvent(key) # sometimes doesn't emit; fixed by timeout
+        timeout = yielded.getDuration() + S.character['resume_action_timeout']
+        taskMgr.doMethodLater(timeout, timeout_handler, key + '_timeout')
         yielded.start()
     elif isinstance(yielded, events):
         items = yielded.items

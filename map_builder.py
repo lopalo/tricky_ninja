@@ -15,6 +15,8 @@ class MapTextureError(BuildWorldError):
 class MapBuilder(object):
     texture_names = ['main', 'center', 'horizontal', 'vertical', 'corners']
 
+    #TODO: add ability to set height of models
+
     def __init__(self, map, main_node):
         self.map = map
         self.main_node = main_node
