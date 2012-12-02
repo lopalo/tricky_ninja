@@ -16,7 +16,7 @@ graphics:
   light_color: [1, 1, 1]
   ambient_light_color: [0.4, 0.4, 0.4]
   enable_shadows: false
-  enable_cartoon: false
+  enable_cartoon: true
 
 camera:
   min_distance: 3
@@ -25,7 +25,7 @@ camera:
   init_distance: 30
   init_vertical_angle: -45
   vertical_angle_step: 3
-  horizontal_angle: 60
+  horizontal_angle: 69 # if less then appear issues with transparent objects
 
 character:
   resume_action_timeout: 0.1

@@ -1,5 +1,6 @@
 from collections import deque
 from math import cos, sin, radians, atan2, degrees, hypot
+from panda3d.core import *
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.ActorInterval import ActorInterval
 from direct.actor.Actor import Actor
@@ -34,6 +35,8 @@ class NPC(Character):
         self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', S.npc['idle_frame'])
         actor.setBlend(frameBlend=True)
+        if S.graphics['enable_cartoon']:
+            actor.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
         ##########
         self.route = deque(route)
         self.target = route[0]

@@ -4,6 +4,7 @@ from direct.gui.DirectGui import *
 from panda3d.core import *
 from map_model.fields_declaration import get_definition, AVAILABLE_ACTIONS
 
+
 class EditPanel:
 
     def __init__(self, editor):
@@ -56,11 +57,14 @@ class EditPanel:
         for fname, info in fields.items():
             if fname.startswith('_'):
                 continue
-            self._add_row(fname + '_title', label(fname + ':'))
+            if info['type'] is not bool:
+                self._add_row(fname + '_title', label(fname + ':'))
             if fname == 'group':
                 self._add_row(fname, group_widget(self, fname, **info))
             elif 'variants_dir' in info:
                 self._add_row(fname, combobox_widget(self, fname, **info))
+            elif info['type'] is bool:
+                self._add_row(fname, bool_widget(self, fname))
             else:
                 self._add_row(fname, row_widget(self, fname, **info))
         if not fields.get('_no_actions', False):
@@ -199,7 +203,7 @@ def row_widget(edit_panel, fname, type, default=False, **kwargs):
                        numLines=1,
                        width=ES.edit_panel['row_width'],
                        frameColor=(1, 1, 1, 1),
-                       scale=ES.edit_panel['widget_scale'] / 2,
+                       scale=ES.edit_panel['widget_scale'] / 1.5,
                        focus=0)
 
 
@@ -240,4 +244,17 @@ def action_widget(edit_panel, fname, action):
     return DirectCheckButton(command=set_value,
                              text=action,
                              indicatorValue=action in actions,
+                             borderWidth=(0.05, 0.05),
+                             scale=ES.edit_panel['widget_scale'])
+
+def bool_widget(edit_panel, fname):
+    group = edit_panel.editor.current_group
+
+    def set_value(status):
+        group[fname] = bool(status)
+
+    return DirectCheckButton(command=set_value,
+                             text=fname,
+                             indicatorValue=group.get(fname, False),
+                             borderWidth=(0.05, 0.05),
                              scale=ES.edit_panel['widget_scale'])

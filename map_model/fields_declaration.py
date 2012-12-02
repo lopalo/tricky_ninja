@@ -3,6 +3,7 @@ from os import path
 AVAILABLE_ACTIONS = ('walk', 'jump', 'see')
 
 # maps kinds to dicts with fields
+
 def get_definition():
     definition = {
         'empty': {},
@@ -35,6 +36,10 @@ def get_definition():
             'height': {
                 'type': float,
                 'default': True,
+            },
+            'disable_cartoon': {
+                'type': bool,
+                'default': True
             }
         },
         'chain_model': {
@@ -49,6 +54,10 @@ def get_definition():
             'height': {
                 'type': float,
                 'default': True,
+            },
+            'disable_cartoon': {
+                'type': bool,
+                'default': True
             }
         },
         'sprite': {

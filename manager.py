@@ -2,7 +2,6 @@ from math import hypot, sin, radians
 from random import choice
 from collections import defaultdict, deque
 
-from direct.filter.CommonFilters import CommonFilters
 from panda3d.core import *
 
 from map_model.map import Map
@@ -126,11 +125,8 @@ class Manager(object):
             dlight.setShadowCaster(True, ss, ss)
             dlnp.reparentTo(self.player.node)
         if S.graphics['enable_cartoon']:
+            # set for models separately
             self.main_node.setShaderAuto() # doesn't work in multithreading mode
-            mnode.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
-            self.filters = CommonFilters(base.win, base.cam)
-            self.filters.setCartoonInk(1)
-
 
     def update_view_fields(self, task):
         """ It is a very expensive funciton. Use only for debugging """

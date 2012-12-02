@@ -1,5 +1,6 @@
 from collections import deque
 from math import cos, sin, radians, atan2, degrees, hypot
+from panda3d.core import *
 from direct.interval.LerpInterval import (
     LerpPosInterval,
     LerpColorScaleInterval
@@ -44,6 +45,8 @@ class Player(Character):
         self.set_camera()
         self.set_move_handlers()
         self.set_control()
+        if S.graphics['enable_cartoon']:
+            actor.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
 
     @property
     def pos(self):

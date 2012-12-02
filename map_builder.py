@@ -15,7 +15,6 @@ class MapTextureError(BuildWorldError):
 class MapBuilder(object):
     texture_names = ['main', 'center', 'horizontal', 'vertical', 'corners']
 
-    #TODO: add ability to set height of models
 
     def __init__(self, map, main_node):
         self.map = map
@@ -95,6 +94,9 @@ class MapBuilder(object):
             else:
                 model.setScale(S.model_size(info['model']))
             model.setPos(coord[0], coord[1], info.get('height', 0))
+            if (S.graphics['enable_cartoon'] and
+                not info.get('disable_cartoon', False)):
+                model.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
         elif kind == 'chain_model':
             model = self._set_chain_model(
                 info['vertical_model'],
@@ -103,6 +105,9 @@ class MapBuilder(object):
                 coord,
                 info.get('height', 0)
             )
+            if (S.graphics['enable_cartoon'] and
+                not info.get('disable_cartoon', False)):
+                model.setAttrib(LightRampAttrib.makeSingleThreshold(0.5, 0.4))
         elif kind == 'sprite':
             model = self._create_plane()
             texture = loader.loadTexture(S.texture(info['texture']))
@@ -115,7 +120,6 @@ class MapBuilder(object):
             model.setScale(size)
             model.setPos(coord[0], coord[1], size / 2)
             model.setBillboardAxis()
-            model.setAttrib(LightRampAttrib.makeDefault())
 
         if model is not None:
             model.setTransparency(True)
