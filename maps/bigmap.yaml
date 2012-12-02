@@ -1,7 +1,45 @@
 definitions:
+  Ba:
+    actions:
+    - walk
+    - jump
+    kind: sprite
+    size: 6.0
+    texture: sakura1
   Hj:
     group: hz
     kind: model_field
+  Jw:
+    actions:
+    - walk
+    - jump
+    - see
+    kind: texture
+    texture: grass1
+  Lr:
+    actions: []
+    kind: chain_model
+    left_bottom_model: fence-corner
+    vertical_model: fence
+  Mx:
+    actions: []
+    kind: model
+    model: stone
+    size: 1.2
+  NV:
+    actions: []
+    kind: texture
+    texture: stone
+  Of:
+    actions: []
+    kind: empty
+  QI:
+    actions:
+    - walk
+    - jump
+    - see
+    kind: texture
+    texture: ground
   hz:
     actions:
     - walk
@@ -16,10 +54,42 @@ definitions:
     - see
     kind: texture
     texture: sand
+  jR:
+    actions: []
+    angle: 40
+    kind: model
+    model: stone
+    size: 1.5
+  jk:
+    actions:
+    - walk
+    - jump
+    kind: sprite
+    size: 5.0
+    texture: sakura
   mQ:
     actions: []
     kind: empty
-hour: 12
+  mY:
+    actions: []
+    angle: 45
+    kind: model
+    model: stone
+    size: 1.4
+  oD:
+    actions: []
+    angle: -30
+    kind: model
+    model: stone
+    size: 3.0
+  zN:
+    actions:
+    - jump
+    height: -1.0
+    kind: chain_model
+    left_bottom_model: fence-corner
+    vertical_model: fence
+hour: 8
 npcs: {}
 routes: {}
 start_position:
@@ -31,37 +101,38 @@ substrate_actions:
 - see
 substrate_texture: grass
 topology:
-- .. .. .. .. Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
-- ss ss ss ss Hj mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj hz Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
-- ss ss ss ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
-- ss ss ss ss Hj mQ mQ mQ mQ mQ Hj Hj Hj mQ mQ mQ mQ mQ Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK
-- ss ss ss ss Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK .. .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK .. .. .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK .. .. .. .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK .. .. .. .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK .. .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK .. .. ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK ..
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
-- ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss ss iK iK iK iK iK iK iK iK iK iK iK iK iK iK ..
+- .. .. .. .. .. mQ .. .. .. .. .. .. .. .. .. .. .. mQ .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+- .. .. .. .. Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. NV NV .. .. ..
+- Jw Jw Jw mQ Hj mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ Hj mQ Jw Jw zN QI zN QI QI QI QI QI QI QI QI Lr ss ss ss ss ss ss ss NV NV NV NV NV NV NV .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN QI zN QI QI QI QI QI QI QI QI Lr ss ss ss ss ss NV NV NV NV NV NV NV NV NV .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN QI zN QI QI ss zN zN zN QI QI Lr ss ss ss ss NV NV ss ss Of NV NV NV NV NV .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN QI zN QI ss zN zN Jw zN QI QI Lr ss ss ss NV NV ss ss ss Mx ss NV NV NV NV .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN QI zN QI zN zN Jw zN zN QI QI Lr ss ss NV NV NV NV ss ss Of NV NV NV NV NV .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN QI zN QI zN Jw jk zN QI QI Lr Lr ss NV NV ss NV NV NV ss Mx NV NV NV NV NV .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj hz Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN QI zN QI zN Jw zN zN QI QI Lr ss ss NV NV ss ss ss NV ss ss Lr Lr Lr Lr Lr .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN QI QI QI Jw jk zN QI QI QI Lr ss NV NV ss ss ss ss NV ss ss Lr iK iK iK iK .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN Jw Jw Jw Jw Jw zN QI Lr Lr Lr NV NV ss ss ss ss ss NV ss ss Lr iK iK iK iK .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN Jw Jw Jw Jw zN zN QI Lr ss NV NV ss Lr Lr Lr Lr ss NV ss ss Lr iK iK iK iK .. ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN Jw Jw Jw Jw zN QI QI Lr ss NV ss ss Lr ss ss Lr ss NV NV NV NV iK iK iK iK iK ..
+- Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw zN Jw Jw jk Jw zN QI QI Lr ss NV ss ss Lr ss ss Lr ss NV NV NV NV iK iK iK iK iK ..
+- Jw Jw Jw mQ Hj mQ mQ mQ mQ mQ Hj Hj Hj mQ mQ mQ mQ mQ Hj mQ zN zN zN Jw jk Jw zN zN QI QI Lr ss NV ss Lr Lr ss ss Lr ss NV ss ss Lr iK iK iK iK iK iK
+- Jw Jw Jw ss Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj ss zN jk Jw Jw jk Jw zN QI QI QI Lr ss NV ss Lr ss Lr Lr Lr ss NV ss ss Lr iK iK iK iK iK iK
+- Jw Jw Jw ss ss mQ ss ss ss ss ss ss ss ss ss ss ss mQ ss ss zN zN zN zN Jw zN zN QI Lr Lr Lr ss NV ss Lr ss Lr ss ss NV NV NV ss Lr iK iK iK iK iK ..
+- Jw Jw Jw Ba ss Ba ss Ba Jw Jw QI QI QI Jw Jw ss Ba ss Ba ss Jw Jw Jw zN zN zN QI QI Lr ss ss ss NV ss Lr Lr Lr ss NV NV ss ss ss Lr iK iK iK iK iK ..
+- Jw Jw Jw Jw Jw Jw Jw Jw Jw Jw QI QI QI Jw Jw Jw Jw Jw Jw Jw Jw Jw Jw QI QI QI QI QI Lr ss ss NV NV ss ss NV NV NV NV ss ss ss ss Lr iK iK iK iK iK ..
+- Jw Jw Jw Jw Jw Jw Jw Jw Jw Jw QI QI QI Jw Jw Jw Jw Jw Jw Jw Jw Jw Jw QI Lr Lr Lr Lr Lr ss ss NV NV NV NV NV NV ss ss ss ss Lr Lr Lr iK iK iK iK .. ..
+- ss ss ss ss ss QI QI QI QI QI QI QI QI QI QI QI QI QI QI QI QI QI QI QI Lr QI QI ss Lr ss ss ss NV NV NV NV NV ss Lr Lr Lr Lr iK iK iK iK iK iK .. ..
+- ss ss ss QI QI QI QI QI QI QI QI QI QI QI jk jk jk jk jk jk jk jk jk QI Lr QI QI ss Lr Lr ss ss ss NV NV NV ss ss Lr iK iK iK iK iK iK iK iK .. .. ..
+- ss ss QI QI ss ss ss ss ss QI QI QI QI jk jk jk ss ss jk ss jk jk ss QI Lr QI QI ss ss Lr ss ss ss ss NV ss ss ss Lr iK iK iK iK iK iK iK .. .. .. ..
+- ss QI QI ss ss ss Ba ss Ba ss QI QI QI ss jk jk jk jk jk ss jk ss jk QI Lr QI QI QI ss Lr ss ss ss ss NV ss ss ss Lr iK iK iK iK iK iK .. .. .. .. ..
+- ss QI ss ss ss Ba ss ss ss Ba QI QI QI ss ss ss jk ss jk ss ss jk QI QI Lr ss QI QI ss Lr Lr Lr Lr ss NV ss ss ss Lr iK iK iK iK iK iK .. .. .. .. ..
+- ss QI ss Ba ss ss ss Ba Ba Ba QI QI QI ss jk jk jk jk jk jk jk jk QI QI Lr ss QI QI ss ss ss ss Lr ss NV ss ss Lr Lr iK iK iK iK iK iK Of jR .. .. ..
+- ss QI ss ss Ba ss Ba ss ss ss QI QI QI ss jk ss jk jk ss ss jk jk QI ss Lr Lr QI QI QI QI QI QI Lr ss ss ss ss Lr iK iK iK iK iK iK Of Of Of .. .. ..
+- ss QI ss Ba ss Ba Ba Ba ss Ba QI QI QI ss ss ss ss ss jk jk jk ss QI ss ss Lr QI QI ss ss ss QI zN ss ss Lr Lr Lr iK iK iK iK iK Of Of Of iK iK mY ..
+- ss QI ss Ba ss ss ss Ba Ba Ba QI QI QI ss jk ss jk jk jk jk ss jk QI ss ss Lr QI QI ss ss ss QI zN ss ss Lr iK iK iK iK iK iK Of Of oD Of iK iK iK iK
+- ss QI ss ss Ba ss Ba Ba ss ss QI QI QI ss ss jk ss ss jk ss jk ss QI ss ss ss QI QI ss ss ss QI zN ss Lr Lr iK iK iK iK iK iK Of Of Of Of iK iK iK iK
+- ss QI ss ss Ba Ba ss Ba ss Ba QI QI QI jk jk jk jk ss jk jk jk jk QI ss ss QI QI QI ss ss ss QI zN ss Lr iK iK iK iK iK iK iK iK Of Of iK iK iK iK iK
+- ss QI Ba Ba ss Ba Ba ss Ba ss QI QI QI ss jk ss jk jk ss jk ss ss QI QI QI QI QI ss ss ss ss QI zN ss Lr iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
+- ss QI ss Ba Ba ss Ba ss Ba QI QI ss QI QI jk jk ss jk jk ss jk ss QI QI QI QI QI ss ss ss ss QI zN ss Lr iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
+- ss QI QI QI QI QI QI QI QI QI QI ss ss QI QI QI QI QI QI QI QI QI QI ss ss QI QI QI QI QI QI QI zN ss Lr iK iK iK iK iK iK iK iK iK iK iK iK iK iK ..
 - .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. iK iK .. .. .. .. iK iK .. iK .. ..
