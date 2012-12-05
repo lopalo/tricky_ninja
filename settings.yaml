@@ -25,7 +25,7 @@ camera:
   init_distance: 30
   init_vertical_angle: -45
   vertical_angle_step: 3
-  horizontal_angle: 69 # if less then appear issues with transparent objects
+  horizontal_angle: 60 # if less 69 then appear issues with transparent objects
 
 character:
   resume_action_timeout: 0.1

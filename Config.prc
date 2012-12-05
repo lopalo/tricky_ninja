@@ -104,4 +104,4 @@ basic-shaders-only #f
 #custom part
 
 default-model-extension .egg
-#threading-model Cull/Draw # doesn't work with shaders
+threading-model Cull/Draw # doesn't work with shaders
