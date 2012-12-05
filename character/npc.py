@@ -49,7 +49,7 @@ class NPC(Character):
     def pos(self, value):
         assert value in self.manager.map
         if hasattr(self, '_pos'):
-            del self.manager.npcs[self._pos]
+            del self.manager.npcs[self._pos] #FIXME: KeyError
         self._pos = value
         self.manager.npcs[self._pos] = self
 
@@ -123,7 +123,7 @@ class NPC(Character):
         assert isinstance(char, Character)
         map = self.manager.map
         radius, c_angle = self.view_radius, self.view_angle
-        pred = lambda pos: 'jump' in map[pos]['actions']
+        pred = lambda pos: 'see' in map[pos]['actions']
         field = map.view_field(self.pos, self.actor_angle,
                                     c_angle, radius, pred)
         if char.pos in field:

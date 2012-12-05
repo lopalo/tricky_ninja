@@ -43,7 +43,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                NPC(self, **_data).dead = True
+                NPC(self, **_data)#.dead = True
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -137,7 +137,7 @@ class Manager(object):
             del self.view_fields[key]
             radius, c_angle = npc.view_radius, npc.view_angle
             angle = int(npc.actor.getHpr()[0] - 90) % 360
-            pred = lambda pos: 'jump' in self.map[pos]['actions']
+            pred = lambda pos: 'see' in self.map[pos]['actions']
             field = self.map.view_field(npc.pos, angle,
                                         c_angle, radius, pred)
             for pos in field:
