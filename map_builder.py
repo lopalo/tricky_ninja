@@ -14,6 +14,7 @@ class MapTextureError(BuildWorldError):
 
 class MapBuilder(object):
     texture_names = ['main', 'center', 'horizontal', 'vertical', 'corners']
+    #TODO: background
 
 
     def __init__(self, map, main_node):
@@ -83,7 +84,7 @@ class MapBuilder(object):
         if kind in ('substrate_texture', 'empty', 'model_field'):
             model = None
         elif kind == 'texture':
-            return None, self._set_texture(info['texture'], info['ident'], coord)
+            return None, self._set_texture(info['texture'], coord)
         elif kind == 'model':
             model = loader.loadModel(S.model(info['model']))
             model.reparentTo(self.main_node)
@@ -123,7 +124,7 @@ class MapBuilder(object):
 
         if model is not None:
             model.setTransparency(True)
-        return model, self._set_texture(None, None, coord, True)
+        return model, self._set_texture(None, coord, True)
 
     def _load_map_textures(self, additional=None):
         if additional is not None:
@@ -170,9 +171,10 @@ class MapBuilder(object):
         plane = render.attachNewNode(pl_maker.generate())
         return plane
 
-    def _set_texture(self, txt_name, ident, pos, only_ss=False):
+    def _set_texture(self, txt_name, pos, only_ss=False):
         ss_textures = self.map_textures[self.map.substrate_texture]
         size = S.graphics['map_texture_size']
+        #TODO: cache result images
         result_image = PNMImage(size, size)
         result_image.addAlpha()
         w, h = size / 2, size / 2
@@ -216,18 +218,18 @@ class MapBuilder(object):
                 for num, (x, y) in enumerate(((0, 0), (w, 0),
                                               (w, h), (0, h))):
                     c = tuple(nbs)[:3]
-                    if all(c) and all(i.get('ident') == ident
+                    if all(c) and all(i.get('texture') == txt_name
                                                     for i in c):
                         img = textures[num]['center']
-                    elif (c[0] and c[2] and c[0].get('ident') == ident
-                                        and c[2].get('ident') == ident):
+                    elif (c[0] and c[2] and c[0].get('texture') == txt_name
+                                        and c[2].get('texture') == txt_name):
                         img = textures[num]['corners']
-                    elif c[0] and c[0].get('ident') == ident:
+                    elif c[0] and c[0].get('texture') == txt_name:
                         if num % 2 == 0:
                             img = textures[num]['horizontal']
                         else:
                             img = textures[num]['vertical']
-                    elif c[2] and c[2].get('ident') == ident:
+                    elif c[2] and c[2].get('texture') == txt_name:
                         if num % 2 == 0:
                             img = textures[num]['vertical']
                         else:

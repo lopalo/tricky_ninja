@@ -12,6 +12,9 @@ from character.body import Body
 
 
 class Manager(object):
+    #TODO: optimization (LOD, ...)
+
+    #TODO: clear loaded parts of map textures
 
     def __init__(self, map_name):
         self.main_node = render.attachNewNode('main_node')
