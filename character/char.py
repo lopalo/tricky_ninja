@@ -53,6 +53,7 @@ class Character(object):
     def angle_to_pos(self, diff): # diff = 0 is forward
         angle = int(self.actor.getHpr()[0] + diff - 90) % 360
         angle = angle if angle <= 180 else angle - 360
+        angle = angle // 45 * 45
         diff = self.reverse_angle_table[angle]
         pos = self.pos[0] + diff[0], self.pos[1] - diff[1]
         return pos
@@ -72,6 +73,7 @@ class Character(object):
             interval = LerpHprInterval(self.actor, dur, (angle, 0, 0),
                                                     (c_angle, 0, 0))
             yield interval
+            self.actor.setH(angle) # if continues by timeout
 
     @action
     def do_walk(self):
@@ -104,6 +106,7 @@ class Character(object):
             self.walking = True
             yield interval
             self.pos = next_pos
+            self.node.setPos(self.pos[0], self.pos[1], 0) # if continues by timeout
             map.unblock(self.pos)
             self.walking = False
         anim.pose(self.idle_frame)

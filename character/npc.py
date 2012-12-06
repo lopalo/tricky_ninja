@@ -48,8 +48,11 @@ class NPC(Character):
     @pos.setter
     def pos(self, value):
         assert value in self.manager.map
-        if hasattr(self, '_pos'):
-            del self.manager.npcs[self._pos] #FIXME: KeyError
+        old_pos = getattr(self, '_pos', None)
+        if (old_pos is not None and
+            old_pos in self.manager.npcs and
+            self.manager.npcs[old_pos] is self):
+            del self.manager.npcs[old_pos]
         self._pos = value
         self.manager.npcs[self._pos] = self
 

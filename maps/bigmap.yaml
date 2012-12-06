@@ -35,7 +35,8 @@ definitions:
     texture: stone
   Of:
     actions: []
-    kind: empty
+    kind: texture
+    texture: sand
   QI:
     actions:
     - walk
@@ -46,6 +47,9 @@ definitions:
   aD:
     group: Ba
     kind: model_field
+  dQ:
+    actions: []
+    kind: empty
   ef:
     actions:
     - walk
@@ -232,11 +236,11 @@ topology:
 - iK Lr Jw Jw Jw Jw Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Jw Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr NV NV Lr Lr iK
 - iK Lr Jw Jw Jw mQ Hj mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ mQ Hj mQ Jw Jw Lr ef zN QI QI QI QI QI QI QI QI Lr ss ss ss ss ss ss ss NV NV NV NV NV NV NV Lr iK
 - iK Lr Jw Jw Jw Jw Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj Jw Jw Jw Lr QI zN QI QI QI QI QI QI QI QI Lr ss ss ss ss ss NV NV NV NV NV NV NV NV NV Lr iK
-- iK Lr Jw Jw Jw Jw Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj Jw Jw Jw Lr QI zN QI QI ss zN zN zN QI QI Lr ss ss ss ss NV NV ss ss Of NV NV NV NV NV Lr iK
+- iK Lr Jw Jw Jw Jw Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj Jw Jw Jw Lr QI zN QI QI ss zN zN zN QI QI Lr ss ss ss ss NV NV ss ss dQ NV NV NV NV NV Lr iK
 - iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr QI zN QI ss zN zN Jw zN QI QI Lr ss ss ss NV NV ss ss ss Mx ss NV NV NV NV Lr iK
-- iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr QI zN QI zN zN Jw zN zN QI QI Lr ss ss NV NV NV NV ss ss Of NV NV NV NV NV Lr iK
+- iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr QI zN QI zN zN Jw zN zN QI QI Lr ss ss NV NV NV NV ss ss dQ NV NV NV NV NV Lr iK
 - iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr QI zN QI zN Jw jk zN QI QI Lr Lr ss NV NV ss NV NV NV ss Mx NV NV NV NV NV Lr iK
-- iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj hz Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr QI zN QI zN Jw zN zN QI QI Lr ss ss NV NV ss ss ss NV ss ss Lr Lr Lr Lr Lr Lr iK
+- iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj hz Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr QI zN QI zN Jw zN zN QI QI Lr ss ss NV NV ss ss ss NV ss dQ Lr Lr Lr Lr Lr Lr iK
 - iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr QI QI QI Jw jk zN QI QI QI Lr ss NV NV ss ss ss ss NV ss ss Lr iK iK iK iK iK iK
 - iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr Jw Jw Jw Jw Jw zN QI Lr Lr Lr NV NV ss ss ss ss ss NV ss ss Lr iK iK iK iK .. ..
 - iK Lr Jw Jw Jw ss Hj mQ Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj Hj mQ Hj ss Jw Jw Lr Jw Jw Jw Jw zN zN QI Lr ss NV NV ss Lr Lr Lr Lr ss NV ss ss Lr iK iK iK iK .. ..
@@ -253,12 +257,12 @@ topology:
 - iK Lr ss ss QI QI Ba aD Ba aD Ba QI QI QI QI jk nX jk nX jk nX jk nX jk nX QI Lr QI QI ss ss Lr ss ss ss ss NV ss ss ss Lr iK iK iK iK iK iK iK .. .. .. ..
 - iK Lr ss QI QI Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX jk QI Lr QI QI QI ss Lr ss ss ss ss NV ss ss ss Lr iK iK iK iK iK iK .. .. .. .. ..
 - iK Lr ss QI Ba aD Ba aD Ba aD Ba aD QI QI QI jk nX jk nX jk nX jk nX jk QI QI Lr ss QI QI ss Lr Lr Lr Lr ss NV ss ss ss Lr iK iK iK iK iK iK .. .. .. .. ..
-- iK Lr ss QI aD Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX QI QI Lr ss QI QI ss ss ss ss Lr ss NV ss ss Lr Lr iK iK iK iK iK iK Of jR .. .. ..
-- iK Lr ss QI Ba aD Ba aD Ba aD Ba aD QI QI QI jk nX jk nX jk nX jk nX jk QI ss Lr Lr QI QI QI QI QI QI Lr ss ss ss ss Lr iK iK iK iK iK iK Of Of Of .. .. ..
-- iK Lr ss QI aD Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX QI ss ss Lr QI QI ss ss ss QI zN ss ss Lr Lr Lr iK iK iK iK iK Of Of Of iK iK mY ..
-- iK Lr ss QI Ba aD Ba aD Ba aD Ba aD QI QI QI jk nX jk nX jk nX jk nX jk QI ss ss Lr QI QI ss ss ss QI zN ss ss Lr iK iK iK iK iK iK Of Of oD Of iK iK iK iK
-- iK Lr ss QI aD Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX QI ss ss ss QI QI ss ss ss QI zN ss Lr Lr iK iK iK iK iK iK Of Of Of Of iK iK iK iK
-- iK Lr ss QI Ba aD Ba aD Ba aD Ba aD QI QI QI jk nX jk nX jk nX jk nX jk QI ss ss QI QI QI ss ss ss QI zN ss Lr iK iK iK iK iK iK iK iK Of Of iK iK iK iK iK
+- iK Lr ss QI aD Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX QI QI Lr ss QI QI ss ss ss ss Lr ss NV ss ss Lr Lr iK iK iK iK iK Of Of jR .. .. ..
+- iK Lr ss QI Ba aD Ba aD Ba aD Ba aD QI QI QI jk nX jk nX jk nX jk nX jk QI ss Lr Lr QI QI QI QI QI QI Lr ss ss ss ss Lr iK iK iK iK iK Of Of Of Of .. .. ..
+- iK Lr ss QI aD Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX QI ss ss Lr QI QI ss ss ss QI zN ss ss Lr Lr Lr iK iK iK iK Of Of Of Of Of Of mY Of
+- iK Lr ss QI Ba aD Ba aD Ba aD Ba aD QI QI QI jk nX jk nX jk nX jk nX jk QI ss ss Lr QI QI ss ss ss QI zN ss ss Lr iK iK iK iK iK iK Of Of oD Of Of iK Of iK
+- iK Lr ss QI aD Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX QI ss ss ss QI QI ss ss ss QI zN ss Lr Lr iK iK iK iK iK iK Of Of Of Of Of iK iK iK
+- iK Lr ss QI Ba aD Ba aD Ba aD Ba aD QI QI QI jk nX jk nX jk nX jk nX jk QI ss ss QI QI QI ss ss ss QI zN ss Lr iK iK iK iK iK iK iK Of Of Of Of iK iK iK iK
 - iK Lr ss QI aD Ba aD Ba aD Ba aD Ba QI QI QI nX jk nX jk nX jk nX jk nX QI QI QI QI QI ss ss ss ss QI zN ss Lr iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
 - iK Lr ss QI Ba aD Ba aD Ba aD Ba QI QI ss QI QI nX jk nX jk nX jk nX jk QI QI QI QI QI ss ss ss ss QI zN ss Lr iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK
 - iK Lr ss QI QI QI QI QI QI QI QI QI QI ss ss QI QI QI QI QI QI QI QI QI QI ss ss QI QI QI QI QI QI QI zN ss Lr iK iK iK iK iK iK iK iK iK iK iK iK iK iK ..
