@@ -38,7 +38,7 @@ class Player(Character):
         actor.setTransparency(False)
         actor.setTexture(loader.loadTexture(
                             S.texture(S.player['texture'])), 1)
-        self.pos = self.init_position = tuple(pos)
+        self.pos = self.init_position = pos
         self.node.setPos(self.pos[0], self.pos[1], 0)
         actor.pose('anim', self.idle_frame)
         actor.setBlend(frameBlend=True)
@@ -310,7 +310,7 @@ class Player(Character):
         self.must_die = False
         yield self._falling()
         yield wait(1)
-        init_pos = tuple(self.init_position)
+        init_pos = self.init_position
         if (not self.manager.map.is_available(init_pos) or
             not self.manager.is_available(init_pos)):
                 return # TODO: maybe delete player

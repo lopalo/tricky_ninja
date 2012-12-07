@@ -1,3 +1,4 @@
+from uuid import uuid4
 from functools import wraps
 from types import GeneratorType
 from direct.interval.ActorInterval import ActorInterval
@@ -33,7 +34,7 @@ def _runner(char, gen, send_value=None):
     except StopIteration:
         char.action = None
         return
-    key = str(id(yielded))
+    key = uuid4().hex
 
     def timeout_handler(task):
         if key not in char.action_timeouts:

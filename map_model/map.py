@@ -87,7 +87,8 @@ class Map(object):
         self._check = check
         self._raise_error_message(check_data(data))
         self.blocked_squares = set()
-        self.start_pos = data['start_position']
+        self.start_pos = tuple(data['start_position'])
+        self.escape_position = tuple(data['escape_position'])
         self.hour = data.get('hour', 0)
         self.substrate_texture = data['substrate_texture']
 
@@ -117,6 +118,7 @@ class Map(object):
         for key, value in data.get('routes', {}).items():
             self.routes[key] = tuple(tuple(i) for i in value)
         self.npcs = data.get('npcs', tuple())
+        self.target_npc = data.get('target_npc', {})
         self._raise_error_message(self._check_routes())
 
     def _raise_error_message(self, errors):

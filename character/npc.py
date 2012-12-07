@@ -12,7 +12,7 @@ from character.action import action, wait
 
 class NPC(Character):
 
-    def __init__(self, manager, texture, route, **spam):
+    def __init__(self, manager, texture, route, alert_texture=None, **spam):
         super(NPC, self).__init__(manager)
 
         self.view_radius = S.npc['normal_view_radius']
@@ -23,6 +23,7 @@ class NPC(Character):
         self.hit_speed = S.npc_anim['hit_speed']
         self.post_hit_range = S.npc_anim['post_hit_range']
         self.post_hit_speed = S.npc_anim['post_hit_speed']
+        self.aler_texture = alert_texture
 
         self.actor = actor = Actor(S.model(self.model),
                                     {'anim': S.model(self.model)})
@@ -47,7 +48,7 @@ class NPC(Character):
 
     @pos.setter
     def pos(self, value):
-        assert value in self.manager.map
+        assert value in self.manager.map, value
         old_pos = getattr(self, '_pos', None)
         if (old_pos is not None and
             old_pos in self.manager.npcs and
@@ -65,6 +66,15 @@ class NPC(Character):
         assert isinstance(value, (tuple, Player))
         self._target = value
 
+    def walk_pred(self, pos):
+        manager = self.manager
+        map = manager.map
+        return ('walk' in map[pos]['actions'] and
+                map.is_available(pos) and
+                (pos not in manager.npcs or
+                manager.npcs[pos].walking) and
+                pos not in manager.bodies)
+
     def get_next_pos(self):
         if self.get_action() != 'walk':
             return
@@ -73,12 +83,7 @@ class NPC(Character):
         target = self.target
         end_pos = target if isinstance(target, tuple) else target.pos
         # TODO: maybe remove corpse occupation check
-        pred = lambda pos: ('walk' in map[pos]['actions'] and
-                            map.is_available(pos) and
-                            (pos not in manager.npcs or
-                            manager.npcs[pos].walking) and
-                            pos not in manager.bodies)
-        path = map.get_path(self.pos, end_pos, pred)
+        path = map.get_path(self.pos, end_pos, self.walk_pred)
         if not path:
             return
         return path[0]
@@ -146,3 +151,17 @@ class NPC(Character):
         self.must_die = False
         self.dead = True
         yield wait(.5)
+
+
+class TargetNPC(NPC):
+
+    walk_pred = Character.walk_pred
+
+    def get_action(self):
+        player = self.manager.player
+        if player and self.in_view_field(player):
+            self.manager.alert(self.pos)
+        if self.pos == self.target:
+            self.route.rotate(-1)
+            self.target = self.route[0]
+        return 'walk'

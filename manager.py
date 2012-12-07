@@ -7,7 +7,7 @@ from panda3d.core import *
 from map_model.map import Map
 from map_builder import MapBuilder
 from character.player import Player
-from character.npc import NPC
+from character.npc import NPC, TargetNPC
 from character.body import Body
 
 
@@ -47,6 +47,10 @@ class Manager(object):
                     route.rotate(1)
                 _data['route'] = route
                 NPC(self, **_data)#.dead = True
+        data = self.map.target_npc.copy()
+        route = deque(self.map.routes[data['route']])
+        data['route'] = route
+        TargetNPC(self, **data)
 
     def is_available(self, pos):
         return (pos in self.map and
@@ -58,10 +62,14 @@ class Manager(object):
         self.player.update_action()
         for npc in tuple(self.npcs.values()):
             if not npc and npc.action is None:
+                if isinstance(npc, TargetNPC):
+                    print 'SUCCESS' #TODO: change to exit of manager
                 del self.npcs[npc._pos]
                 Body(npc, self)
                 continue
             npc.update_action()
+            if isinstance(npc, TargetNPC) and npc.pos == self.map.escape_position:
+                print 'FAIL' #TODO: change to exit of manager
         return task.cont
 
     def on_player_moved(self, prev_pos, pos):
@@ -96,10 +104,14 @@ class Manager(object):
                 continue
             length = hypot(npc.pos[0] - pos[0], npc.pos[1] - pos[1])
             if length <= S.npc['alert_radius']:
-                npc.target = target_pos or self.player
-                npc.speed = S.npc['excited_speed']
-                npc.view_radius = S.npc['excited_view_radius']
-                npc.view_angle = S.npc['excited_view_angle']
+                if isinstance(npc, TargetNPC):
+                    npc.target = self.map.escape_position
+                    npc.speed = S.target_npc['escape_speed']
+                else:
+                    npc.target = target_pos or self.player
+                    npc.speed = S.npc['excited_speed']
+                    npc.view_radius = S.npc['excited_view_radius']
+                    npc.view_angle = S.npc['excited_view_angle']
 
     def setup_graphics(self):
         angle = self.map.hour * 15 - 90

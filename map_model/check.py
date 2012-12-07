@@ -9,8 +9,8 @@ def check_map_data(data):
     group_definition = fdecl.get_definition()
     all_actions = set(fdecl.AVAILABLE_ACTIONS)
     stop = False
-    for f in ('substrate_texture', 'definitions',
-              'topology', 'start_position', 'hour'):
+    for f in ('substrate_texture', 'definitions', 'topology',
+              'start_position', 'escape_position', 'hour'):
         if f not in data:
             stop = True
             yield f, 'is not specified'
@@ -69,7 +69,7 @@ def check_map_data(data):
             if id not in data['definitions']:
                 yield 'topology', 'unknown ident ' + id
 
-
+    #TODO: check target_npc
     for num, npc in enumerate(data.get('npcs', tuple())):
         for f, i in fdecl.npc.items():
             if not i.get('default', False) and f not in npc:

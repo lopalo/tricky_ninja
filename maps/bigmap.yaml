@@ -111,6 +111,9 @@ definitions:
     left_bottom_model: fence-corner
     vertical_model: fence
 hour: 8
+target_npc:
+  route: house_target
+  texture: nskinwh
 npcs:
 - alert_texture: nskinrd
   count: 2
@@ -224,6 +227,9 @@ routes:
 start_position:
 - 49
 - 7
+escape_position:
+- 25
+- 34
 substrate_actions:
 - walk
 - jump

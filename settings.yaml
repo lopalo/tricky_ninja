@@ -73,6 +73,9 @@ npc:
   body_frame: 170
   body_shift: -2
 
+target_npc:
+  escape_speed: 2.5
+
 show_control_keys: true
 
 control_keys:
