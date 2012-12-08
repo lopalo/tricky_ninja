@@ -31,18 +31,19 @@ class TestPlayer(unittest.TestCase):
         pl.actor.getAnimControl.return_value = self.anim_mock = mock.Mock()
         pl.speed = 1
         S.pl_anim = {
-            'walk_range': (43, 46),
             'pre_jump_range': (32, 40),
             'pre_jump_speed': 4,
             'post_jump_range': (12, 30),
             'post_jump_speed': 2,
-            'pick_up_speed': 10,
-            'pick_up_range': (109, 201),
             'body_moving_range': (1329, 2373)
         }
         S.player = defaultdict(int)
         S.player['body_moving_speed'] = .2
-        S.ch_anim = {'walk_range': (343, 400)}
+        S.ch_anim = {
+            'walk_range': (343, 400),
+            'pick_up_speed': 10,
+            'pick_up_range': (109, 201),
+        }
         S.control_keys = {
             'move_right': 'arrow_right',
             'move_left': 'arrow_left',

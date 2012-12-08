@@ -66,15 +66,6 @@ class NPC(Character):
         assert isinstance(value, (tuple, Player))
         self._target = value
 
-    def path_pred(self, pos):
-        manager = self.manager
-        map = manager.map
-        return ('walk' in map[pos]['actions'] and
-                map.is_available(pos) and
-                (pos not in manager.npcs or
-                manager.npcs[pos].walking) and
-                pos not in manager.bodies)
-
     def get_next_pos(self):
         if self.get_action() != 'walk':
             return
@@ -82,7 +73,6 @@ class NPC(Character):
         map = manager.map
         target = self.target
         end_pos = target if isinstance(target, tuple) else target.pos
-        # TODO: maybe remove corpse occupation check
         path = map.get_path(self.pos, end_pos, self.path_pred)
         if not path:
             return

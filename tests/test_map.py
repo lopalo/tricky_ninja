@@ -14,6 +14,7 @@ class TestMap(unittest.TestCase):
             definitions=definitions,
             topology=topology,
             start_position=(0, 0),
+            escape_position=(0, 0),
         )
         return Map(data=data, check=False)
 
@@ -27,7 +28,7 @@ class TestMap(unittest.TestCase):
             'ss ss ss .. ss ss ss ss',
         ]
 
-        defin = dict((i, {}) for i in ('WL', 'st'))
+        defin = dict((i, {'kind':'empty'}) for i in ('WL', 'st'))
         map = self.get_map(defin, top)
         pred = lambda pos: map[pos].get('ident') != 'WL'
         waves = map.wave(map.groups['st'][0], pred)
@@ -53,7 +54,10 @@ class TestMap(unittest.TestCase):
             'ss ss ss .. ss ss ss ss',
         ]
 
-        defin = {'st':{}, 'WL': {'actions': ['walk', 'see']}}
+        defin = {
+            'st':{'kind':'empty'},
+            'WL': {'kind':'empty', 'actions': ['walk', 'see']}
+        }
         map = self.get_map(defin, top)
         field = list(map.get_jump_field(map.groups['st'][0]))
         self.assertEqual([(2, 4), (0, 2), (1, 3)], field)
@@ -68,7 +72,10 @@ class TestMap(unittest.TestCase):
             'ss ss ss .. ss ss ss ss',
         ]
 
-        defin = {'st':{}, 'WL': {'actions': ['jump', 'see']}}
+        defin = {
+            'st':{'kind':'empty'},
+            'WL': {'kind':'empty', 'actions': ['jump']}
+        }
         map = self.get_map(defin, top)
         field = list(map.get_jump_field(map.groups['st'][0]))
         self.assertEqual([(2, 4), (2, 0), (1, 1), (0, 2), (1, 3)], field)
@@ -86,7 +93,7 @@ class TestMap(unittest.TestCase):
         steps = [i + str(n) for i in ('a', 'b')
                 for n in range(1, 10)
                 if not (i == 'b' and n > 7)]
-        defin = dict((i, {}) for i in ['WL', 'st', 'fn'] + steps)
+        defin = dict((i, {'kind':'empty'}) for i in ['WL', 'st', 'fn'] + steps)
         map = self.get_map(defin, top)
         pred = lambda pos: map[pos].get('ident') != 'WL'
         res = map.get_path(map.groups['st'][0],
@@ -103,7 +110,7 @@ class TestMap(unittest.TestCase):
             'ss ss ss ss ss ss ss ss ss',
             'ss ss ss ss ss ss ss ss ss',
         ]
-        defin = {'st':{}, 'fd': {}}
+        defin = {'st':{'kind':'empty'}, 'fd': {'kind':'empty'}}
         map = self.get_map(defin, top)
         pred = lambda x: True
         res = map.view_field(map.groups['st'][0], 90, 92, 10, pred)
@@ -118,7 +125,7 @@ class TestMap(unittest.TestCase):
             'ss ss fd ss ss ss ss ss ss',
             'ss ss ss ss ss ss ss ss ss',
         ]
-        defin = {'st':{}, 'fd': {}}
+        defin = {'st':{'kind':'empty'}, 'fd': {'kind':'empty'}}
         map = self.get_map(defin, top)
         pred = lambda x: True
         res = map.view_field(map.groups['st'][0], 180, 20, 7, pred)
@@ -133,7 +140,7 @@ class TestMap(unittest.TestCase):
             'ss ss ss fd fd fd ss ss ss',
             'ss ss ss ss ss ss ss ss ss',
         ]
-        defin = {'st':{}, 'fd': {}}
+        defin = {'st':{'kind':'empty'}, 'fd': {'kind':'empty'}}
         map = self.get_map(defin, top)
         pred = lambda x: True
         res = map.view_field(map.groups['st'][0], 0, 40, 6, pred)
@@ -148,7 +155,7 @@ class TestMap(unittest.TestCase):
             'ss ss fd fd ss ss ss ss ss',
             'ss ss ss ss ss ss ss ss ss',
         ]
-        defin = {'st':{}, 'fd': {}}
+        defin = {'st':{'kind':'empty'}, 'fd': {'kind':'empty'}}
         map = self.get_map(defin, top)
         pred = lambda x: True
         res = map.view_field(map.groups['st'][0], 315, 60, 5, pred)
@@ -183,7 +190,7 @@ class TestMap(unittest.TestCase):
             'ss ss fd fd ss ss ss fd fd',
             'ss ss fd ss ss ss ss ss fd',
         ]
-        defin = dict((i, {}) for i in ('WL', 'st', 'fd'))
+        defin = dict((i, {'kind':'empty'}) for i in ('WL', 'st', 'fd'))
         map = self.get_map(defin, top)
         pred = lambda pos: map[pos].get('ident') != 'WL'
         res = map.view_field(map.groups['st'][0], 270, 120, 7, pred)
@@ -198,7 +205,7 @@ class TestMap(unittest.TestCase):
             'ss ss ss fd ss ss ss ss fd',
             'ss ss ss ss ss ss ss ss fd',
         ]
-        defin = dict((i, {}) for i in ('WL', 'st', 'fd'))
+        defin = dict((i, {'kind':'empty'}) for i in ('WL', 'st', 'fd'))
         map = self.get_map(defin, top)
         pred = lambda pos: map[pos].get('ident') != 'WL'
         res = map.view_field(map.groups['st'][0], 230, 120, 7, pred)
@@ -214,8 +221,8 @@ class TestMap(unittest.TestCase):
             'ss 33 ss 22 ss 11 ss ss',
         ]
 
-        defin = dict((i, {}) for i in ('cc', 'fr', 'to', '11',
-                                       '22', '33', '44', '55'))
+        defin = dict((i, {'kind':'empty'}) for i in ('cc', 'fr', 'to', '11',
+                                                     '22', '33', '44', '55'))
         map = self.get_map(defin, top)
         pred = lambda pos: pos in map
         cc = map.groups['cc'][0]

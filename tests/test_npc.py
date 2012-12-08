@@ -16,8 +16,8 @@ class TestNPC(unittest.TestCase):
     @mock.patch('manager.Map')
     @mock.patch('manager.Player')
     @mock.patch('manager.NPC')
-    @mock.patch('manager.CommonFilters')
-    def setUp(self, map_mock, pl_mock, npc_mock, filters):
+    @mock.patch('manager.TargetNPC')
+    def setUp(self, map_mock, pl_mock, npc_mock, target_npc_mock):
         __builtin__.S = mock.MagicMock()
         __builtin__.render = mock.Mock()
         __builtin__.base = mock.Mock()
@@ -41,10 +41,11 @@ class TestNPC(unittest.TestCase):
         ]
         data = dict(
             substrate_texture='grass',
-            substrate_actions=['jump', 'walk'],
+            substrate_actions=['jump', 'walk', 'see'],
             definitions={},
             topology=top,
             start_position=(0, 0),
+            escape_position=(0, 0),
         )
         manager.map = Map(data=data, check=False)
 
