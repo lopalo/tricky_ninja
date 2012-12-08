@@ -34,6 +34,8 @@ character:
     death_speed: 0.3
     backward_death_range: [165, 170]
     forward_death_range: [175, 182]
+    pick_up_speed: 0.5
+    pick_up_range: [82, 92]
 
 player:
   texture: nskinbl
@@ -50,8 +52,6 @@ player:
     post_hit_range: [49, 58]
     post_hit_speed: 0.7
     body_moving_range: [14, 29]
-    pick_up_speed: 0.5
-    pick_up_range: [82, 92]
   idle_frame: 28
   body_captured_frame: 14
   body_moving_speed: 3 #1

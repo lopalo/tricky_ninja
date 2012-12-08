@@ -66,7 +66,7 @@ class NPC(Character):
         assert isinstance(value, (tuple, Player))
         self._target = value
 
-    def walk_pred(self, pos):
+    def path_pred(self, pos):
         manager = self.manager
         map = manager.map
         return ('walk' in map[pos]['actions'] and
@@ -83,7 +83,7 @@ class NPC(Character):
         target = self.target
         end_pos = target if isinstance(target, tuple) else target.pos
         # TODO: maybe remove corpse occupation check
-        path = map.get_path(self.pos, end_pos, self.walk_pred)
+        path = map.get_path(self.pos, end_pos, self.path_pred)
         if not path:
             return
         return path[0]
@@ -152,10 +152,26 @@ class NPC(Character):
         self.dead = True
         yield wait(.5)
 
+    @action
+    def do_revive(self):
+        target_coord = self.angle_to_pos(0)
+        if target_coord not in self.manager.bodies:
+            return
+        body = self.manager.bodies[target_coord]
+        body.hide()
+        interval = self.actor.actorInterval(
+            'anim',
+            playRate=S.ch_anim['pick_up_speed'],
+            startFrame=S.ch_anim['pick_up_range'][0],
+            endFrame=S.ch_anim['pick_up_range'][1]
+        )
+        yield interval
+        body.revive()
+
 
 class TargetNPC(NPC):
 
-    walk_pred = Character.walk_pred
+    path_pred = Character.walk_pred
 
     def get_action(self):
         player = self.manager.player

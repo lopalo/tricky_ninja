@@ -379,9 +379,9 @@ class Player(Character):
         anim = actor.getAnimControl('anim')
         interval = actor.actorInterval(
             'anim',
-            playRate=S.pl_anim['pick_up_speed'],
-            startFrame=S.pl_anim['pick_up_range'][0],
-            endFrame=S.pl_anim['pick_up_range'][1]
+            playRate=S.ch_anim['pick_up_speed'],
+            startFrame=S.ch_anim['pick_up_range'][0],
+            endFrame=S.ch_anim['pick_up_range'][1]
         )
         yield interval
         body.bind(self)

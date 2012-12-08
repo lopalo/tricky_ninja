@@ -46,7 +46,7 @@ class Manager(object):
                 while pos != route[0]:
                     route.rotate(1)
                 _data['route'] = route
-                NPC(self, **_data)#.dead = True
+                NPC(self, **_data)#.dead = True # for debugging
         data = self.map.target_npc.copy()
         route = deque(self.map.routes[data['route']])
         data['route'] = route
@@ -64,7 +64,7 @@ class Manager(object):
             if not npc and npc.action is None:
                 if isinstance(npc, TargetNPC):
                     print 'SUCCESS' #TODO: change to exit of manager
-                del self.npcs[npc._pos]
+                del self.npcs[npc.pos]
                 Body(npc, self)
                 continue
             npc.update_action()

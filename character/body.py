@@ -2,9 +2,7 @@ from math import cos, sin, radians, atan2, degrees, hypot
 from direct.interval.LerpInterval import LerpPosInterval, LerpColorScaleInterval
 
 
-
 class Body(object):
-    #TODO: implement resurrection
 
     def __init__(self, npc, manager):
         self.npc = npc
@@ -109,4 +107,18 @@ class Body(object):
         node.wrtReparentTo(self.manager.main_node)
         self.poses = poses
         node.setPos(poses[0][0], poses[0][1], 0)
+        self.show()
+
+    def revive(self):
+        del self.manager.bodies[self.poses[0]]
+        del self.manager.bodies[self.poses[1]]
+        pos = self.poses[0]
+        npc = self.npc
+        npc.pos = pos
+        npc.node.setPos(pos[0], pos[1], 0)
+        npc.actor.setX(0)
+        npc.actor.pose('anim', S.npc['idle_frame'])
+        npc.node.setH(0)
+        npc.dead = False
+        npc.target = npc.init_position
         self.show()
