@@ -98,7 +98,7 @@ class Manager(object):
                 continue
             model.setAlphaScale(S.graphics['transparency'])
 
-    def alert(self, pos, target_pos=None):
+    def alert(self, pos, target=None):
         for npc in self.npcs.values():
             if not npc:
                 continue
@@ -108,7 +108,7 @@ class Manager(object):
                     npc.target = self.map.escape_position
                     npc.speed = S.target_npc['escape_speed']
                 else:
-                    npc.target = target_pos or self.player
+                    npc.target = target or self.player
                     npc.speed = S.npc['excited_speed']
                     npc.view_radius = S.npc['excited_view_radius']
                     npc.view_angle = S.npc['excited_view_angle']

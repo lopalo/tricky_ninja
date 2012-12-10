@@ -46,16 +46,6 @@ class Character(object):
                 'walk' in map[pos]['actions'] and
                 self.manager.is_available(pos))
 
-    def path_pred(self, pos):
-        manager = self.manager
-        map = manager.map
-        # TODO: maybe remove corpse occupation check
-        return ('walk' in map[pos]['actions'] and
-                map.is_available(pos) and
-                (pos not in manager.npcs or
-                manager.npcs[pos].walking) and
-                pos not in manager.bodies)
-
     @property
     def actor_angle(self):
         return int(self.actor.getHpr()[0] - 90) % 360

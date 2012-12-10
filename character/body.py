@@ -5,6 +5,7 @@ from direct.interval.LerpInterval import LerpPosInterval, LerpColorScaleInterval
 class Body(object):
 
     def __init__(self, npc, manager):
+        self.lock = False
         self.npc = npc
         actor = npc.actor
         self.manager = manager
@@ -31,6 +32,9 @@ class Body(object):
                               second_pos[0] - npc.pos[0]))
         npc.node.setHpr(angle, 0, 0)
         self.show()
+
+    def __nonzero__(self):
+        return self.npc.dead
 
     @property
     def poses(self):
@@ -122,3 +126,4 @@ class Body(object):
         npc.dead = False
         npc.target = npc.init_position
         self.show()
+        self.lock = False
