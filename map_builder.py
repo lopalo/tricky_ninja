@@ -14,8 +14,6 @@ class MapTextureError(BuildWorldError):
 
 class MapBuilder(object):
     texture_names = ['main', 'center', 'horizontal', 'vertical', 'corners']
-    #TODO: background
-
 
     def __init__(self, map, main_node):
         self.map = map
@@ -30,6 +28,21 @@ class MapBuilder(object):
             model, substr = self._draw_square(coord, info)
             self._models[coord] = model
             self._substrate[coord] = substr
+        background = self.map.background
+        if background is None:
+            return
+        #setting of background
+        plane = loader.loadModel(S.model('plane'))
+        texture = loader.loadTexture(
+                        S.map_background(background))
+        plane.setTexture(texture)
+        plane.setTransparency(True)
+        plane.setHpr(0, -90, 0)
+        plane.reparentTo(self.main_node)
+        f = S.graphics['background_stretch_factor']
+        s = self.map.size
+        plane.setScale(s[0] * f, f, s[1] * f)
+        plane.setPos(*(self.map.middle_pos + (-0.1,)))
 
     def get_model(self, coord):
         return self._models.get(coord)

@@ -111,6 +111,7 @@ definitions:
     left_bottom_model: fence-corner
     vertical_model: fence
 hour: 8
+background: water_texture
 target_npc:
   route: house_target
   texture: nskinwh

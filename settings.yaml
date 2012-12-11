@@ -1,6 +1,7 @@
 paths:
   textures: graphic_objects/textures
   map_textures: graphic_objects/map_textures
+  map_backgrounds: graphic_objects/map_backgrounds
   models: graphic_objects/models
   model_sizes: graphic_objects/sizes.yaml
   maps: maps
@@ -10,6 +11,7 @@ show_pathes: false # for debugging
 text_scale: 0.03
 
 graphics:
+  background_stretch_factor: 1.8
   map_texture_size: 256
   transparency: 0.3 # for showing player inside models
   shadow_size: 512

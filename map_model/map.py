@@ -91,6 +91,7 @@ class Map(object):
         self.escape_position = tuple(data['escape_position'])
         self.hour = data.get('hour', 0)
         self.substrate_texture = data['substrate_texture']
+        self.background = data.get('background')
 
         self.textures = set([self.substrate_texture])
         self.groups = defaultdict(list)
@@ -172,6 +173,18 @@ class Map(object):
 
     def __contains__(self, coord):
         return coord in self._data
+
+    @property
+    def size(self):
+        xs = [p[0] for p, i in self]
+        ys = [p[1] for p, i in self]
+        return max(xs) - min(xs), max(ys) - min(ys)
+
+    @property
+    def middle_pos(self):
+        xs = [p[0] for p, i in self]
+        ys = [p[1] for p, i in self]
+        return int((max(xs) + min(xs)) / 2), int((max(ys) + min(ys)) / 2)
 
     def neighbors(self, coord, all=False, yield_names=False):
         keys = self._neighbors.keys()

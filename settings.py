@@ -26,6 +26,10 @@ class Settings(BaseSettings):
         #returns directory
         return os.path.join(self._path, self.paths['map_textures'], name)
 
+    def map_background(self, name):
+        name += '.png'
+        return os.path.join(self._path, self.paths['map_backgrounds'], name)
+
     def texture(self, name):
         name += '.png'
         return os.path.join(self._path, self.paths['textures'], name)
