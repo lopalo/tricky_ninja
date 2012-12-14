@@ -24,6 +24,7 @@ class MapBuilder(object):
         self._load_map_textures()
         self._substrate = {}
         self._models = {}
+        self._cached_textures = {}
         for coord, info in self.map:
             model, substr = self._draw_square(coord, info)
             self._models[coord] = model
@@ -142,7 +143,7 @@ class MapBuilder(object):
     def _load_map_textures(self, additional=None):
         if additional is not None:
             self.map.textures.add(additional)
-        self.map_textures = {}
+        self._map_textures = {}
         for txt_name in self.map.textures:
             txt_paths = glob(path.join(S.map_texture(txt_name), '*.png'))
             if len(txt_paths) == 5:
@@ -150,7 +151,7 @@ class MapBuilder(object):
                 if set(names) != set(self.texture_names):
                     raise MapTextureError(
                             'Wrong part names ({0})'.format(txt_name))
-                self.map_textures[txt_name] = parts = [{}, {}, {}, {}]
+                self._map_textures[txt_name] = parts = [{}, {}, {}, {}]
                 images = dict((name, PNMImage(Filename(path)))
                         for name, path in zip(names, txt_paths))
                 for name, i in images.items():
@@ -176,7 +177,10 @@ class MapBuilder(object):
                 if path.basename(texture).split('.')[0] != 'main':
                     raise MapTextureError(
                         'Wrong name of main part ({0})'.format(txt_name))
-                self.map_textures[txt_name] = PNMImage(texture)
+                self._map_textures[txt_name] = PNMImage(texture)
+
+    def clear_map_textures(self):
+        del self._map_textures
 
     def _create_plane(self):
         pl_maker = CardMaker('plane')
@@ -185,12 +189,11 @@ class MapBuilder(object):
         return plane
 
     def _set_texture(self, txt_name, pos, only_ss=False):
-        ss_textures = self.map_textures[self.map.substrate_texture]
+        ss_textures = self._map_textures[self.map.substrate_texture]
         size = S.graphics['map_texture_size']
-        #TODO: cache result images
-        result_image = PNMImage(size, size)
-        result_image.addAlpha()
         w, h = size / 2, size / 2
+        txt_ident = []
+        to_draw = []
 
         nbs = dict(self.map.neighbors(pos, True, True))
         t, tr = nbs.get('top'), nbs.get('top-right')
@@ -219,12 +222,13 @@ class MapBuilder(object):
             else:
                 ss_img = ss_textures[num]['main']
             nbs.rotate(-2)
-            result_image.copySubImage(ss_img, x, y, 0, 0, w, h)
+            txt_ident.append((id(ss_img), num))
+            to_draw.append((ss_img, x, y, 0, 0, w, h))
 
         if not only_ss:
-            if not txt_name in self.map_textures:
+            if not txt_name in self._map_textures:
                 self._load_map_textures(txt_name)
-            textures = self.map_textures[txt_name]
+            textures = self._map_textures[txt_name]
             mpart = type(textures) is list
             if mpart:
                 #draws multipart texture
@@ -250,17 +254,28 @@ class MapBuilder(object):
                     else:
                         img = textures[num]['main']
                     nbs.rotate(-2)
-                    result_image.blendSubImage(img, x, y, 0, 0, w, h)
+                    txt_ident.append((id(img), num))
+                    to_draw.append((img, x, y, 0, 0, w, h))
             else:
                 #draws single texture
                 img = textures
-                result_image.blendSubImage(img, 0, 0, 0, 0, size, size)
+                txt_ident.append(id(img))
+                to_draw.append((img, 0, 0, 0, 0, size, size))
 
+        txt_ident = tuple(txt_ident)
         plane = self._create_plane()
-        texture = Texture()
-        texture.load(result_image)
-        texture.setWrapU(Texture.WMClamp)
-        texture.setWrapV(Texture.WMClamp)
+        if txt_ident in self._cached_textures:
+            texture = self._cached_textures[txt_ident]
+        else:
+            result_image = PNMImage(size, size)
+            result_image.addAlpha()
+            for val in to_draw:
+                result_image.blendSubImage(*val)
+            texture = Texture()
+            texture.load(result_image)
+            texture.setWrapU(Texture.WMClamp)
+            texture.setWrapV(Texture.WMClamp)
+            self._cached_textures[txt_ident] = texture
         plane.setTexture(texture)
         plane.setHpr(0, -90, 0)
         plane.reparentTo(self.main_node)

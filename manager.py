@@ -14,8 +14,6 @@ from character.body import Body
 class Manager(object):
     #TODO: optimization (LOD, ...)
 
-    #TODO: clear loaded parts of map textures
-
     def __init__(self, map_name):
         self.main_node = render.attachNewNode('main_node')
         self.blocked_squares = set()
@@ -23,6 +21,7 @@ class Manager(object):
         self.map = Map(map_name)
         self.map_builder = MapBuilder(self.map, self.main_node)
         self.map_builder.build()
+        self.map_builder.clear_map_textures()
         self.player = Player(self, self.map.start_pos)
         self.set_npcs()
         self.setup_graphics()
