@@ -24,7 +24,7 @@ class NPC(Character):
         self.hit_speed = S.npc_anim['hit_speed']
         self.post_hit_range = S.npc_anim['post_hit_range']
         self.post_hit_speed = S.npc_anim['post_hit_speed']
-        self.aler_texture = alert_texture
+        self.alert_texture = alert_texture
 
         self.actor = actor = Actor(S.model(self.model),
                                     {'anim': S.model(self.model)})
@@ -205,6 +205,11 @@ class NPC(Character):
         )
         yield interval
         body.revive()
+
+    def set_alert_texture(self):
+        if self.alert_texture is not None:
+            texture = loader.loadTexture(S.texture(self.alert_texture))
+            self.actor.setTexture(texture, 1)
 
 
 class TargetNPC(NPC):

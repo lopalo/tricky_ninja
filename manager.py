@@ -107,6 +107,7 @@ class Manager(object):
                     npc.target = self.map.escape_position
                     npc.speed = S.target_npc['escape_speed']
                 else:
+                    npc.set_alert_texture()
                     npc.target = target or self.player
                     npc.speed = S.npc['excited_speed']
                     npc.view_radius = S.npc['excited_view_radius']
