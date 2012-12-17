@@ -215,6 +215,8 @@ class Map(object):
             wave = new_wave
 
     def get_path(self, start, end, pred):
+        if not pred(end):
+            return
         open_lst = [(0 , 0, start)]
         visited = {start: None}
         while open_lst:

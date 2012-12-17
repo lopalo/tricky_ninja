@@ -1,3 +1,4 @@
+background: water_texture
 definitions:
   Ba:
     actions:
@@ -61,6 +62,7 @@ definitions:
     actions:
     - walk
     - see
+    disable_cartoon: true
     height: -0.14
     kind: model
     model: japan_house
@@ -110,11 +112,10 @@ definitions:
     kind: chain_model
     left_bottom_model: fence-corner
     vertical_model: fence
+escape_position:
+- 25
+- 34
 hour: 8
-background: water_texture
-target_npc:
-  route: house_target
-  texture: nskinwh
 npcs:
 - alert_texture: nskinrd
   count: 2
@@ -228,14 +229,14 @@ routes:
 start_position:
 - 49
 - 7
-escape_position:
-- 25
-- 34
 substrate_actions:
 - walk
 - jump
 - see
 substrate_texture: grass
+target_npc:
+  route: house_target
+  texture: nskinwh
 topology:
 - iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK iK .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
 - iK Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr Lr iK .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. iK iK iK iK iK iK ..
