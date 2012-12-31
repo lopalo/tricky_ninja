@@ -9,6 +9,10 @@ paths:
 show_view_field: false # for debugging
 show_pathes: false # for debugging
 text_scale: 0.03
+menu_background: graphic_objects/menu_background.jpg
+preloader_image: graphic_objects/preloader.jpg
+fail_background: graphic_objects/fail_background.jpg
+win_background: graphic_objects/win_background.jpg
 
 graphics:
   background_stretch_factor: 1.8
@@ -27,7 +31,7 @@ camera:
   init_distance: 30
   init_vertical_angle: -45
   vertical_angle_step: 3
-  horizontal_angle: 60 # if less 69 then appear issues with transparent objects
+  horizontal_angle: 60 # if less than 69 then appear issues with transparent objects
 
 character:
   resume_action_timeout: 0.1
@@ -41,7 +45,7 @@ character:
 
 player:
   texture: nskinbl
-  speed: 3 #2
+  speed: 2
   pointer_texture: blue_pointer
   jump_height: 0.5
   animation:

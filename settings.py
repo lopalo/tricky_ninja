@@ -42,3 +42,19 @@ class Settings(BaseSettings):
 
     def model_size(self, model_name):
         return self.model_sizes.get(model_name, 1)
+
+    @property
+    def menu_backg(self):
+        return os.path.join(self._path, self.menu_background)
+
+    @property
+    def preloader(self):
+        return os.path.join(self._path, self.preloader_image)
+
+    @property
+    def fail_backg(self):
+        return os.path.join(self._path, self.fail_background)
+
+    @property
+    def win_backg(self):
+        return os.path.join(self._path, self.win_background)

@@ -12,7 +12,6 @@ from character.body import Body
 
 
 class Manager(object):
-    #TODO: optimization (LOD, ...)
 
     def __init__(self, map_name):
         self.main_node = render.attachNewNode('main_node')
@@ -62,14 +61,17 @@ class Manager(object):
         for npc in tuple(self.npcs.values()):
             if not npc and npc.action is None:
                 if isinstance(npc, TargetNPC):
-                    print 'SUCCESS' #TODO: change to exit of manager
+                    self.finish(True)
                 del self.npcs[npc.pos]
                 Body(npc, self)
                 continue
             npc.update_action()
             if isinstance(npc, TargetNPC) and npc.pos == self.map.escape_position:
-                print 'FAIL' #TODO: change to exit of manager
+                self.finish(False)
         return task.cont
+
+    def finish(self, win):
+        base.finish_game(win)
 
     def on_player_moved(self, prev_pos, pos):
         map = self.map
@@ -108,6 +110,7 @@ class Manager(object):
                     npc.speed = S.target_npc['escape_speed']
                 else:
                     npc.set_alert_texture()
+                    #FIXME: don't set target if path to it doesn't exist
                     npc.target = target or self.player
                     npc.speed = S.npc['excited_speed']
                     npc.view_radius = S.npc['excited_view_radius']

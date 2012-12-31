@@ -310,10 +310,14 @@ class Player(Character):
         self.must_die = False
         yield self._falling()
         yield wait(1)
+        self.manager.finish(False)
+        return
+
+        ### reviving for testing ###
         init_pos = self.init_position
         if (not self.manager.map.is_available(init_pos) or
             not self.manager.is_available(init_pos)):
-                return # TODO: maybe delete player
+                return
         self.dead = False
         self.pos = init_pos
         self.node.setPos(self.pos[0], self.pos[1], 0)
