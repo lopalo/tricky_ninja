@@ -49,6 +49,9 @@ routes:
 start_position:
 - 13
 - 4
+escape_position:
+- 13
+- 5
 substrate_actions:
 - walk
 - jump

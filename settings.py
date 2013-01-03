@@ -37,8 +37,12 @@ class Settings(BaseSettings):
     def model(self, name):
         return os.path.join(self._path, self.paths['models'], name)
 
+    @property
+    def map_dir(self):
+        return os.path.join(self._path, self.paths['maps'])
+
     def map(self, name):
-        return os.path.join(self._path, self.paths['maps'], name)
+        return os.path.join(self.map_dir, name)
 
     def model_size(self, model_name):
         return self.model_sizes.get(model_name, 1)
@@ -58,3 +62,8 @@ class Settings(BaseSettings):
     @property
     def win_backg(self):
         return os.path.join(self._path, self.win_background)
+
+    def map_thumbnail(self, name):
+        name += '.png'
+        return os.path.join(self._path, self.paths['map_thumbnails'], name)
+

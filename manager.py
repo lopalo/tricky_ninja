@@ -46,6 +46,8 @@ class Manager(object):
                 _data['route'] = route
                 NPC(self, **_data)#.dead = True # for debugging
         data = self.map.target_npc.copy()
+        if not data:
+            return
         route = deque(self.map.routes[data['route']])
         data['route'] = route
         TargetNPC(self, **data)

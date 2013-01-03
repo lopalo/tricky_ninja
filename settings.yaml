@@ -5,9 +5,14 @@ paths:
   models: graphic_objects/models
   model_sizes: graphic_objects/sizes.yaml
   maps: maps
+  map_thumbnails: graphic_objects/map_thumbnails
 
-show_view_field: false # for debugging
-show_pathes: false # for debugging
+# for debugging
+show_view_field: false 
+show_pathes: false
+invisible_player: false 
+respawn_player: false 
+   
 text_scale: 0.03
 menu_background: graphic_objects/menu_background.jpg
 preloader_image: graphic_objects/preloader.jpg
@@ -21,7 +26,7 @@ graphics:
   shadow_size: 512
   light_color: [1, 1, 1]
   ambient_light_color: [0.4, 0.4, 0.4]
-  enable_shadows: false
+  enable_shadows: false 
   enable_cartoon: true
 
 camera:
@@ -82,7 +87,7 @@ npc:
 target_npc:
   escape_speed: 2.5
 
-show_control_keys: true
+show_control_keys: true 
 
 control_keys:
 - close_window: escape

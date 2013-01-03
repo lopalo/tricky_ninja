@@ -141,6 +141,8 @@ class NPC(Character):
 
     def in_view_field(self, char):
         assert isinstance(char, Character)
+        if isinstance(char, Player) and S.invisible_player:
+            return None
         map = self.manager.map
         radius, c_angle = self.view_radius, self.view_angle
         pred = lambda pos: 'see' in map[pos]['actions']

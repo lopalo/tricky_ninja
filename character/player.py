@@ -310,9 +310,9 @@ class Player(Character):
         self.must_die = False
         yield self._falling()
         yield wait(1)
-        self.manager.finish(False)
-        return
-
+        if not S.respawn_player:
+            self.manager.finish(False)
+            return
         ### reviving for testing ###
         init_pos = self.init_position
         if (not self.manager.map.is_available(init_pos) or

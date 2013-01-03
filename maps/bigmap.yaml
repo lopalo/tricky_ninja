@@ -1,4 +1,6 @@
 background: water_texture
+title: Japan House
+thumbnail: bigmap
 definitions:
   Ba:
     actions:
